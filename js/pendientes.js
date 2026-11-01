@@ -40,8 +40,7 @@ const filaTarea = t => fila({
   col: 'tareas', id: t.id, clase: t.hecha ? 'hecho' : '',
   titulo: esc(t.texto),
   detalle: t.fecha ? (t.hecha ? fechaCorta(t.fecha) : textoFecha(t.fecha)) : '',
-  ok: t.hecha ? null : { accion: 'tareaHecha', id: t.id, etiqueta: 'Marcar hecha', nombre: t.texto },
-  extra: t.hecha ? `<button type="button" class="btn mini suave" data-accion="tareaHecha" data-id="${esc(t.id)}">${ic('deshacer')}<span>Deshacer</span></button>` : '',
+  ok: { accion: 'tareaHecha', id: t.id, nombre: t.texto, etiqueta: t.hecha ? 'Deshacer' : 'Marcar hecha', variante: t.hecha ? 'deshacer' : '' },
 });
 
 FORMULARIOS.tarea = {
@@ -91,14 +90,14 @@ function filaMeta(m) {
   const aMano = !m.auto && i.objetivo > 0;
   const extra = (i.objetivo ? `<div class="linea detalle"><span>${i.texto}</span></div>` : '')
     + (aMano ? `<label class="en-linea">Llevo <input class="monto-en-linea" inputmode="numeric" value="${miles(m.actual)}"
-        data-cambio="avanceMeta" data-id="${esc(m.id)}" aria-label="Cuánto llevo de ${esc(m.nombre)}"></label>` : '')
-    + `<button type="button" class="btn mini ${m.hecha ? 'suave' : 'pagar'}" data-accion="metaHecha" data-id="${esc(m.id)}">${ic(m.hecha ? 'deshacer' : 'check')}<span>${m.hecha ? 'Reabrir' : 'Cumplida'}</span></button>`;
+        data-cambio="avanceMeta" data-id="${esc(m.id)}" aria-label="Cuánto llevo de ${esc(m.nombre)}"></label>` : '');
   return fila({
     col: 'metas', id: m.id, clase: m.hecha ? 'hecho' : '',
     izquierda: i.objetivo ? anillo(i.pct, `<b>${i.pct}%</b>`, i.atrasada ? 'atrasada' : '') : ico(m.hecha ? 'ok' : 'meta', m.hecha ? 'pos' : 'acc'),
     titulo: esc(m.nombre),
     derecha: m.fecha ? (m.hecha ? fechaCorta(m.fecha) : textoFecha(m.fecha)) : '',
     detalle: m.nota ? esc(m.nota) : '',
+    ok: { accion: 'metaHecha', id: m.id, nombre: m.nombre, etiqueta: m.hecha ? 'Reabrir' : 'Marcar cumplida', variante: m.hecha ? 'deshacer' : '' },
     extra,
   });
 }
@@ -160,8 +159,8 @@ function filaHabito(h) {
     titulo: esc(h.nombre),
     derecha: `<span class="racha ${n >= 3 ? 'ambar' : 'suave'}">${n} ${n === 1 ? 'día' : 'días'}</span>`,
     detalle: n ? 'Racha actual' : 'Sin racha todavía',
-    extra: `<div class="tira" aria-label="Últimos 7 días">${tira}</div>
-      <button type="button" class="btn mini ${hechoHoy ? 'suave' : 'pagar'}" data-accion="habitoHoy" data-id="${esc(h.id)}">${ic(hechoHoy ? 'deshacer' : 'check')}<span>${hechoHoy ? 'Deshacer hoy' : 'Hecho hoy'}</span></button>`,
+    ok: { accion: 'habitoHoy', id: h.id, nombre: h.nombre, etiqueta: hechoHoy ? 'Deshacer hoy' : 'Marcar hecho hoy', variante: hechoHoy ? 'deshacer' : '' },
+    extra: `<div class="tira" aria-label="Últimos 7 días">${tira}</div>`,
   });
 }
 

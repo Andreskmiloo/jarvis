@@ -173,10 +173,11 @@ const cab = (titulo, sub = '', icono = '', acciones = '') =>
 
 // Fila de lista. Todos los campos ya son HTML seguro: usa esc() con el texto del usuario.
 // Con `col` + `id` muestra los botones de editar y borrar.
-// Con `ok` ({ accion, id, etiqueta, nombre }) muestra un botón de acción rápida.
+// Con `ok` ({ accion, id, etiqueta, nombre, variante }) muestra un botón redondo de acción en la misma fila
+// (variante 'deshacer' = flecha de deshacer). Su texto va en aria-label y title.
 function fila(o) {
   const rapido = o.ok
-    ? `<button type="button" class="ok-rapido" data-accion="${o.ok.accion}" data-id="${esc(o.ok.id)}" aria-label="${esc(o.ok.etiqueta)}: ${esc(o.ok.nombre)}" title="${esc(o.ok.etiqueta)}">${ic('check')}</button>`
+    ? `<button type="button" class="ok-rapido${o.ok.variante === 'deshacer' ? ' es-deshacer' : ''}" data-accion="${o.ok.accion}" data-id="${esc(o.ok.id)}" aria-label="${esc(o.ok.etiqueta)}: ${esc(o.ok.nombre)}" title="${esc(o.ok.etiqueta)}">${ic(o.ok.variante === 'deshacer' ? 'deshacer' : 'check')}</button>`
     : '';
   const iconos = o.botones ? `<div class="iconos">${o.botones}</div>` : o.col ? `<div class="iconos">
       <button type="button" class="icono-btn" data-accion="editar" data-col="${o.col}" data-id="${esc(o.id)}" aria-label="Editar" title="Editar">${ic('editar')}</button>

@@ -64,8 +64,8 @@ function dibujarCaja(cont) {
   const serie = proyeccion(30);
   const n = serie.length;
   const w = Math.max(280, Math.floor(cont.clientWidth) || 320);
-  const h = w < 520 ? 210 : 260;
-  const m = { t: 18, r: 10, b: 28, l: 10 };
+  const h = w < 520 ? 170 : 210;
+  const m = { t: 14, r: 8, b: 24, l: 8 };
   const valores = serie.flatMap(p => [p.saldo, p.conCobros]);
   const maxReal = Math.max(0, ...valores);
   const minReal = Math.min(0, ...valores);
@@ -288,7 +288,7 @@ function listaLecturas(max = 5) {
   if (!L.length) return '<p class="vacio">Todo en orden. Jarvis no ve nada que requiera tu atención.</p>';
   const fila = l => `<li class="lectura ${l.nivel}">
       ${ico(l.icono, CLASE_NIVEL[l.nivel])}
-      <div><b>${l.titulo}</b><p>${l.texto}</p>${l.extra}</div>
+      <div><b>${l.titulo}</b><p>${l.texto}${l.extra ? ' ' + l.extra : ''}</p></div>
     </li>`;
   const resto = L.slice(max);
   return `<ul class="lecturas">${L.slice(0, max).map(fila).join('')}</ul>

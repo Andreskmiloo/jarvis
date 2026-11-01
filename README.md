@@ -16,6 +16,10 @@ suave, para celular y PC.
   una rutina de hábitos con rachas.
 - **Negocio**: ventas, pedidos y ganancia hacia tu meta, y el ritmo que necesitas para llegar.
 
+En cada fila, el botón redondo con palomita marca el elemento como pagado, cobrado, hecho o cumplido;
+cuando ya está marcado, el botón pasa a ser una flecha curva que lo deshace. Si dejas el puntero
+encima, dice qué hace. El diseño es compacto: todo cabe con poco desplazamiento, en celular y en PC.
+
 ## Cómo usarla
 
 Abre `index.html` con doble clic. No hay que instalar nada.

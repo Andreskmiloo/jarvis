@@ -148,7 +148,7 @@ function filaPago(p) {
     titulo: esc(p.nombre),
     derecha: p.monto ? peso(p.monto) : (p.pagado ? '' : '<span class="ambar">mínimo por confirmar</span>'),
     detalle,
-    extra: `<button type="button" class="btn mini ${p.pagado ? 'suave' : 'pagar'}" data-accion="pagar" data-id="${esc(p.id)}">${ic(p.pagado ? 'deshacer' : 'check')}<span>${p.pagado ? 'Deshacer' : 'Marcar pagado'}</span></button>`,
+    ok: { accion: 'pagar', id: p.id, nombre: p.nombre, etiqueta: p.pagado ? 'Deshacer' : 'Marcar pagado', variante: p.pagado ? 'deshacer' : '' },
   });
 }
 
@@ -244,5 +244,5 @@ const filaCobro = o => fila({
   titulo: esc(o.cliente) + (o.producto ? ` <span class="suave">· ${esc(o.producto)}</span>` : ''),
   derecha: peso(o.precio),
   detalle: o.fechaCobro ? 'cobrar ' + textoFecha(o.fechaCobro) : 'sin fecha de cobro',
-  extra: `<button type="button" class="btn mini pagar" data-accion="cobrado" data-id="${esc(o.id)}">${ic('check')}<span>Cobrado</span></button>`,
+  ok: { accion: 'cobrado', id: o.id, nombre: o.cliente, etiqueta: 'Marcar cobrado' },
 });
