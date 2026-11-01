@@ -11,9 +11,14 @@ queda como un resplandor lejano; sigue un poco al puntero y al desplazamiento). 
 suavidad: cifras que cuentan hasta su valor, barras y anillos que se llenan, tarjetas que entran una
 tras otra. Sin emojis: solo iconos vectoriales.
 
-La esfera (`js/holograma.js`) es solo adorno y está pensada para no pesar: se pausa con la pestaña
-oculta o con una ventana abierta, va a menos cuadros en celular y baja sola su ritmo si el aparato
-es lento. Con "reducir movimiento" activado se dibuja una vez y queda quieta.
+La esfera (`js/holograma.js`) es el "núcleo" de Jarvis: un ovillo de fragmentos dorados; una red de
+nodos por la que saltan señales (un anillo la escanea de polo a polo y enciende los nodos que cruza);
+nueve órbitas que van naciendo, girando alrededor y desvaneciéndose; anillos de medición que giran
+cada uno a su ritmo; y un núcleo que late y lanza una onda cada pocos segundos.
+
+Es solo adorno y está pensada para no pesar: se pausa con la pestaña oculta o con una ventana abierta,
+va a menos cuadros en celular y baja sola su ritmo si el aparato es lento. Con "reducir movimiento"
+activado se dibuja una vez (con la red, las señales y las órbitas) y queda quieta.
 
 ## Qué tiene
 
