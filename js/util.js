@@ -5,6 +5,7 @@
 // y toISOString() para "hoy" daría mañana después de las 7 pm.
 
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const DIAS_SEMANA = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 
 // ---------- Formato ----------
 function miles(n) {
@@ -30,6 +31,12 @@ function esc(texto) {
 let contadorId = 0;
 const uid = () => Date.now().toString(36) + (contadorId++).toString(36) + Math.random().toString(36).slice(2, 5);
 const suma = (lista, f) => lista.reduce((total, x) => total + (Number(f(x)) || 0), 0);
+
+function formatear(valor, formato) {
+  if (formato === 'peso') return peso(valor);
+  if (formato === 'pct') return Math.round(valor) + '%';
+  return String(Math.round(valor));
+}
 
 // ---------- Fechas ----------
 const iso = (y, m, d) => y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
@@ -68,12 +75,22 @@ function cuando(s) {
   return 'en ' + n + ' días';
 }
 
+// "hace 3 días", "hoy", "ayer" (para fechas pasadas, sin la palabra "vencido")
+function hace(s) {
+  if (!s) return 'sin registrar';
+  const n = -diasHasta(s);
+  if (n <= 0) return 'hoy';
+  return n === 1 ? 'ayer' : 'hace ' + n + ' días';
+}
+
 // "4 nov" (con año si no es el actual)
 function fechaCorta(s) {
   if (!s) return '';
   const [y, m, d] = s.split('-').map(Number);
   return d + ' ' + MESES[m - 1] + (y !== new Date().getFullYear() ? ' ' + y : '');
 }
+
+const fechaConDia = s => DIAS_SEMANA[aFecha(s).getDay()] + ' ' + fechaCorta(s);
 
 const claseFecha = s => { const n = diasHasta(s); return n < 0 ? 'rojo' : n <= 2 ? 'ambar' : 'suave'; };
 const textoFecha = s => s ? `<span class="fecha ${claseFecha(s)}">${fechaCorta(s)} · ${cuando(s)}</span>` : '';
@@ -128,35 +145,42 @@ const campoFecha = (etiqueta, nombre, valor, extra = '') =>
 const casilla = (etiqueta, nombre, marcada) =>
   `<label class="casilla"><input type="checkbox" name="${nombre}"${marcada ? ' checked' : ''}> ${etiqueta}</label>`;
 
+// opciones: [[valor, texto], ...]  (el texto puede venir del usuario, por eso se escapa)
 function selector(etiqueta, nombre, opciones, valor) {
-  const ops = opciones.map(([v, t]) => `<option value="${v}"${v === valor ? ' selected' : ''}>${t}</option>`).join('');
+  const ops = opciones.map(([v, t]) => `<option value="${esc(v)}"${v === valor ? ' selected' : ''}>${esc(t)}</option>`).join('');
   return `<label>${etiqueta}<select name="${nombre}">${ops}</select></label>`;
 }
 
-// Formulario plegable. `item` = lo que se está editando (o null para crear uno nuevo).
-function formulario(nombre, titulo, item, campos) {
-  return `<details class="agregar"${item ? ' open' : ''}>
-    <summary>${item ? '✎ Editando: ' + esc(item.nombre || item.cliente || item.texto) : '＋ ' + titulo}</summary>
-    <form data-form="${nombre}" autocomplete="off">
-      ${campos}
-      <div class="botones">
-        <button class="primario">${item ? 'Guardar cambios' : 'Agregar'}</button>
-        ${item ? '<button type="button" data-accion="cancelar">Cancelar</button>' : ''}
-      </div>
-    </form>
-  </details>`;
+// Botón que abre un formulario (en una ventana emergente). `ctx` llega al formulario como datos.
+const btnNuevo = (form, texto, ctx = {}, clase = 'btn mini') =>
+  `<button type="button" class="${clase}" data-accion="nuevo" data-form="${form}"${
+    Object.entries(ctx).map(([k, v]) => ` data-${k}="${esc(v)}"`).join('')}>${ic('mas')}<span>${texto}</span></button>`;
+
+// Encabezado de página
+function encabezado(etiqueta, titulo, sub = '', acciones = '') {
+  return `<header class="encabezado">
+    <div><span class="etiqueta">${etiqueta}</span><h2 class="titulo">${titulo}</h2>${sub ? `<p class="sub">${sub}</p>` : ''}</div>
+    ${acciones ? `<div class="acciones-enc">${acciones}</div>` : ''}
+  </header>`;
 }
+
+// Cabecera de tarjeta: título (con icono opcional), texto secundario y acciones a la derecha
+const cab = (titulo, sub = '', icono = '', acciones = '') =>
+  `<div class="cab">
+    <h3>${icono ? ico(icono) : ''}<span>${titulo}</span></h3>
+    ${sub || acciones ? `<div class="cab-der">${sub ? `<span class="sub">${sub}</span>` : ''}${acciones}</div>` : ''}
+  </div>`;
 
 // Fila de lista. Todos los campos ya son HTML seguro: usa esc() con el texto del usuario.
 // Con `col` + `id` muestra los botones de editar y borrar.
-// Con `ok` ({ accion, id, etiqueta, nombre }) muestra un botón ✓ de acción rápida.
+// Con `ok` ({ accion, id, etiqueta, nombre }) muestra un botón de acción rápida.
 function fila(o) {
   const rapido = o.ok
-    ? `<button class="ok-rapido" data-accion="${o.ok.accion}" data-id="${esc(o.ok.id)}" aria-label="${esc(o.ok.etiqueta)}: ${esc(o.ok.nombre)}" title="${esc(o.ok.etiqueta)}">✓</button>`
+    ? `<button type="button" class="ok-rapido" data-accion="${o.ok.accion}" data-id="${esc(o.ok.id)}" aria-label="${esc(o.ok.etiqueta)}: ${esc(o.ok.nombre)}" title="${esc(o.ok.etiqueta)}">${ic('check')}</button>`
     : '';
-  const iconos = o.col ? `<div class="iconos">
-      <button data-accion="editar" data-col="${o.col}" data-id="${esc(o.id)}" aria-label="Editar" title="Editar">✎</button>
-      <button data-accion="borrar" data-col="${o.col}" data-id="${esc(o.id)}" aria-label="Borrar" title="Borrar">🗑</button>
+  const iconos = o.botones ? `<div class="iconos">${o.botones}</div>` : o.col ? `<div class="iconos">
+      <button type="button" class="icono-btn" data-accion="editar" data-col="${o.col}" data-id="${esc(o.id)}" aria-label="Editar" title="Editar">${ic('editar')}</button>
+      <button type="button" class="icono-btn" data-accion="borrar" data-col="${o.col}" data-id="${esc(o.id)}" aria-label="Borrar" title="Borrar">${ic('borrar')}</button>
     </div>` : '';
   return `<li class="item${o.clase ? ' ' + o.clase : ''}">
     ${o.izquierda || ''}
@@ -172,3 +196,20 @@ function fila(o) {
 
 const ul = (filas, vacio, clase = '') =>
   filas.length ? `<ul class="lista ${clase}">${filas.join('')}</ul>` : `<p class="vacio">${vacio}</p>`;
+
+// ---------- Cifras que se animan (ver ui.js) ----------
+// Cifra que "cuenta" hasta su valor. El texto ya viene con el valor final.
+const contador = (valor, formato = 'peso', clase = '') =>
+  `<span class="${clase}" data-contar="${Number(valor) || 0}" data-formato="${formato}">${formatear(valor, formato)}</span>`;
+
+const limitarPct = n => Math.max(0, Math.min(100, Math.round((Number(n) || 0) * 10) / 10));
+
+// Barra de progreso que se llena
+const barraProg = (pct, clase = '') =>
+  `<div class="barra-prog ${clase}" data-p="${limitarPct(pct)}" style="--p:${limitarPct(pct)}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(limitarPct(pct))}"><i></i></div>`;
+
+// Anillo de progreso con texto en el centro
+const anillo = (pct, centro = '', clase = '') =>
+  `<div class="anillo ${clase}" data-p="${limitarPct(pct)}" style="--p:${limitarPct(pct)}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(limitarPct(pct))}">
+    <svg viewBox="0 0 36 36" aria-hidden="true"><circle class="pista" cx="18" cy="18" r="15.9155" pathLength="100"/><circle class="progreso" cx="18" cy="18" r="15.9155" pathLength="100"/></svg>
+    <span>${centro}</span></div>`;

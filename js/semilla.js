@@ -1,15 +1,22 @@
 // Datos iniciales (tu mensaje del 31 oct 2026). Solo se usan la primera vez que abres Jarvis.
 //
-// ⚠ Son datos personales (montos y nombres). El repositorio es privado; si algún día lo
-//   publicas, vacía este archivo antes (deja `semilla()` devolviendo datosVacios()).
+// ATENCIÓN: son datos personales (montos y nombres). El repositorio es privado; si algún día
+// lo publicas, vacía este archivo antes (deja `semilla()` devolviendo datosVacios()).
 
 function semilla() {
   const h = hoy();
   return {
-    version: 1,
+    version: 2,
     ultimoRespaldo: '',
     ingresos: { q15: 793900, q30: 800000 }, // la del 30 de octubre ya llegó
-    config: { gananciaEstimada: 100000 },   // ~$100.000 de ganancia por perfume
+    config: { gananciaEstimada: 100000 },   // ~$100.000 de ganancia por venta
+
+    // Dónde está tu plata. Escribe aquí cuánto tienes (efectivo = físico, digital = bancos y apps).
+    cuentas: [
+      { nombre: 'Billetera', tipo: 'efectivo', saldo: 0, actualizado: '' },
+      { nombre: 'BBVA', tipo: 'digital', saldo: 0, actualizado: '' }, // aquí llegan los ingresos
+    ],
+    movimientos: [],
 
     pagos: [
       // Deudas pendientes: salen de la quincena del 30 de octubre, salvo Addi
@@ -37,12 +44,12 @@ function semilla() {
       { nombre: 'Transporte (motos)', monto: 32000, soloHabiles: true },
     ],
 
-    // Me deben / ya cobrado (costo vacío = se usa la ganancia estimada)
+    // Ventas del negocio: me deben / ya cobrado (costo vacío = se usa la ganancia estimada)
     pedidos: [
-      { cliente: 'Tío Álvaro', perfume: '', precio: 300000, costo: null, estado: 'entregado', fechaCobro: '2026-10-30' },
-      { cliente: 'Jerónimo', perfume: '', precio: 300000, costo: null, estado: 'pagado', fechaCobro: '' },
-      { cliente: 'Compañero de clase', perfume: '', precio: 130000, costo: null, estado: 'entregado', fechaCobro: '2026-11-15' },
-      { cliente: 'Cote', perfume: '', precio: 150000, costo: null, estado: 'pagado', fechaCobro: '' },
+      { cliente: 'Tío Álvaro', producto: '', precio: 300000, costo: null, estado: 'entregado', fechaCobro: '2026-10-30' },
+      { cliente: 'Jerónimo', producto: '', precio: 300000, costo: null, estado: 'pagado', fechaCobro: '' },
+      { cliente: 'Compañero de clase', producto: '', precio: 130000, costo: null, estado: 'entregado', fechaCobro: '2026-11-15' },
+      { cliente: 'Cote', producto: '', precio: 150000, costo: null, estado: 'pagado', fechaCobro: '' },
     ],
 
     tareas: [
@@ -50,9 +57,9 @@ function semilla() {
     ],
 
     metas: [
-      { nombre: 'Vender $10.000.000 en perfumes', fecha: '2026-12-31', objetivo: 10000000, auto: 'ventas',
-        nota: 'Ganancia aproximada: $100.000 por perfume' },
-      { nombre: 'Cerrar 10 pedidos de perfumes', fecha: '2026-11-10', objetivo: 10, auto: 'pedidos',
+      { nombre: 'Vender $10.000.000', fecha: '2026-12-31', objetivo: 10000000, auto: 'ventas',
+        nota: 'Ganancia aproximada: $100.000 por venta' },
+      { nombre: 'Cerrar 10 pedidos', fecha: '2026-11-10', objetivo: 10, auto: 'pedidos',
         nota: 'Cuenta todos los pedidos registrados' },
       { nombre: 'Patineta Ninebot', fecha: '2026-11-15', objetivo: 2300000, actual: 0 },
       { nombre: 'Pase A2', fecha: '2026-12-31', objetivo: 1455800, actual: 0,
@@ -61,6 +68,10 @@ function semilla() {
         nota: 'En enero 2027. Falta definir el precio' },
       { nombre: 'Pasar Matemática', fecha: '', objetivo: 0,
         nota: 'Necesito 4.3 en el Momento 3' },
+    ],
+
+    habitos: [
+      { nombre: 'Estudiar Matemática', hechos: [] },
     ],
   };
 }

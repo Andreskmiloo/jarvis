@@ -37,26 +37,28 @@ function resumenQuincena(inicio) {
 const resta = n => n ? '−' + peso(n) : '$0';
 const quincenasVisibles = () => { const a = inicioQuincena(hoy()); return [a, siguienteQuincena(a)]; };
 const avisoSinDescontar = r => r.sinDescontar.length
-  ? `<p class="aviso">⚠ Sin descontar (falta el mínimo): ${r.sinDescontar.map(p => esc(p.nombre)).join(', ')}</p>` : '';
+  ? `<p class="aviso">${ic('alerta')}<span>Sin descontar (falta el mínimo): ${r.sinDescontar.map(p => esc(p.nombre)).join(', ')}</span></p>` : '';
 
 // Lo que vence en los próximos 7 días (y lo ya vencido), lo más urgente primero.
+const claseUrgencia = f => { const n = diasHasta(f); return n < 0 ? 'neg' : n <= 2 ? 'warn' : 'acc'; };
+
 function vencenPronto(conTareas) {
   const limite = sumarDias(hoy(), 7);
   const items = [];
   for (const p of datos.pagos) {
     if (!p.pagado && p.fecha && p.fecha <= limite)
-      items.push({ icono: '💸', fecha: p.fecha, texto: p.nombre, porPagar: p.monto, id: p.id,
+      items.push({ icono: 'pago', clase: claseUrgencia(p.fecha), fecha: p.fecha, texto: p.nombre, porPagar: p.monto, id: p.id,
         monto: p.monto ? peso(p.monto) : 'por confirmar', accion: 'pagar', etiqueta: 'Marcar pagado' });
   }
   for (const o of porCobrar()) {
     if (o.fechaCobro && o.fechaCobro <= limite)
-      items.push({ icono: '🧾', fecha: o.fechaCobro, texto: 'Cobrar a ' + o.cliente, id: o.id,
+      items.push({ icono: 'cobro', clase: claseUrgencia(o.fechaCobro), fecha: o.fechaCobro, texto: 'Cobrar a ' + o.cliente, id: o.id,
         monto: peso(o.precio), accion: 'cobrado', etiqueta: 'Marcar cobrado' });
   }
   if (conTareas) {
     for (const t of datos.tareas) {
       if (!t.hecha && t.fecha && t.fecha <= limite)
-        items.push({ icono: '✅', fecha: t.fecha, texto: t.texto, id: t.id,
+        items.push({ icono: 'tarea', clase: claseUrgencia(t.fecha), fecha: t.fecha, texto: t.texto, id: t.id,
           monto: '', accion: 'tareaHecha', etiqueta: 'Marcar hecha' });
     }
   }
@@ -65,28 +67,28 @@ function vencenPronto(conTareas) {
 
 const totalPorPagar = items => suma(items, i => i.porPagar);
 
-// Cada fila trae un ✓ para marcarla como pagada / cobrada / hecha sin salir de la pantalla.
+// Cada fila trae un botón para marcarla como pagada / cobrada / hecha sin salir de la pantalla.
 const listaAlertas = (items, clase) => ul(items.map(i => fila({
-  izquierda: `<span class="icono">${i.icono}</span>`,
+  izquierda: ico(i.icono, i.clase),
   titulo: esc(i.texto), derecha: i.monto, detalle: textoFecha(i.fecha),
   ok: { accion: i.accion, id: i.id, etiqueta: i.etiqueta, nombre: i.texto },
-})), 'Nada vence en los próximos 7 días 🎉', clase);
+})), 'Nada vence en los próximos 7 días.', clase);
 
 // ---------- Pantalla ----------
 // Las clases a-xxx colocan cada tarjeta en la rejilla de PC (ver style.css); en celular van una tras otra.
 function vistaFinanzas() {
   const [actual, siguiente] = quincenasVisibles();
   const alertas = vencenPronto(false);
-  return `<h2 class="titulo">Finanzas</h2>
+  return `${encabezado('Flujo y compromisos', 'Finanzas', 'Quincenas, deudas, fijos y lo que te deben.')}
     <section class="rejilla finanzas">
       <article class="tarjeta a-vence${alertas.length ? ' alerta' : ''}">
-        <h3>⏰ Vence en los próximos 7 días <small>${alertas.length ? peso(totalPorPagar(alertas)) + ' por pagar' : ''}</small></h3>
+        ${cab('Vence en los próximos 7 días', alertas.length ? peso(totalPorPagar(alertas)) + ' por pagar' : '', 'reloj')}
         ${listaAlertas(alertas, 'columnas-pc')}
       </article>
       ${tarjetaQuincena(resumenQuincena(actual), 'Quincena actual', 'a-actual')}
       ${tarjetaQuincena(resumenQuincena(siguiente), 'Siguiente quincena', 'a-siguiente')}
-      ${seccionPagos('deuda', 'Deudas', 'deuda', 'a-deudas')}
-      ${seccionPagos('fijo', 'Fijos', 'fijo', 'a-fijos')}
+      ${seccionPagos('deuda', 'Deudas', 'a-deudas', 'tarjeta')}
+      ${seccionPagos('fijo', 'Fijos', 'a-fijos', 'repetir')}
       ${seccionDiarios()}
       ${seccionPorCobrar()}
     </section>`;
@@ -95,46 +97,36 @@ function vistaFinanzas() {
 function tarjetaQuincena(r, titulo, area) {
   const clave = esQuincena15(r.inicio) ? 'q15' : 'q30';
   const dia = clave.slice(1);
+  const base = Math.max(r.ingreso, r.totalPagos + r.totalDiarios, 1); // si gastas más de lo que entra, la barra queda llena
+  const parte = n => limitarPct(Math.max(0, n) / base * 100);
   const detalleDiarios = r.diarios.map(g => esc(g.nombre) + ' × ' + g.dias + ' días').join(' · ');
+  const seg = (clase, n) => `<i class="${clase}" data-p="${parte(n)}" style="--p:${parte(n)}"></i>`;
   return `<article class="tarjeta ${area}">
-    <h3>${titulo} <small>${r.etiqueta}</small></h3>
+    ${cab(titulo, r.etiqueta, 'calendario')}
     <div class="fila-cuenta"><span>Ingreso del ${dia}</span>
       <input class="monto-en-linea" inputmode="numeric" value="${miles(r.ingreso)}"
              data-cambio="ingreso" data-id="${clave}" aria-label="Ingreso quincena del ${dia}"></div>
-    <div class="fila-cuenta"><span>Pagos</span><b>${resta(r.totalPagos)}</b></div>
-    <div class="fila-cuenta"><span>Gastos diarios${detalleDiarios ? `<small>${detalleDiarios}</small>` : ''}</span><b>${resta(r.totalDiarios)}</b></div>
-    <div class="fila-cuenta total"><span>Libre</span><b class="${r.libre < 0 ? 'rojo' : 'verde'}">${peso(r.libre)}</b></div>
+    <div class="reparto" aria-hidden="true">${seg('pagos', r.totalPagos)}${seg('diarios', r.totalDiarios)}${seg('libre', r.libre)}</div>
+    <div class="fila-cuenta"><span class="leyenda pagos">Pagos</span><b data-k="pagos">${resta(r.totalPagos)}</b></div>
+    <div class="fila-cuenta"><span class="leyenda diarios">Gastos diarios${detalleDiarios ? `<small>${detalleDiarios}</small>` : ''}</span><b data-k="diarios">${resta(r.totalDiarios)}</b></div>
+    <div class="fila-cuenta total"><span class="leyenda libre">Libre</span><b class="num ${r.libre < 0 ? 'rojo' : 'verde'}" data-k="libre">${contador(r.libre)}</b></div>
     ${avisoSinDescontar(r)}
-    ${r.cobros ? `<p class="suave">Por cobrar con fecha en esta quincena: <b>+${peso(r.cobros)}</b> · libre si cobras: <b>${peso(r.libre + r.cobros)}</b></p>` : ''}
+    ${r.cobros ? `<p class="nota">Por cobrar con fecha en esta quincena: <b>+${peso(r.cobros)}</b> · libre si cobras: <b>${peso(r.libre + r.cobros)}</b></p>` : ''}
   </article>`;
 }
 
 // ---------- Deudas y fijos (misma lista, misma forma) ----------
-function seccionPagos(tipo, titulo, singular, area) {
-  const previo = enEdicion('pagos');
-  const item = previo && previo.tipo === tipo ? previo : null;
+function seccionPagos(tipo, titulo, area, icono) {
   const todos = datos.pagos.filter(p => p.tipo === tipo);
   const pendientes = todos.filter(p => !p.pagado).sort(porFecha);
   const pagados = todos.filter(p => p.pagado)
     .sort((a, b) => (b.fechaPago || b.fecha || '').localeCompare(a.fechaPago || a.fecha || ''));
+  const resumen = `${pendientes.length} pendiente${pendientes.length === 1 ? '' : 's'} · ${peso(suma(pendientes, p => p.monto))}`;
   return `<article class="tarjeta ${area}">
-    <h3>${titulo} <small>${pendientes.length} pendiente${pendientes.length === 1 ? '' : 's'} · ${peso(suma(pendientes, p => p.monto))}</small></h3>
-    ${ul(pendientes.map(filaPago), 'Nada pendiente 🎉')}
-    ${pagados.length ? `<details class="pagados"><summary>Pagados (${pagados.length})</summary>${ul(pagados.map(filaPago))}</details>` : ''}
-    ${formulario('pago', 'Agregar ' + singular, item, camposPago(item, tipo))}
+    ${cab(titulo, resumen, icono, btnNuevo('pago', 'Agregar', { tipo }))}
+    ${ul(pendientes.map(filaPago), 'Nada pendiente.')}
+    ${pagados.length ? `<details class="mas pagados"><summary>Pagados (${pagados.length}) ${ic('chevron')}</summary>${ul(pagados.map(filaPago))}</details>` : ''}
   </article>`;
-}
-
-function camposPago(p, tipo) {
-  p = p || {};
-  return campo('Nombre', 'nombre', p.nombre, 'required')
-    + selector('Tipo', 'tipo', [['deuda', 'Deuda'], ['fijo', 'Fijo']], p.tipo || tipo)
-    + campoDinero('Monto a pagar (vacío = por confirmar)', 'monto', p.monto)
-    + campoDinero('Deuda total (opcional)', 'saldo', p.saldo)
-    + campoFecha('Fecha límite', 'fecha', p.fecha)
-    + casilla('Se repite cada mes', 'mensual', p.mensual)
-    + casilla('Se paga con cobros (no resta de la quincena)', 'conCobros', p.conCobros)
-    + campo('Nota', 'nota', p.nota);
 }
 
 function filaPago(p) {
@@ -147,27 +139,44 @@ function filaPago(p) {
     p.saldo ? 'deuda total ' + peso(p.saldo) : '',
     p.mensual ? 'cada mes' : '',
     p.conCobros ? 'se paga con cobros' : '',
+    p.cuenta ? 'desde ' + esc(nombreCuenta(p.cuenta)) : '',
     p.nota ? esc(p.nota) : '',
   ].filter(Boolean).join(' · ');
   return fila({
     col: 'pagos', id: p.id, clase: p.pagado ? 'hecho' : '',
+    izquierda: ico(p.tipo === 'fijo' ? 'repetir' : 'tarjeta', p.pagado ? 'mut' : p.tipo === 'fijo' ? 'acc' : 'warn'),
     titulo: esc(p.nombre),
     derecha: p.monto ? peso(p.monto) : (p.pagado ? '' : '<span class="ambar">mínimo por confirmar</span>'),
     detalle,
-    extra: `<button class="pagar${p.pagado ? ' hecho' : ''}" data-accion="pagar" data-id="${esc(p.id)}">${p.pagado ? '↩ Deshacer' : '✓ Marcar pagado'}</button>`,
+    extra: `<button type="button" class="btn mini ${p.pagado ? 'suave' : 'pagar'}" data-accion="pagar" data-id="${esc(p.id)}">${ic(p.pagado ? 'deshacer' : 'check')}<span>${p.pagado ? 'Deshacer' : 'Marcar pagado'}</span></button>`,
   });
 }
 
-formularios.pago = d => {
-  const previo = enEdicion('pagos') || {};
-  guardarItem('pagos', {
-    ...previo, id: previo.id || uid(),
-    nombre: d.nombre, tipo: d.tipo, monto: d.monto || 0, saldo: d.saldo || 0, fecha: d.fecha,
-    mensual: d.mensual, conCobros: d.conCobros, nota: d.nota,
-  });
+FORMULARIOS.pago = {
+  col: 'pagos',
+  titulo: (p, ctx) => p ? 'Editar pago' : (ctx.tipo === 'fijo' ? 'Nuevo fijo' : 'Nueva deuda'),
+  campos: (p, ctx) => {
+    p = p || {};
+    return campo('Nombre', 'nombre', p.nombre, 'required')
+      + selector('Tipo', 'tipo', [['deuda', 'Deuda'], ['fijo', 'Fijo']], p.tipo || ctx.tipo || 'deuda')
+      + campoDinero('Monto a pagar (vacío = por confirmar)', 'monto', p.monto)
+      + campoDinero('Deuda total (opcional)', 'saldo', p.saldo)
+      + campoFecha('Fecha límite', 'fecha', p.fecha)
+      + (datos.cuentas.length ? selector('Se paga desde (descuenta el saldo al pagar)', 'cuenta', opcionesCuentas(true), p.cuenta || '') : '')
+      + casilla('Se repite cada mes', 'mensual', p.mensual)
+      + casilla('Se paga con cobros (no resta de la quincena)', 'conCobros', p.conCobros)
+      + campo('Nota', 'nota', p.nota);
+  },
+  guardar: (d, previo) => {
+    guardarItem('pagos', {
+      ...previo, id: previo.id || uid(),
+      nombre: d.nombre, tipo: d.tipo, monto: d.monto || 0, saldo: d.saldo || 0, fecha: d.fecha,
+      cuenta: d.cuenta || '', mensual: d.mensual, conCobros: d.conCobros, nota: d.nota,
+    });
+  },
 };
 
-// Pagar = marcar pagado. Si se repite cada mes, nace el del mes siguiente.
+// Pagar = marcar pagado (y descontar de la cuenta asignada). Si se repite cada mes, nace el del mes siguiente.
 // Deshacer = lo contrario (y borra el del mes siguiente si nadie lo ha tocado).
 acciones.pagar = id => {
   const p = buscar('pagos', id);
@@ -175,57 +184,65 @@ acciones.pagar = id => {
   if (p.pagado) {
     const sig = p.siguienteId && buscar('pagos', p.siguienteId);
     if (sig && !sig.pagado) borrarItem('pagos', sig.id);
-    p.pagado = false; p.fechaPago = ''; p.siguienteId = '';
-  } else {
-    p.pagado = true; p.fechaPago = hoy();
-    if (p.mensual && p.fecha) {
-      const sig = { ...p, id: uid(), fecha: sumarMes(p.fecha), pagado: false, fechaPago: '', siguienteId: '' };
-      datos.pagos.push(sig);
-      p.siguienteId = sig.id;
-    }
+    if (p.movId) quitarMov(p.movId);
+    p.pagado = false; p.fechaPago = ''; p.siguienteId = ''; p.movId = '';
+    avisar('Pago revertido');
+    return;
   }
+  p.pagado = true; p.fechaPago = hoy();
+  const cuenta = p.cuenta && buscar('cuentas', p.cuenta);
+  if (cuenta && p.monto) p.movId = registrarMov({ tipo: 'gasto', monto: p.monto, cuenta: cuenta.id, categoria: 'Pagos', nota: p.nombre }).id;
+  if (p.mensual && p.fecha) {
+    const sig = { ...p, id: uid(), fecha: sumarMes(p.fecha), pagado: false, fechaPago: '', siguienteId: '', movId: '' };
+    datos.pagos.push(sig);
+    p.siguienteId = sig.id;
+  }
+  avisar(cuenta && p.monto ? 'Pagado. Se descontó de ' + cuenta.nombre : 'Marcado como pagado');
 };
 
 cambios.ingreso = (clave, valor) => { datos.ingresos[clave] = dinero(valor); };
 
 // ---------- Gastos diarios ----------
 function seccionDiarios() {
-  const item = enEdicion('diarios');
-  const g = item || { soloHabiles: true };
   const filas = datos.diarios.map(x => fila({
-    col: 'diarios', id: x.id, titulo: esc(x.nombre), derecha: peso(x.monto) + '/día',
+    col: 'diarios', id: x.id, izquierda: ico('calendario', 'acc'),
+    titulo: esc(x.nombre), derecha: peso(x.monto) + '/día',
     detalle: x.soloHabiles ? 'solo entre semana (lun–vie)' : 'todos los días',
   }));
   return `<article class="tarjeta a-diarios">
-    <h3>Gastos diarios <small>se restan del libre</small></h3>
+    ${cab('Gastos diarios', 'se restan del libre', 'pulso', btnNuevo('diario', 'Agregar'))}
     ${ul(filas, 'Sin gastos diarios.')}
-    ${formulario('diario', 'Agregar gasto diario', item,
-      campo('Nombre', 'nombre', g.nombre, 'required')
-      + campoDinero('Monto por día', 'monto', g.monto, 'required')
-      + casilla('Solo entre semana (lunes a viernes)', 'soloHabiles', g.soloHabiles))}
   </article>`;
 }
 
-formularios.diario = d => {
-  const previo = enEdicion('diarios') || {};
-  guardarItem('diarios', { ...previo, id: previo.id || uid(), nombre: d.nombre, monto: d.monto || 0, soloHabiles: d.soloHabiles });
+FORMULARIOS.diario = {
+  col: 'diarios',
+  titulo: g => g ? 'Editar gasto diario' : 'Nuevo gasto diario',
+  campos: g => {
+    g = g || { soloHabiles: true };
+    return campo('Nombre', 'nombre', g.nombre, 'required')
+      + campoDinero('Monto por día', 'monto', g.monto, 'required')
+      + casilla('Solo entre semana (lunes a viernes)', 'soloHabiles', g.soloHabiles);
+  },
+  guardar: (d, previo) => {
+    guardarItem('diarios', { ...previo, id: previo.id || uid(), nombre: d.nombre, monto: d.monto || 0, soloHabiles: d.soloHabiles });
+  },
 };
 
 // ---------- Por cobrar (pedidos entregados y sin pagar) ----------
 function seccionPorCobrar() {
   const lista = porCobrar().sort((a, b) => (a.fechaCobro || '9999').localeCompare(b.fechaCobro || '9999'));
   return `<article class="tarjeta a-cobrar">
-    <h3>Por cobrar <small>${peso(suma(lista, o => o.precio))}</small></h3>
+    ${cab('Por cobrar', peso(suma(lista, o => o.precio)), 'cobro')}
     ${ul(lista.map(filaCobro), 'Nadie te debe por ahora.', 'columnas-pc')}
-    <p class="suave">Aquí salen los pedidos entregados y sin pagar. <a href="#parfums">Registrar un pedido →</a></p>
+    <p class="pie">Aquí salen los pedidos entregados y sin pagar. <a href="#negocio">Registrar un pedido ${ic('flecha')}</a></p>
   </article>`;
 }
 
 const filaCobro = o => fila({
-  titulo: esc(o.cliente) + (o.perfume ? ` <span class="suave">· ${esc(o.perfume)}</span>` : ''),
+  izquierda: ico('cobro', o.fechaCobro && o.fechaCobro < hoy() ? 'neg' : 'acc'),
+  titulo: esc(o.cliente) + (o.producto ? ` <span class="suave">· ${esc(o.producto)}</span>` : ''),
   derecha: peso(o.precio),
   detalle: o.fechaCobro ? 'cobrar ' + textoFecha(o.fechaCobro) : 'sin fecha de cobro',
-  extra: `<button class="pagar" data-accion="cobrado" data-id="${esc(o.id)}">✓ Cobrado</button>`,
+  extra: `<button type="button" class="btn mini pagar" data-accion="cobrado" data-id="${esc(o.id)}">${ic('check')}<span>Cobrado</span></button>`,
 });
-
-acciones.cobrado = id => { const o = buscar('pedidos', id); if (o) o.estado = 'pagado'; };

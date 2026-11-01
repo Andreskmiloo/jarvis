@@ -1,4 +1,4 @@
-// ===== PENDIENTES (matriz de Eisenhower) Y METAS =====
+// ===== PENDIENTES (matriz de Eisenhower), METAS Y RUTINA =====
 
 const CUADRANTES = [
   { urgente: true,  importante: true,  titulo: 'Urgente e importante',     pista: 'Hazlo ya',          clase: 'q1' },
@@ -8,27 +8,21 @@ const CUADRANTES = [
 ];
 
 function vistaPendientes() {
-  return `<h2 class="titulo">Pendientes y metas</h2>
-    <section class="rejilla">
+  return `${encabezado('Organización', 'Pendientes y metas', 'Tareas por prioridad, metas con progreso y tu rutina.')}
+    <section class="rejilla pendientes">
       ${seccionTareas()}
       ${seccionMetas()}
+      ${seccionRutina()}
     </section>`;
 }
 
 // ---------- Tareas ----------
 function seccionTareas() {
-  const item = enEdicion('tareas');
-  const t = item || {};
   const hechas = datos.tareas.filter(x => x.hecha);
-  return `<article class="tarjeta ancho">
-    <h3>Matriz de Eisenhower <small>${datos.tareas.length - hechas.length} pendientes</small></h3>
+  return `<article class="tarjeta a-matriz">
+    ${cab('Matriz de Eisenhower', `${datos.tareas.length - hechas.length} pendientes`, 'pendientes', btnNuevo('tarea', 'Agregar tarea'))}
     <div class="matriz">${CUADRANTES.map(cuadrante).join('')}</div>
-    ${hechas.length ? `<details class="pagados"><summary>Hechas (${hechas.length})</summary>${ul(hechas.map(filaTarea))}</details>` : ''}
-    ${formulario('tarea', 'Agregar tarea', item,
-      campo('Tarea', 'texto', t.texto, 'required')
-      + campoFecha('Fecha (opcional)', 'fecha', t.fecha)
-      + casilla('Urgente', 'urgente', t.urgente)
-      + casilla('Importante', 'importante', t.importante))}
+    ${hechas.length ? `<details class="mas pagados"><summary>Hechas (${hechas.length}) ${ic('chevron')}</summary>${ul(hechas.map(filaTarea))}</details>` : ''}
   </article>`;
 }
 
@@ -46,17 +40,28 @@ const filaTarea = t => fila({
   col: 'tareas', id: t.id, clase: t.hecha ? 'hecho' : '',
   titulo: esc(t.texto),
   detalle: t.fecha ? (t.hecha ? fechaCorta(t.fecha) : textoFecha(t.fecha)) : '',
-  extra: `<button class="pagar${t.hecha ? ' hecho' : ''}" data-accion="tareaHecha" data-id="${esc(t.id)}">${t.hecha ? '↩ Deshacer' : '✓ Hecha'}</button>`,
+  ok: t.hecha ? null : { accion: 'tareaHecha', id: t.id, etiqueta: 'Marcar hecha', nombre: t.texto },
+  extra: t.hecha ? `<button type="button" class="btn mini suave" data-accion="tareaHecha" data-id="${esc(t.id)}">${ic('deshacer')}<span>Deshacer</span></button>` : '',
 });
 
-formularios.tarea = d => {
-  const previo = enEdicion('tareas') || {};
-  guardarItem('tareas', { ...previo, id: previo.id || uid(), texto: d.texto, fecha: d.fecha, urgente: d.urgente, importante: d.importante });
+FORMULARIOS.tarea = {
+  col: 'tareas',
+  titulo: t => t ? 'Editar tarea' : 'Nueva tarea',
+  campos: t => {
+    t = t || {};
+    return campo('Tarea', 'texto', t.texto, 'required')
+      + campoFecha('Fecha (opcional)', 'fecha', t.fecha)
+      + casilla('Urgente', 'urgente', t.urgente)
+      + casilla('Importante', 'importante', t.importante);
+  },
+  guardar: (d, previo) => {
+    guardarItem('tareas', { ...previo, id: previo.id || uid(), texto: d.texto, fecha: d.fecha, urgente: d.urgente, importante: d.importante });
+  },
 };
 acciones.tareaHecha = id => { const t = buscar('tareas', id); if (t) t.hecha = !t.hecha; };
 
 // ---------- Metas ----------
-// Avance: automático (ventas de perfumes / cantidad de pedidos) o escrito a mano.
+// Avance: automático (ventas del negocio / cantidad de pedidos) o escrito a mano.
 function avanceMeta(m) {
   if (m.auto === 'ventas') return suma(datos.pedidos, o => o.precio);
   if (m.auto === 'pedidos') return datos.pedidos.length;
@@ -73,39 +78,24 @@ function infoMeta(m) {
   return { objetivo, actual, pct, atrasada, texto: fmt(actual) + ' de ' + fmt(objetivo) + (cuenta ? ' pedidos' : '') };
 }
 
-const barraMeta = i => `<div class="barra-meta${i.atrasada ? ' atrasada' : ''}" role="progressbar"
-  aria-valuemin="0" aria-valuemax="100" aria-valuenow="${i.pct}"><div style="width:${i.pct}%"></div></div>`;
-
 function seccionMetas() {
-  const item = enEdicion('metas');
-  const m = item || {};
   const ordenadas = [...datos.metas].sort((a, b) => (!!a.hecha - !!b.hecha) || porFecha(a, b));
-  return `<article class="tarjeta ancho">
-    <h3>Metas <small>${datos.metas.filter(x => !x.hecha).length} en camino</small></h3>
+  return `<article class="tarjeta a-metas">
+    ${cab('Metas', `${datos.metas.filter(x => !x.hecha).length} en camino`, 'meta', btnNuevo('meta', 'Agregar meta'))}
     ${ul(ordenadas.map(filaMeta), 'Aún no tienes metas.', 'columnas')}
-    ${formulario('meta', 'Agregar meta', item,
-      campo('Meta', 'nombre', m.nombre, 'required')
-      + campoFecha('Fecha (opcional)', 'fecha', m.fecha)
-      + campoDinero('Cuánto necesito (opcional: pesos o cantidad)', 'objetivo', m.objetivo)
-      + selector('Cómo se mide el avance', 'auto', [
-          ['', 'A mano'],
-          ['ventas', 'Ventas de perfumes (automático)'],
-          ['pedidos', 'Pedidos registrados (automático)'],
-        ], m.auto || '')
-      + campoDinero('Llevo (solo si es a mano)', 'actual', m.actual)
-      + campo('Nota', 'nota', m.nota))}
   </article>`;
 }
 
 function filaMeta(m) {
   const i = infoMeta(m);
   const aMano = !m.auto && i.objetivo > 0;
-  const extra = (i.objetivo ? barraMeta(i) + `<div class="linea detalle"><span>${i.texto}</span><span>${i.pct}%</span></div>` : '')
+  const extra = (i.objetivo ? `<div class="linea detalle"><span>${i.texto}</span></div>` : '')
     + (aMano ? `<label class="en-linea">Llevo <input class="monto-en-linea" inputmode="numeric" value="${miles(m.actual)}"
         data-cambio="avanceMeta" data-id="${esc(m.id)}" aria-label="Cuánto llevo de ${esc(m.nombre)}"></label>` : '')
-    + `<button class="pagar${m.hecha ? ' hecho' : ''}" data-accion="metaHecha" data-id="${esc(m.id)}">${m.hecha ? '↩ Reabrir' : '✓ Cumplida'}</button>`;
+    + `<button type="button" class="btn mini ${m.hecha ? 'suave' : 'pagar'}" data-accion="metaHecha" data-id="${esc(m.id)}">${ic(m.hecha ? 'deshacer' : 'check')}<span>${m.hecha ? 'Reabrir' : 'Cumplida'}</span></button>`;
   return fila({
     col: 'metas', id: m.id, clase: m.hecha ? 'hecho' : '',
+    izquierda: i.objetivo ? anillo(i.pct, `<b>${i.pct}%</b>`, i.atrasada ? 'atrasada' : '') : ico(m.hecha ? 'ok' : 'meta', m.hecha ? 'pos' : 'acc'),
     titulo: esc(m.nombre),
     derecha: m.fecha ? (m.hecha ? fechaCorta(m.fecha) : textoFecha(m.fecha)) : '',
     detalle: m.nota ? esc(m.nota) : '',
@@ -113,12 +103,79 @@ function filaMeta(m) {
   });
 }
 
-formularios.meta = d => {
-  const previo = enEdicion('metas') || {};
-  guardarItem('metas', {
-    ...previo, id: previo.id || uid(),
-    nombre: d.nombre, fecha: d.fecha, objetivo: d.objetivo || 0, auto: d.auto, actual: d.actual || 0, nota: d.nota,
-  });
+FORMULARIOS.meta = {
+  col: 'metas',
+  titulo: m => m ? 'Editar meta' : 'Nueva meta',
+  campos: m => {
+    m = m || {};
+    return campo('Meta', 'nombre', m.nombre, 'required')
+      + campoFecha('Fecha (opcional)', 'fecha', m.fecha)
+      + campoDinero('Cuánto necesito (opcional: pesos o cantidad)', 'objetivo', m.objetivo)
+      + selector('Cómo se mide el avance', 'auto', [
+          ['', 'A mano'],
+          ['ventas', 'Ventas del negocio (automático)'],
+          ['pedidos', 'Pedidos registrados (automático)'],
+        ], m.auto || '')
+      + campoDinero('Llevo (solo si es a mano)', 'actual', m.actual)
+      + campo('Nota', 'nota', m.nota);
+  },
+  guardar: (d, previo) => {
+    guardarItem('metas', {
+      ...previo, id: previo.id || uid(),
+      nombre: d.nombre, fecha: d.fecha, objetivo: d.objetivo || 0, auto: d.auto, actual: d.actual || 0, nota: d.nota,
+    });
+  },
 };
 cambios.avanceMeta = (id, valor) => { const m = buscar('metas', id); if (m) m.actual = dinero(valor); };
 acciones.metaHecha = id => { const m = buscar('metas', id); if (m) m.hecha = !m.hecha; };
+
+// ---------- Rutina (hábitos con racha) ----------
+// Racha = días seguidos hasta hoy (o hasta ayer, si hoy todavía no lo marcas).
+function racha(h) {
+  const hechos = new Set(h.hechos);
+  let f = hechos.has(hoy()) ? hoy() : sumarDias(hoy(), -1);
+  let n = 0;
+  while (hechos.has(f)) { n++; f = sumarDias(f, -1); }
+  return n;
+}
+
+function seccionRutina() {
+  const hechosHoy = datos.habitos.filter(h => h.hechos.includes(hoy())).length;
+  return `<article class="tarjeta a-rutina">
+    ${cab('Rutina', datos.habitos.length ? `${hechosHoy} de ${datos.habitos.length} hoy` : '', 'llama', btnNuevo('habito', 'Agregar hábito'))}
+    ${ul(datos.habitos.map(filaHabito), 'Agrega un hábito (estudiar, ejercicio, leer) y construye tu racha día a día.', 'columnas')}
+  </article>`;
+}
+
+function filaHabito(h) {
+  const hechoHoy = h.hechos.includes(hoy());
+  const n = racha(h);
+  const tira = [6, 5, 4, 3, 2, 1, 0].map(k => {
+    const f = sumarDias(hoy(), -k);
+    return `<span class="dia${h.hechos.includes(f) ? ' on' : ''}${k === 0 ? ' hoy' : ''}" title="${fechaConDia(f)}"><small>${DIAS_SEMANA[aFecha(f).getDay()].charAt(0).toUpperCase()}</small><i></i></span>`;
+  }).join('');
+  return fila({
+    col: 'habitos', id: h.id,
+    izquierda: ico('llama', n >= 3 ? 'warn' : 'mut'),
+    titulo: esc(h.nombre),
+    derecha: `<span class="racha ${n >= 3 ? 'ambar' : 'suave'}">${n} ${n === 1 ? 'día' : 'días'}</span>`,
+    detalle: n ? 'Racha actual' : 'Sin racha todavía',
+    extra: `<div class="tira" aria-label="Últimos 7 días">${tira}</div>
+      <button type="button" class="btn mini ${hechoHoy ? 'suave' : 'pagar'}" data-accion="habitoHoy" data-id="${esc(h.id)}">${ic(hechoHoy ? 'deshacer' : 'check')}<span>${hechoHoy ? 'Deshacer hoy' : 'Hecho hoy'}</span></button>`,
+  });
+}
+
+FORMULARIOS.habito = {
+  col: 'habitos',
+  titulo: h => h ? 'Editar hábito' : 'Nuevo hábito',
+  campos: h => campo('Hábito', 'nombre', (h || {}).nombre, 'required placeholder="Ej.: Estudiar 1 hora"'),
+  guardar: (d, previo) => {
+    guardarItem('habitos', { ...previo, id: previo.id || uid(), nombre: d.nombre, hechos: previo.hechos || [] });
+  },
+};
+acciones.habitoHoy = id => {
+  const h = buscar('habitos', id);
+  if (!h) return;
+  const hoyS = hoy();
+  h.hechos = h.hechos.includes(hoyS) ? h.hechos.filter(f => f !== hoyS) : [...h.hechos, hoyS];
+};
