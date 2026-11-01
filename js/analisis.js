@@ -97,12 +97,12 @@ function dibujarCaja(cont) {
   cont.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="Flujo de caja proyectado a 30 días">
       <defs>
         <linearGradient id="${id}a" gradientUnits="userSpaceOnUse" x1="0" y1="${m.t}" x2="0" y2="${h - m.b}">
-          <stop offset="0" stop-color="#38bdf8" stop-opacity=".40"/><stop offset="${fz}" stop-color="#38bdf8" stop-opacity="0"/>
-          <stop offset="${fz}" stop-color="#fb7185" stop-opacity="0"/><stop offset="1" stop-color="#fb7185" stop-opacity=".40"/>
+          <stop offset="0" stop-color="#ffb02e" stop-opacity=".38"/><stop offset="${fz}" stop-color="#ffb02e" stop-opacity="0"/>
+          <stop offset="${fz}" stop-color="#ff6b7a" stop-opacity="0"/><stop offset="1" stop-color="#ff6b7a" stop-opacity=".40"/>
         </linearGradient>
         <linearGradient id="${id}l" gradientUnits="userSpaceOnUse" x1="0" y1="${m.t}" x2="0" y2="${h - m.b}">
-          <stop offset="0" stop-color="#67e8f9"/><stop offset="${fz}" stop-color="#818cf8"/>
-          <stop offset="${fz}" stop-color="#fb7185"/><stop offset="1" stop-color="#fb7185"/>
+          <stop offset="0" stop-color="#ffe3a0"/><stop offset="${fz}" stop-color="#ff9a1f"/>
+          <stop offset="${fz}" stop-color="#ff6b7a"/><stop offset="1" stop-color="#ff6b7a"/>
         </linearGradient>
       </defs>
       ${[0.25, 0.5, 0.75].map(f => `<line class="rejilla-y" x1="${m.l}" x2="${w - m.r}" y1="${(m.t + (h - m.t - m.b) * f).toFixed(1)}" y2="${(m.t + (h - m.t - m.b) * f).toFixed(1)}"/>`).join('')}

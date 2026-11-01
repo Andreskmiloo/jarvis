@@ -1,8 +1,19 @@
 # Jarvis
 
 Tu centro de control personal: una app web en español, sin servidor y sin dependencias. Guarda todo
-en el navegador (`localStorage`) y se respalda con un archivo JSON. Tema oscuro, con movimiento
-suave, para celular y PC.
+en el navegador (`localStorage`) y se respalda con un archivo JSON. Para celular y PC.
+
+## Aspecto
+
+Holográfico, como el Jarvis de las películas: luz dorada sobre azul acero oscuro, líneas finas y una
+esfera de fragmentos dorados que gira detrás de la tarjeta principal de Inicio (en las demás pantallas
+queda como un resplandor lejano; sigue un poco al puntero y al desplazamiento). Todo se mueve con
+suavidad: cifras que cuentan hasta su valor, barras y anillos que se llenan, tarjetas que entran una
+tras otra. Sin emojis: solo iconos vectoriales.
+
+La esfera (`js/holograma.js`) es solo adorno y está pensada para no pesar: se pausa con la pestaña
+oculta o con una ventana abierta, va a menos cuadros en celular y baja sola su ritmo si el aparato
+es lento. Con "reducir movimiento" activado se dibuja una vez y queda quieta.
 
 ## Qué tiene
 
@@ -76,12 +87,13 @@ no hay animaciones.
 
 ```
 index.html        estructura de la página
-style.css         sistema visual (tema oscuro, animaciones, celular y PC)
+style.css         sistema visual (paleta dorada, vidrio, animaciones, celular y PC)
 js/iconos.js      iconos vectoriales propios
 js/util.js        pesos, fechas, quincenas y piezas de HTML
 js/semilla.js     datos iniciales
 js/datos.js       estado, localStorage, migración de versiones, exportar / importar
 js/ui.js          ventana emergente, avisos, animaciones y reloj
+js/holograma.js   esfera dorada del fondo (canvas)
 js/cuentas.js     cuentas, movimientos y transferencias
 js/finanzas.js    quincenas, alertas, deudas, fijos, gastos diarios, por cobrar
 js/pendientes.js  matriz de Eisenhower, metas y rutina

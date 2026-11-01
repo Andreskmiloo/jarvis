@@ -51,6 +51,7 @@ function render() {
     else a.removeAttribute('aria-current');
   });
   document.title = seccion.texto + ' · Jarvis';
+  document.body.dataset.vista = id; // el CSS usa esto (por ejemplo, el holograma brilla más en Inicio)
   document.getElementById('pie-respaldo').textContent = datos.ultimoRespaldo ? 'Último respaldo: ' + hace(datos.ultimoRespaldo) : 'Aún sin respaldo';
 
   if (cambio) previos.clear();
