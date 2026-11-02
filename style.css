@@ -32,6 +32,8 @@
   --ease: cubic-bezier(.2, .8, .2, 1);
   --holo: min(139vw, 920px);                   /* ancho del lienzo de la esfera (incluye órbitas y anillos) */
   --aura: min(118vw, 780px);                   /* ancho del resplandor de CSS detrás de la esfera */
+  --inset-sup: env(safe-area-inset-top, 0px);  /* zonas seguras del celular (muesca y barra de inicio) */
+  --inset-inf: env(safe-area-inset-bottom, 0px);
   color-scheme: dark;
 }
 
@@ -39,7 +41,7 @@
 html { font-size: 15px; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: var(--bg); }
 body {
   margin: 0; min-height: 100vh; overflow-x: hidden;
-  color: var(--txt); /* sin fondo propio: así el fondo animado (z-index -1) no queda tapado por el body */
+  color: var(--txt); background: var(--bg); /* fondo propio: el fondo animado (.fondo, z-index 0) va encima de este y debajo de la app */
   font: 1rem/1.4 var(--fuente); font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
 }
@@ -68,7 +70,7 @@ b { font-weight: 650; }
 
 /* ---------- Fondo animado ---------- */
 .fondo {
-  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: -1; overflow: hidden; pointer-events: none;
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 0; overflow: hidden; pointer-events: none;
   background:
     radial-gradient(1000px 560px at 80% -8%, rgba(255, 150, 40, .1), transparent 60%),
     radial-gradient(900px 700px at -8% 108%, rgba(50, 100, 180, .17), transparent 62%),
@@ -104,10 +106,10 @@ body[data-vista="inicio"] .holo, body[data-vista="inicio"] .holo-aura { opacity:
 }
 
 /* ---------- Estructura ---------- */
-.app { min-height: 100vh; }
+.app { position: relative; z-index: 1; min-height: 100vh; }
 .lateral { display: contents; }
 
-.marca { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: calc(10px + env(safe-area-inset-top)) 14px 2px; }
+.marca { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: calc(10px + var(--inset-sup)) 14px 2px; }
 .marca-logo { display: flex; align-items: center; gap: 9px; color: var(--txt); }
 .marca-logo:hover { text-decoration: none; }
 .logo { width: 32px; height: 32px; filter: drop-shadow(0 0 6px rgba(255, 160, 40, .45)); }
@@ -120,7 +122,7 @@ body[data-vista="inicio"] .holo, body[data-vista="inicio"] .holo-aura { opacity:
 .punto { width: 7px; height: 7px; border-radius: 50%; background: var(--pos); animation: pulso 2.4s infinite; }
 .btn.registrar-lat { display: none; }
 
-main { padding: 2px 12px calc(86px + env(safe-area-inset-bottom)); }
+main { padding: 2px 12px calc(86px + var(--inset-inf)); }
 
 /* ---------- Menú ---------- */
 .menu {
@@ -627,7 +629,7 @@ select.estado.pagado { color: var(--pos); border-color: rgba(61, 220, 151, .45);
 }
 
 @media (min-width: 760px) {
-  main { padding: 4px 24px calc(92px + env(safe-area-inset-bottom)); }
+  main { padding: 4px 24px calc(92px + var(--inset-inf)); }
   .rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .tarjeta { padding: 14px; }
   .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
