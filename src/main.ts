@@ -2,19 +2,22 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./style.css";
 import * as maplibregl from "maplibre-gl";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
-import { type GeoJSONSource, type LngLatLike, type MapMouseEvent, type StyleSpecification } from "maplibre-gl";
+import { type GeoJSONSource, type MapMouseEvent } from "maplibre-gl";
 import { CAPAS_POI, CAPAS_RASTER, plantillaRaster, type Atributos, type CapaPOI } from "./config/capas";
 import { geojsonCaja } from "./fuentes/arcgis";
 import { buscarDireccion } from "./fuentes/nominatim";
 import { categoriaAire, describirClima } from "./fuentes/openmeteo";
 import { buscar, CAJA_BOGOTA, type Caja, type LugarOSM } from "./fuentes/overpass";
 import { cargarPerfil, type Gusto } from "./intereses/perfil";
+import { ANCLA_DATOS, CAPA_EDIFICIOS, estiloMapa, EXAGERACION, type Tema, VISTA_2D, VISTA_3D } from "./mapa/estilo";
+import { animar } from "./ui/anim";
+import { iniciarVivo } from "./vivo";
+import { CLAVE_WINDY, enlacesEnVivo, webcamsCerca } from "./fuentes/webcams";
 import { Lugares, type MiLugar } from "./lugares/store";
 import { aviso, descargar, esc, metros } from "./ui/html";
 import { distancia, resumir, type Resumen } from "./zona/resumen";
 
 // ---------- Estado ----------
-const BOGOTA: LngLatLike = [-74.0817, 4.6482];
 const iniciales = import.meta.glob<unknown>("/data/mis-lugares*.json", { eager: true, import: "default" });
 const lugares = new Lugares(undefined, (iniciales["/data/mis-lugares.json"] as MiLugar[]) ?? []);
 const perfil = cargarPerfil();
@@ -30,45 +33,69 @@ let controlZona: AbortController | null = null;
 
 // ---------- Mapa ----------
 maplibregl.setWorkerUrl(workerUrl);
-// Base de OpenStreetMap: sin clave y con cobertura mundial.
-const oscuro = matchMedia("(prefers-color-scheme: dark)").matches;
-const estilo: StyleSpecification = {
-  version: 8,
-  sources: {
-    base: {
-      type: "raster",
-      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      tileSize: 256,
-      maxzoom: 19,
-      attribution: "© OpenStreetMap · Datos: Catastro Bogotá/IDECA, Open-Meteo",
-    },
-  },
-  layers: [
-    {
-      id: "base",
-      type: "raster",
-      source: "base",
-      paint: oscuro
-        ? { "raster-saturation": -0.6, "raster-brightness-max": 0.55, "raster-contrast": 0.15 }
-        : { "raster-saturation": -0.45 },
-    },
-  ],
-};
+// Tema visual: blanco y negro (por defecto) o Matrix. Se recuerda en este navegador.
+function temaGuardado(): Tema {
+  try {
+    return localStorage.getItem("ojo-de-dios:tema") === "matrix" ? "matrix" : "mono";
+  } catch {
+    return "mono";
+  }
+}
+const tema = temaGuardado();
+document.documentElement.dataset.tema = tema;
+document.getElementById("boton-tema")!.addEventListener("click", () => {
+  try {
+    localStorage.setItem("ojo-de-dios:tema", tema === "mono" ? "matrix" : "mono");
+  } catch {
+    /* sin almacenamiento: el tema no se puede recordar */
+  }
+  location.reload();
+});
 
+const movil = matchMedia("(max-width: 720px)").matches;
 const mapa = new maplibregl.Map({
   container: "mapa",
-  style: estilo,
-  center: BOGOTA,
-  zoom: 11.3,
+  style: estiloMapa(tema),
+  ...VISTA_3D,
+  zoom: movil ? VISTA_3D.zoom - 0.9 : VISTA_3D.zoom,
+  maxPitch: 78,
+  // En pantallas densas se limita la resolución: se ve igual y va más fluido.
+  pixelRatio: Math.min(devicePixelRatio, movil ? 1.5 : 2),
   attributionControl: { compact: true },
 });
-mapa.addControl(new maplibregl.NavigationControl(), "top-right");
+// El panel tapa parte del mapa: el "centro" útil se corre para que nada quede debajo.
+mapa.setPadding(movil ? { top: 0, left: 0, right: 0, bottom: innerHeight * 0.42 } : { top: 0, left: 410, right: 0, bottom: 0 });
+
+let en3d = true;
+function relieve(activo: boolean) {
+  try {
+    mapa.setTerrain(activo ? { source: "relieve", exaggeration: EXAGERACION } : null);
+  } catch {
+    /* equipo sin soporte de relieve: el mapa sigue en plano */
+  }
+  if (mapa.getLayer(CAPA_EDIFICIOS)) mapa.setLayoutProperty(CAPA_EDIFICIOS, "visibility", activo ? "visible" : "none");
+}
+const boton3d = document.getElementById("boton-3d")!;
+boton3d.addEventListener("click", () => {
+  en3d = !en3d;
+  boton3d.textContent = en3d ? "2D" : "3D";
+  boton3d.setAttribute("aria-pressed", String(en3d));
+  relieve(en3d);
+  mapa.easeTo({ ...(en3d ? { pitch: VISTA_3D.pitch, bearing: VISTA_3D.bearing } : VISTA_2D), duration: 900 });
+});
+document.getElementById("boton-orbita")!.addEventListener("click", () => {
+  mapa.easeTo({ bearing: mapa.getBearing() + 90, duration: 2400, easing: (t) => t * (2 - t) });
+});
+
+mapa.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
 mapa.addControl(new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: false }), "top-right");
 
-const marcador = new maplibregl.Marker({ color: "#0b7a75" });
+const elMarcador = Object.assign(document.createElement("div"), { className: "mira" });
+const marcador = new maplibregl.Marker({ element: elMarcador });
 const capasInteractivas: string[] = [];
 
 mapa.on("load", () => {
+  relieve(true);
   // Mis lugares e intereses siempre presentes.
   mapa.addSource("mis-lugares", { type: "geojson", data: geoLugares() });
   mapa.addLayer({
@@ -130,6 +157,7 @@ mapa.on("moveend", () => {
 const panel = document.getElementById("panel")!;
 const tabs = {
   zona: document.getElementById("tab-zona")!,
+  vivo: document.getElementById("tab-vivo")!,
   intereses: document.getElementById("tab-intereses")!,
   lugares: document.getElementById("tab-lugares")!,
   capas: document.getElementById("tab-capas")!,
@@ -137,7 +165,9 @@ const tabs = {
 type Tab = keyof typeof tabs;
 
 function abrirTab(t: Tab) {
+  const cambia = tabs[t].hidden;
   for (const [k, el] of Object.entries(tabs)) el.hidden = k !== t;
+  if (cambia) animar(tabs[t]);
   document.querySelectorAll<HTMLButtonElement>(".pestanas button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === t)));
   if (panel.classList.contains("contraido")) panel.classList.remove("contraido");
 }
@@ -155,17 +185,53 @@ document.getElementById("buscador")!.addEventListener("submit", async (e) => {
   try {
     const [r] = await buscarDireccion(q);
     if (!r) return aviso("No encontré esa dirección");
-    mapa.flyTo({ center: [r.lng, r.lat], zoom: 16 });
-    leerZona(r.lat, r.lng);
+    caerEn(r.lat, r.lng, /localidad|barrio|suburb/i.test(r.tipo ?? "") ? 14.2 : 16.2);
   } catch {
     aviso("La búsqueda falló, intenta de nuevo");
   }
 });
 
+const vivo = iniciarVivo(mapa, tabs.vivo, (id) => {
+  capasInteractivas.push(id);
+  mapa.on("mouseenter", id, () => (mapa.getCanvas().style.cursor = "pointer"));
+  mapa.on("mouseleave", id, () => (mapa.getCanvas().style.cursor = ""));
+});
+
+// ---------- Caída ----------
+/** Llega a un lugar "cayendo" desde arriba: sube, se inclina y aterriza con una onda. */
+function caerEn(lat: number, lng: number, zoom = 16.2) {
+  const reducido = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reducido) {
+    mapa.jumpTo({ center: [lng, lat], zoom, pitch: en3d ? 60 : 0 });
+    return leerZona(lat, lng);
+  }
+  const lejos = distancia(mapa.getCenter().lat, mapa.getCenter().lng, lat, lng) > 400;
+  mapa.flyTo({
+    center: [lng, lat],
+    zoom,
+    pitch: en3d ? 66 : 0,
+    bearing: en3d ? mapa.getBearing() + 35 : 0,
+    curve: lejos ? 1.9 : 1.2,
+    duration: lejos ? 3600 : 2200,
+    // Cae acelerando y los últimos metros van en cámara lenta.
+    easing: (t) => (t < 0.55 ? 0.88 * (t / 0.55) ** 2.4 : 0.88 + 0.12 * (1 - (1 - (t - 0.55) / 0.45) ** 3)),
+    essential: true,
+  });
+  leerZona(lat, lng);
+  mapa.once("moveend", () => {
+    const onda = Object.assign(document.createElement("div"), { className: "impacto" });
+    const m = new maplibregl.Marker({ element: onda }).setLngLat([lng, lat]).addTo(mapa);
+    setTimeout(() => m.remove(), 1300);
+  });
+}
+
 // ---------- Zona ----------
 async function leerZona(lat: number, lng: number) {
   ultimoPunto = { lat, lng };
   marcador.setLngLat([lng, lat]).addTo(mapa);
+  elMarcador.classList.remove("mira--pulso");
+  void elMarcador.offsetWidth;
+  elMarcador.classList.add("mira--pulso");
   abrirTab("zona");
   controlZona?.abort();
   controlZona = new AbortController();
@@ -174,6 +240,8 @@ async function leerZona(lat: number, lng: number) {
     const r = await resumir(lat, lng, 500, controlZona.signal);
     if (controlZona.signal.aborted) return;
     tabs.zona.innerHTML = htmlZona(r);
+    animar(tabs.zona);
+    if (CLAVE_WINDY) pintarWebcams(lat, lng, controlZona.signal);
     tabs.zona.querySelector("[data-guardar]")?.addEventListener("click", () => guardarPunto(lat, lng));
   } catch (e) {
     if (!controlZona.signal.aborted) tabs.zona.innerHTML = `<p class="errores">No pude leer la zona: ${esc(e)}</p>`;
@@ -182,7 +250,7 @@ async function leerZona(lat: number, lng: number) {
 
 function htmlZona(r: Resumen): string {
   const partes: string[] = [];
-  partes.push(`<h2>📍 ${esc(r.zona.find((d) => d.etiqueta === "Barrio")?.valor ?? "Zona")}</h2>`);
+  partes.push(`<h2 data-descifrar>${esc(r.zona.find((d) => d.etiqueta === "Barrio")?.valor ?? "Zona")}</h2><p class="nota">${r.lat.toFixed(5)}, ${r.lng.toFixed(5)} · leído a las ${new Date().toLocaleTimeString("es-CO")}</p>`);
   partes.push(
     r.zona.length
       ? `<dl class="datos">${r.zona.map((d) => `<dt>${esc(d.etiqueta)}</dt><dd>${esc(d.valor)}</dd>`).join("")}</dl>`
@@ -191,13 +259,13 @@ function htmlZona(r: Resumen): string {
 
   const t: string[] = [];
   if (r.clima) {
-    t.push(`<div class="tarjeta"><b>${Math.round(r.clima.temperatura)}°</b><span>${esc(describirClima(r.clima.codigo))} · sens. ${Math.round(r.clima.sensacion)}°</span></div>`);
+    t.push(`<div class="tarjeta"><b data-contar="${Math.round(r.clima.temperatura)}" data-sufijo="°">${Math.round(r.clima.temperatura)}°</b><span>${esc(describirClima(r.clima.codigo))} · sens. ${Math.round(r.clima.sensacion)}°</span></div>`);
     t.push(`<div class="tarjeta"><b>${r.clima.probLluviaProx3h}%</b><span>lluvia próx. 3 h</span></div>`);
     t.push(`<div class="tarjeta"><b>${r.clima.humedad}%</b><span>humedad · viento ${Math.round(r.clima.viento)} km/h</span></div>`);
   }
   if (r.aire) {
     const c = categoriaAire(r.aire.indiceUS);
-    t.push(`<div class="tarjeta" style="box-shadow: inset 4px 0 0 ${c.color}"><b>${r.aire.indiceUS}</b><span>aire: ${esc(c.texto)} · PM2.5 ${r.aire.pm25}</span></div>`);
+    t.push(`<div class="tarjeta" style="box-shadow: inset 4px 0 0 ${c.color}"><b data-contar="${r.aire.indiceUS}">${r.aire.indiceUS}</b><span>aire: ${esc(c.texto)} · PM2.5 ${r.aire.pm25}</span></div>`);
     t.push(`<div class="tarjeta"><b>${Math.round(r.aire.uv)}</b><span>índice UV</span></div>`);
   }
   if (t.length) partes.push(`<h3>Ahora mismo</h3><div class="tarjetas">${t.join("")}</div>`);
@@ -210,6 +278,13 @@ function htmlZona(r: Resumen): string {
     }
     partes.push(`</ul>`);
   }
+
+  const cv = vivo.cercaDe(r.lat, r.lng, 500);
+  partes.push(`<h3>En vivo a menos de 500 m</h3><ul class="lista">
+    <li><div class="fila"><span>Semáforos en falla</span><b class="${cv.fallas ? "rojo" : ""}">${cv.fallas}</b></div></li>
+    <li><div class="fila"><span>Cámaras (sin video público)</span><b>${cv.camaras.length}</b></div>${
+      cv.camaras.length ? `<div class="sub">${cv.camaras.slice(0, 3).map((c) => `${esc(c.direccion)} · ${esc(c.estado.toLowerCase())}`).join(" · ")}</div>` : ""
+    }</li></ul>`);
 
   const mios = lugares
     .todos()
@@ -224,15 +299,47 @@ function htmlZona(r: Resumen): string {
   }
 
   const ll = `${r.lat},${r.lng}`;
+  partes.push(`<h3>Cámaras en vivo</h3><div id="webcams">${
+    CLAVE_WINDY ? `<p class="cargando">Buscando webcams públicas</p>` : ""
+  }</div><div class="acciones">${enlacesEnVivo(r.lat, r.lng)
+    .map((e) => `<a class="boton sec peq" target="_blank" rel="noopener" href="${e.url}">${esc(e.nombre)}</a>`)
+    .join("")}</div><p class="nota">Las ${cv.camaras.length ? `${cv.camaras.length} cámaras del Distrito cercanas` : "cámaras del Distrito"} (tráfico, fotodetección, C4) no transmiten al público; estas son webcams públicas.</p>`);
   partes.push(`<h3>Ver la calle</h3><div class="acciones">
     <a class="boton sec peq" target="_blank" rel="noopener" href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${ll}">Street View</a>
     <a class="boton sec peq" target="_blank" rel="noopener" href="https://www.mapillary.com/app/?lat=${r.lat}&lng=${r.lng}&z=17">Mapillary</a>
     <a class="boton sec peq" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${ll}">Google Maps</a>
   </div>
-  <p class="nota">Bogotá no publica video en vivo de sus cámaras (C4/CEM son internas); estas son fotos públicas a nivel de calle.</p>`);
+  <p class="nota">Bogotá no publica video en vivo de sus cámaras; estas son imágenes públicas a nivel de calle.</p>`);
   partes.push(`<div class="acciones"><button class="boton" data-guardar>★ Guardar como mi lugar</button></div>`);
   if (r.errores.length) partes.push(`<p class="errores">Sin respuesta: ${r.errores.map(esc).join(" · ")}</p>`);
   return partes.join("");
+}
+
+async function pintarWebcams(lat: number, lng: number, signal: AbortSignal) {
+  const cont = document.getElementById("webcams");
+  if (!cont) return;
+  try {
+    const lista = (await webcamsCerca(lat, lng, signal)).map((w) => ({ w, d: Math.round(distancia(lat, lng, w.lat, w.lng)) })).sort((a, b) => a.d - b.d);
+    if (signal.aborted) return;
+    if (!lista.length) {
+      cont.innerHTML = `<p class="nota">No hay webcams públicas activas a menos de 30 km.</p>`;
+      return;
+    }
+    cont.innerHTML = lista
+      .slice(0, 4)
+      .map(
+        ({ w, d }) => `<div class="webcam"><div class="fila"><b>${esc(w.titulo)}</b><span class="sub">${metros(d)}</span></div>${
+          w.reproductor
+            ? `<iframe src="${esc(w.reproductor)}" title="${esc(w.titulo)}" loading="lazy" allow="autoplay; fullscreen" referrerpolicy="no-referrer"></iframe>`
+            : w.imagen
+              ? `<img src="${esc(w.imagen)}" alt="${esc(w.titulo)}" loading="lazy" />`
+              : ""
+        }</div>`,
+      )
+      .join("");
+  } catch (e) {
+    if (!signal.aborted) cont.innerHTML = `<p class="errores">Webcams: ${esc(e instanceof Error ? e.message : e)}</p>`;
+  }
 }
 
 // ---------- Capas ----------
@@ -263,15 +370,11 @@ function alternarRaster(id: string, on: boolean) {
   if (on) {
     activasRaster.add(id);
     if (!mapa.getSource(id)) mapa.addSource(id, { type: "raster", tiles: [plantillaRaster(c)], tileSize: 256 });
-    mapa.addLayer({ id, type: "raster", source: id, paint: { "raster-opacity": c.opacidad } }, primeraCapaVectorial());
+    mapa.addLayer({ id, type: "raster", source: id, paint: { "raster-opacity": c.opacidad } }, ANCLA_DATOS);
   } else {
     activasRaster.delete(id);
     if (mapa.getLayer(id)) mapa.removeLayer(id);
   }
-}
-
-function primeraCapaVectorial(): string | undefined {
-  return mapa.getStyle().layers.find((l) => l.type !== "raster")?.id;
 }
 
 function alternarPOI(id: string, on: boolean) {
@@ -323,7 +426,7 @@ function refrescarPOI() {
 function popupDe(f: maplibregl.MapGeoJSONFeature, donde: maplibregl.LngLat) {
   const p = (f.properties ?? {}) as Atributos & { __capa?: string; nombre?: string; sub?: string; id?: string };
   let h = "";
-  if (f.layer.id === "mis-lugares" || f.layer.id === "intereses") {
+  if (!p.__capa) {
     h = `<b>${esc(p.nombre)}</b><br><span class="nota">${esc(p.sub ?? "")}</span>`;
   } else {
     const c = CAPAS_POI.find((x) => x.id === p.__capa);
@@ -563,8 +666,7 @@ function pintarLugares() {
   q("[data-ver]").forEach((b) =>
     b.addEventListener("click", () => {
       const l = buscarL(b.dataset.ver!);
-      mapa.flyTo({ center: [l.lng, l.lat], zoom: 16 });
-      leerZona(l.lat, l.lng);
+      caerEn(l.lat, l.lng);
     }),
   );
   q("[data-alternar]").forEach((b) => b.addEventListener("click", () => lugares.marcarVisitado(b.dataset.alternar!, !buscarL(b.dataset.alternar!).visitado)));

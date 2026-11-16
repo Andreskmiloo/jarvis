@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0f1720" />
+    <meta name="theme-color" content="#111213" />
     <title>Ojo de Dios · Bogotá</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>" />
   </head>
@@ -13,13 +13,14 @@
     <aside id="panel" class="panel">
       <header class="panel__cabecera">
         <button id="asa" class="asa" aria-label="Expandir o contraer panel"></button>
-        <h1>👁️ Ojo de Dios <small>Bogotá</small></h1>
+        <h1><span class="ojo">◉</span> OJO_DE_DIOS <small>// BOGOTÁ</small></h1>
         <form id="buscador" class="buscador" role="search">
           <input id="busqueda" type="search" placeholder="Busca dirección o lugar…" autocomplete="off" />
         </form>
         <nav class="pestanas" role="tablist">
           <button role="tab" data-tab="zona" aria-selected="true">Zona</button>
-          <button role="tab" data-tab="intereses">Intereses</button>
+          <button role="tab" data-tab="vivo">Vivo</button>
+          <button role="tab" data-tab="intereses">Gustos</button>
           <button role="tab" data-tab="lugares">Lugares</button>
           <button role="tab" data-tab="capas">Capas</button>
         </nav>
@@ -28,11 +29,17 @@
       <section id="tab-zona" class="tab" role="tabpanel">
         <p class="vacio">Toca cualquier punto del mapa para leer la zona: localidad, UPZ, barrio, estrato, valor del suelo, clima, aire y qué hay cerca.</p>
       </section>
+      <section id="tab-vivo" class="tab" role="tabpanel" hidden></section>
       <section id="tab-intereses" class="tab" role="tabpanel" hidden></section>
       <section id="tab-lugares" class="tab" role="tabpanel" hidden></section>
       <section id="tab-capas" class="tab" role="tabpanel" hidden></section>
     </aside>
 
+    <div class="vista">
+      <button id="boton-3d" class="boton-mapa" aria-pressed="true" title="Cambiar entre relieve 3D y plano">2D</button>
+      <button id="boton-tema" class="boton-mapa" title="Cambiar tema: blanco y negro o Matrix">◐</button>
+      <button id="boton-orbita" class="boton-mapa" title="Girar la vista 90°">⟳</button>
+    </div>
     <div id="aviso" class="aviso" role="status" aria-live="polite" hidden></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

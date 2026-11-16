@@ -5,6 +5,8 @@ export interface ResultadoBusqueda {
   nombre: string;
   lat: number;
   lng: number;
+  /** Tipo de resultado (suburb, road, amenity…): define qué tan cerca se aterriza. */
+  tipo?: string;
 }
 
 /** Acepta "4.65, -74.06" o un link de Google Maps con @lat,lng o ?q=lat,lng. */
@@ -33,6 +35,6 @@ export async function buscarDireccion(texto: string, signal?: AbortSignal): Prom
   });
   const r = await fetch(`https://nominatim.openstreetmap.org/search?${p}`, { signal });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  const d = (await r.json()) as { display_name: string; lat: string; lon: string }[];
-  return d.map((x) => ({ nombre: x.display_name, lat: Number(x.lat), lng: Number(x.lon) }));
+  const d = (await r.json()) as { display_name: string; lat: string; lon: string; addresstype?: string; type?: string }[];
+  return d.map((x) => ({ nombre: x.display_name, lat: Number(x.lat), lng: Number(x.lon), tipo: ["suburb", "city_district", "borough", "quarter", "neighbourhood", "city", "town"].includes(x.addresstype ?? x.type ?? "") ? "barrio" : x.addresstype }));
 }

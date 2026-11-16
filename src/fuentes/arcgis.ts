@@ -7,6 +7,8 @@ export interface ConsultaPunto {
   radio?: number;
   limite?: number;
   geometria?: boolean;
+  /** Filtro SQL adicional. */
+  donde?: string;
 }
 
 export function urlConsultaPunto(ruta: string, c: ConsultaPunto): string {
@@ -25,6 +27,7 @@ export function urlConsultaPunto(ruta: string, c: ConsultaPunto): string {
     p.set("units", "esriSRUnit_Meter");
   }
   if (c.limite) p.set("resultRecordCount", String(c.limite));
+  if (c.donde) p.set("where", c.donde);
   return `${ARCGIS_BASE}/${ruta}/query?${p}`;
 }
 
@@ -72,9 +75,10 @@ export async function atributosCercanos(
   lat: number,
   radios: number[] = [0],
   signal?: AbortSignal,
+  donde?: string,
 ): Promise<Atributos | null> {
   for (const radio of radios) {
-    const r = await atributosEnPunto(ruta, { lng, lat, radio, limite: 1 }, signal);
+    const r = await atributosEnPunto(ruta, { lng, lat, radio, limite: 1, donde }, signal);
     if (r.length) return r[0];
   }
   return null;

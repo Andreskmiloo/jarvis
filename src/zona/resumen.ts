@@ -60,7 +60,7 @@ export async function resumir(lat: number, lng: number, radio = 500, signal?: Ab
 
   const zonaP = Promise.all(
     CAPAS_ZONA.map((c) =>
-      atrapar(c.nombre, atributosCercanos(c.ruta, lng, lat, c.radios, signal)).then((a) => (a ? c.formatear(a) : [])),
+      atrapar(c.nombre, atributosCercanos(c.ruta, lng, lat, c.radios, signal, c.donde)).then((a) => (a ? c.formatear(a) : [])),
     ),
   );
   const climaP = atrapar("Clima", clima(lat, lng, signal));

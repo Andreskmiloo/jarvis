@@ -14,6 +14,8 @@ export interface CapaZona {
   ruta: string; // carpeta/servicio/MapServer/n
   /** Radios (m) a probar en orden: manzanas no cubren las calles. */
   radios?: number[];
+  /** Filtro SQL: las capas con serie temporal solo se leen en su año más reciente. */
+  donde?: string;
   formatear: (a: Atributos) => { etiqueta: string; valor: string }[];
 }
 
@@ -49,6 +51,10 @@ const equipamiento = (a: Atributos) => [
   `Clase: ${na(a.LECCLASIF)}`,
 ];
 
+/** Año de los datos: no se muestra nada anterior. */
+export const ANIO = 2026;
+export const SOLO_ANIO = `ANO >= DATE '${ANIO}-01-01'`;
+
 export const CAPAS_ZONA: CapaZona[] = [
   {
     id: "localidad",
@@ -73,13 +79,14 @@ export const CAPAS_ZONA: CapaZona[] = [
     nombre: "Estrato",
     ruta: "ordenamientoterritorial/estratificacion/MapServer/1",
     radios: [0, 25, 60, 150],
-    formatear: (a) => [{ etiqueta: "Estrato", valor: txt(a.ESTRATO) }],
+    formatear: (a) => [{ etiqueta: "Estrato (vigente)", valor: a.ESTRATO === 0 ? "0 · no residencial" : txt(a.ESTRATO) }],
   },
   {
     id: "valor",
     nombre: "Valor del suelo",
     ruta: "catastro/valorreferencia/MapServer/0",
     radios: [0, 25, 60, 150],
+    donde: SOLO_ANIO,
     formatear: (a) => [
       { etiqueta: "Valor de referencia m² terreno", valor: `${pesos(a.V_REF)} (${anio(a.ANO)})` },
     ],
@@ -89,6 +96,7 @@ export const CAPAS_ZONA: CapaZona[] = [
     nombre: "Uso predominante",
     ruta: "catastro/usopredominante/MapServer/0",
     radios: [0, 25, 60, 150],
+    donde: SOLO_ANIO,
     formatear: (a) => [{ etiqueta: "Uso predominante", valor: `${titulo(a.GRUPOUSOECON)} (${anio(a.ANO)})` }],
   },
 ];
@@ -209,15 +217,17 @@ export interface CapaRaster {
   nombre: string;
   servicio: string; // carpeta/servicio/MapServer
   capas?: string; // p.ej. "show:1"
+  /** Filtro por subcapa, p.ej. { 0: SOLO_ANIO }. */
+  filtros?: Record<number, string>;
   opacidad: number;
 }
 
 export const CAPAS_RASTER: CapaRaster[] = [
   { id: "r-localidades", nombre: "Límites de localidades", servicio: "ordenamientoterritorial/localidad/MapServer", opacidad: 0.9 },
   { id: "r-upz", nombre: "Límites de UPZ", servicio: "ordenamientoterritorial/unidadplaneamientozonal/MapServer", opacidad: 0.8 },
-  { id: "r-estrato", nombre: "Estrato por manzana", servicio: "ordenamientoterritorial/estratificacion/MapServer", capas: "show:1", opacidad: 0.6 },
-  { id: "r-valor", nombre: "Valor del suelo m² por manzana", servicio: "catastro/valorreferencia/MapServer", opacidad: 0.6 },
-  { id: "r-uso", nombre: "Uso predominante por manzana", servicio: "catastro/usopredominante/MapServer", opacidad: 0.6 },
+  { id: "r-estrato", nombre: "Estrato por manzana (vigente)", servicio: "ordenamientoterritorial/estratificacion/MapServer", capas: "show:1", opacidad: 0.6 },
+  { id: "r-valor", nombre: `Valor del suelo m² por manzana (${ANIO})`, servicio: "catastro/valorreferencia/MapServer", filtros: { 0: SOLO_ANIO }, opacidad: 0.6 },
+  { id: "r-uso", nombre: `Uso predominante por manzana (${ANIO})`, servicio: "catastro/usopredominante/MapServer", filtros: { 0: SOLO_ANIO }, opacidad: 0.6 },
   { id: "r-densidad", nombre: "Densidad de población por UPZ", servicio: "social/densidadpersonasUPZ/MapServer", opacidad: 0.55 },
   { id: "r-arboles", nombre: "Densidad de árboles", servicio: "ambiente/densidadarboles/MapServer", opacidad: 0.55 },
   { id: "r-comparendos", nombre: "Densidad de comparendos", servicio: "movilidad/densidadcomparendos/MapServer", opacidad: 0.55 },
@@ -237,6 +247,7 @@ export function plantillaRaster(c: CapaRaster): string {
     f: "image",
   });
   if (c.capas) p.set("layers", c.capas);
+  if (c.filtros) p.set("layerDefs", JSON.stringify(c.filtros));
   // {bbox-epsg-3857} no debe codificarse.
   return `${ARCGIS_BASE}/${c.servicio}/export?bbox={bbox-epsg-3857}&${p}`;
 }
