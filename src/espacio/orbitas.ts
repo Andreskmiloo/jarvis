@@ -2,7 +2,7 @@
 // Reingeniería de `src/lib/orbit.ts` y la clasificación por misión de OSIRIS
 // (github.com/simplifaisoul/osiris, licencia MIT); aquí todo corre en el navegador
 // y se cruza con Bogotá: qué pasa por encima de ti y cuándo.
-import { degreesLat, degreesLong, ecfToLookAngles, eciToEcf, eciToGeodetic, gstime, propagate, twoline2satrec, type SatRec } from "satellite.js";
+import { degreesLat, degreesLong, ecfToLookAngles, eciToEcf, eciToGeodetic, gstime, propagate, twoline2satrec, type SatRec } from "./sgp4";
 
 export interface Tle {
   nombre: string;
