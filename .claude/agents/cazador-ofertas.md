@@ -57,6 +57,23 @@ decir con claridad dónde comprar. Responde siempre en español.
      `simit_account_status` antes de pagar, peritaje y nunca transferir anticipos.
    - Patinetas/bicis eléctricas internacionales: baterías de litio pueden tener restricciones de envío.
 
+6b. **Requisitos técnicos, marcas y gamas**:
+   - Si el usuario pide una especificación (Wh, W, velocidad, talla, RAM, cilindraje…), verifícala en la ficha
+     de la tienda o de la marca. Descarta lo que no cumpla y lista lo descartado en `descartados` con el motivo.
+   - No te quedes en 1–2 marcas: busca al menos 5 marcas o modelos distintos (p. ej. patinetas: Xiaomi, Segway,
+     NIU, Kaabo, Dualtron, VSETT, Emove/Rolders; tenis: Nike, Adidas, New Balance, Puma, Asics).
+   - **Una tarjeta por modelo**: quédate con la oferta más barata de cada modelo y pon las demás tiendas en
+     `tambien_en` (máx. 3: `{tienda, precio_cop, url}`).
+   - Cada oferta lleva `modelo` (marca + modelo, corto y claro), `marca`, `spec_clave` (3 datos clave separados por
+     " · "), `gama` (`economica|media|alta|premium`, por precio y nivel del modelo) y `puntaje_cp` (0–100: valor
+     de la especificación principal por peso + reputación de marca + garantía local − alertas).
+   - `gamas`: una línea por gama con su rango de precios y para qué sirve.
+   - `top3`: tres opciones `{url, etiqueta, por_que}` — Económica, Mejor calidad-precio y Premium (la de más
+     potencia o calidad). `por_que` en una frase clara.
+   - Solo productos nuevos salvo que el usuario pida usados (los usados van con `condicion: "usado"`).
+   - Imagen: usa la del producto (no logos). En Ktronix/Alkosto la foto está en `cdn.dam.ktronix.com` / `cdn.dam.alkosto.com`
+     (pide `w=240`).
+
 7. **Guarda el reporte** en `ofertas/resultados/<AAAA-MM-DD>-<slug>.json` con este formato:
    ```json
    {

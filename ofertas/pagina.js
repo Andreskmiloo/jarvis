@@ -164,23 +164,52 @@ if (a[0] === '--deseos') {
 } else {
   if (!a[0]) { console.error('Uso: node ofertas/pagina.js <reporte.json> [salida.html] | --deseos'); process.exit(1); }
   const d = JSON.parse(fs.readFileSync(a[0], 'utf8'));
-  const out = a[1] || a[0].replace(/\.json$/, '.html');
-  embedImagenes(d.resultados || []).then(() => {
-    fs.writeFileSync(out, reporte(d));
-    console.log(out);
-  });
+  if (a.includes('--solo-json')) {
+    // Prepara el reporte para la base de datos del buscador: máx. 30 ofertas, imágenes pequeñas incrustadas, < 250 KB.
+    d.resultados = (d.resultados || []).filter((r) => r.precio_cop)
+      .sort((x, y) => (x.precio_final_estimado_cop ?? x.precio_cop) - (y.precio_final_estimado_cop ?? y.precio_cop)).slice(0, 30);
+    const salida = a[a.indexOf('--solo-json') + 1] && !a[a.indexOf('--solo-json') + 1].startsWith('--') ? a[a.indexOf('--solo-json') + 1] : a[0].replace(/\.json$/, '.db.json');
+    embedImagenes(d.resultados, 12000).then(() => {
+      let txt = JSON.stringify(d);
+      if (txt.length > 250000) { d.resultados.forEach((r) => { r.imagen = null; }); txt = JSON.stringify(d); }
+      fs.writeFileSync(salida, txt);
+      console.log(salida, txt.length, 'bytes');
+    });
+  } else {
+    const out = a[1] && !a[1].startsWith('--') ? a[1] : a[0].replace(/\.json$/, '.html');
+    embedImagenes(d.resultados || [], 60000).then(() => {
+      fs.writeFileSync(out, vitrinaEstatica(d));
+      console.log(out);
+    });
+  }
+}
+
+// Página individual con el mismo diseño de vitrina del buscador: copia su <style> y su <script id="vitrina">.
+function vitrinaEstatica(d) {
+  const b = fs.readFileSync(path.join(__dirname, 'buscador.html'), 'utf8');
+  const fonts = (b.match(/<link[^>]+fonts[^>]*>/g) || []).join('\n');
+  const style = b.match(/<style>[\s\S]*?<\/style>/)[0];
+  const vit = b.match(/<script id="vitrina">[\s\S]*?<\/script>/)[0];
+  const datos = JSON.stringify(d).replace(/</g, '\\u003c');
+  return `<title>Ofertas: ${esc(d.consulta)}</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+${fonts}
+${style}
+<div class="wrap"><div class="brand"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><strong>Cazador</strong> de ofertas</span><span class="note brand-sub">Bogotá · nuevos y mejor calidad-precio</span></div><main id="view" style="display:grid;gap:24px"></main></div>
+${vit}
+<script>Vitrina.mount(document.getElementById('view'), ${datos});</script>`;
 }
 
 // El visor de Artifacts bloquea imágenes externas: se descargan y se incrustan como data: URI.
-async function embedImagenes(lista) {
+async function embedImagenes(lista, maxBytes = 200000) {
   await Promise.all(lista.map(async (r) => {
     if (!r.imagen || r.imagen.startsWith('data:')) return;
     try {
-      const url = r.imagen.includes('media.falabella') ? r.imagen.replace(/\/public$/, '/w=120,h=120,fit=pad') : r.imagen;
+      const url = r.imagen.includes('alicdn.com') ? r.imagen.replace(/(\.(jpg|png|webp|avif))(_.*)?$/i, '$1_120x120.jpg') : r.imagen.includes('media-amazon.com') ? r.imagen.replace(/\._[^.]+_\./, '._AC_UL120_.') : r.imagen.includes('/arquivos/ids/') ? r.imagen.replace(/\/ids\/(\d+)(-\d+-\d+)?\//, '/ids/$1-120-120/') : r.imagen.includes('media.falabella') ? r.imagen.replace(/\/public$/, '/w=96,h=96,fit=pad') : r.imagen;
       const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(10000) });
       const tipo = res.headers.get('content-type') || '';
       const buf = Buffer.from(await res.arrayBuffer());
-      r.imagen = res.ok && tipo.startsWith('image/') && buf.length < 200000 ? `data:${tipo.split(';')[0]};base64,${buf.toString('base64')}` : null;
+      r.imagen = res.ok && tipo.startsWith('image/') && buf.length < maxBytes ? `data:${tipo.split(';')[0]};base64,${buf.toString('base64')}` : null;
     } catch { r.imagen = null; }
   }));
 }
