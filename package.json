@@ -11,7 +11,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "maplibre-gl": "^6.18.0"
+    "maplibre-gl": "^6.18.0",
+    "satellite.js": "^7.2.0"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.16",

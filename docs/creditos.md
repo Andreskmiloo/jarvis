@@ -1,0 +1,30 @@
+# Créditos
+
+## OSIRIS
+Partes de Ojo de Dios se diseñaron estudiando **OSIRIS** — Open Source Intelligence & Reconnaissance Integrated System
+(https://github.com/simplifaisoul/osiris), publicado bajo licencia MIT:
+
+> MIT License — Copyright (c) 2026 simplifaisoul
+>
+> Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+> documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+> rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+> persons to whom the Software is furnished to do so, subject to the following conditions:
+>
+> The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+> Software.
+>
+> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+> WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+> COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+> OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Qué se tomó (reimplementado para una página estática enfocada en Bogotá):
+- Propagación de órbitas SGP4 con `satellite.js` y partición en el antimeridiano (`src/lib/orbit.ts` → `src/espacio/orbitas.ts`), y la clasificación de satélites por misión.
+- Elección de fuentes: NASA FIRMS (CSV 24 h sin clave), NASA EONET, NOAA SWPC, CelesTrak, GDELT.
+- La idea de un asistente que mueve el mapa con la clave de IA del propio usuario.
+
+Lo demás (globo y vuelo, capas de Bogotá, ficha de zona, gustos, "Ahora aquí", cálculo del terminador) es propio.
+
+## Datos
+CelesTrak · NASA FIRMS, EONET y GIBS · NOAA SWPC · GDELT · OpenStreetMap · Catastro Bogotá/IDECA · Secretaría de Movilidad · Open-Meteo · Esri · EOX Sentinel-2 cloudless.

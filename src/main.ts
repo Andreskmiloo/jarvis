@@ -13,6 +13,7 @@ import { buscarPhoton } from "./fuentes/photon";
 import { cargarPerfil, type Gusto } from "./intereses/perfil";
 import { ANCLA_DATOS, CAPA_EDIFICIOS, estiloMapa, EXAGERACION, type Tema, VISTA_2D, VISTA_3D, VISTA_TIERRA } from "./mapa/estilo";
 import { conectarRitmo, nitidezAdaptativa } from "./mapa/ritmo";
+import { iniciarPlaneta } from "./espacio/ui";
 import { animar } from "./ui/anim";
 import { iniciarVivo } from "./vivo";
 import { iniciarCamaras } from "./camaras/ui";
@@ -293,6 +294,7 @@ const camarasUI = iniciarCamaras(mapa, document.getElementById("vivo-camaras")!,
 function abrirWaze(lat: number, lng: number) {
   camarasUI.abrirExterna("Tráfico en vivo · Waze", `https://embed.waze.com/iframe?zoom=15&lat=${lat.toFixed(5)}&lon=${lng.toFixed(5)}&ct=livemap&pin=1`);
 }
+const planeta = iniciarPlaneta(mapa, document.getElementById("vivo-planeta")!, registrar, (lat, lng, zoom) => caerEn(lat, lng, zoom));
 const vivo = iniciarVivo(mapa, document.getElementById("vivo-datos")!, (id) => {
   capasInteractivas.push(id);
   mapa.on("mouseenter", id, () => (mapa.getCanvas().style.cursor = "pointer"));
@@ -453,12 +455,39 @@ async function leerZona(lat: number, lng: number) {
     tabs.zona.innerHTML = htmlZona(r);
     animar(tabs.zona);
     if (CLAVE_WINDY) pintarWebcams(lat, lng, controlZona.signal);
+    void ahoraAqui(r, controlZona.signal);
     tabs.zona.querySelector("[data-guardar]")?.addEventListener("click", () => guardarPunto(lat, lng));
     tabs.zona.querySelector("[data-waze-zona]")?.addEventListener("click", () => abrirWaze(lat, lng));
     tabs.zona.querySelectorAll<HTMLButtonElement>("[data-webcam]").forEach((b) => b.addEventListener("click", () => camarasUI.abrirExterna(b.dataset.titulo ?? "Webcam", b.dataset.webcam!)));
   } catch (e) {
     if (!controlZona.signal.aborted) tabs.zona.innerHTML = `<p class="errores">No pude leer la zona: ${esc(e)}</p>`;
   }
+}
+
+/** "Ahora aquí": lo que pasa encima y alrededor del punto (satélites, incendios, eventos) y sus noticias. */
+async function ahoraAqui(r: Resumen, signal: AbortSignal) {
+  const caja = document.createElement("section");
+  caja.className = "ahora-aqui";
+  caja.innerHTML = `<h3>Ahora aquí</h3><p class="cargando">Mirando el cielo y las noticias</p>`;
+  tabs.zona.appendChild(caja);
+  const lineas = await planeta.resumen(r.lat, r.lng);
+  if (signal.aborted) return;
+  const tema = r.zona.find((d) => d.etiqueta === "Barrio")?.valor ?? r.zona.find((d) => d.etiqueta === "Localidad")?.valor;
+  let h = `<h3>Ahora aquí</h3>${lineas.length ? `<ul class="lista">${lineas.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>` : `<p class="nota">Cielo y alrededores tranquilos.</p>`}`;
+  caja.innerHTML = h + (tema ? `<p class="cargando">Noticias de ${esc(tema)}</p>` : "");
+  if (!tema) return;
+  try {
+    const ns = await planeta.noticiasDe(tema);
+    if (signal.aborted) return;
+    h += `<h3>Noticias de ${esc(tema)} (48 h)</h3>${
+      ns.length
+        ? `<ul class="lista">${ns.map((n) => `<li><a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.titulo)}</a><div class="sub">${esc(n.medio)}</div></li>`).join("")}</ul>`
+        : `<p class="nota">Sin noticias recientes con ese nombre.</p>`
+    }`;
+  } catch (e) {
+    h += `<p class="nota">Noticias: ${esc(e instanceof Error ? e.message : e)}</p>`;
+  }
+  if (!signal.aborted) caja.innerHTML = h;
 }
 
 function htmlZona(r: Resumen): string {

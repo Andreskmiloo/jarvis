@@ -27,6 +27,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # Incendios (NASA FIRMS 24 h) y órbitas de satélites (CelesTrak) frescos en cada publicación.
+      - name: Actualizar incendios y satélites
+        run: node scripts/guardar-espacio.mjs
+        continue-on-error: true
+        timeout-minutes: 8
       # Refresca los lugares guardados con Overpass (desde GitHub sí responde). Si falla, quedan los del repo.
       - name: Actualizar lugares guardados
         run: node scripts/guardar-lugares.mjs
