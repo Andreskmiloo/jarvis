@@ -1,5 +1,694 @@
 {
   "version": 1,
   "actualizado": "2026-11-16",
-  "areas": []
+  "areas": [
+    {
+      "area": "deporte",
+      "gustos": [
+        {
+          "id": "futbol",
+          "nombre": "Futbol",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "horario": "fines de semana",
+            "relacionado_con": [
+              "padel",
+              "tenis",
+              "voley"
+            ]
+          },
+          "osm": [
+            {
+              "leisure": "pitch",
+              "sport": "soccer"
+            },
+            {
+              "leisure": "sports_centre",
+              "sport": "soccer"
+            }
+          ],
+          "palabras_clave": [
+            "futbol",
+            "microfutbol",
+            "cancha sintetica"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "voley",
+          "nombre": "Voley",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "horario": "fines de semana",
+            "relacionado_con": [
+              "padel",
+              "tenis",
+              "futbol"
+            ]
+          },
+          "osm": [
+            {
+              "leisure": "pitch",
+              "sport": "volleyball"
+            },
+            {
+              "leisure": "sports_centre",
+              "sport": "volleyball"
+            }
+          ],
+          "palabras_clave": [
+            "voleibol",
+            "volley"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "billar",
+          "nombre": "Billar",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "relacionado_con": [
+              "vida-nocturna"
+            ]
+          },
+          "osm": [
+            {
+              "leisure": "sports_centre",
+              "sport": "billiards"
+            },
+            {
+              "amenity": "billiards"
+            }
+          ],
+          "palabras_clave": [
+            "billar",
+            "pool",
+            "snooker"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "padel",
+          "nombre": "Padel",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "horario": "fines de semana",
+            "relacionado_con": [
+              "tenis",
+              "voley",
+              "futbol"
+            ]
+          },
+          "osm": [
+            {
+              "leisure": "pitch",
+              "sport": "padel"
+            },
+            {
+              "leisure": "sports_centre",
+              "sport": "padel"
+            }
+          ],
+          "palabras_clave": [
+            "padel",
+            "cancha de padel"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "golf",
+          "nombre": "Golf",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "relacionado_con": [
+              "old-money"
+            ]
+          },
+          "osm": [
+            {
+              "leisure": "golf_course"
+            },
+            {
+              "leisure": "driving_range"
+            },
+            {
+              "leisure": "miniature_golf"
+            }
+          ],
+          "palabras_clave": [
+            "golf",
+            "driving range",
+            "minigolf"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "tenis",
+          "nombre": "Tenis",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "horario": "fines de semana",
+            "relacionado_con": [
+              "padel",
+              "voley",
+              "futbol"
+            ]
+          },
+          "osm": [
+            {
+              "leisure": "pitch",
+              "sport": "tennis"
+            },
+            {
+              "leisure": "sports_centre",
+              "sport": "tennis"
+            }
+          ],
+          "palabras_clave": [
+            "tenis",
+            "cancha de tenis"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        }
+      ]
+    },
+    {
+      "area": "moda",
+      "gustos": [
+        {
+          "id": "sneakers",
+          "nombre": "Sneakers",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "relacionado_con": [
+              "streetwear"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "shoes"
+            }
+          ],
+          "palabras_clave": [
+            "sneakers",
+            "tenis",
+            "sneakerhead",
+            "resell"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "streetwear",
+          "nombre": "Streetwear",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "relacionado_con": [
+              "sneakers"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "clothes"
+            }
+          ],
+          "palabras_clave": [
+            "streetwear",
+            "urbano",
+            "skate shop"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "old-money",
+          "nombre": "Old money",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "relacionado_con": [
+              "marcas-disenador",
+              "golf"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "clothes"
+            },
+            {
+              "shop": "boutique"
+            }
+          ],
+          "palabras_clave": [
+            "old money",
+            "clasico",
+            "elegante",
+            "sastreria"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "marcas-disenador",
+          "nombre": "Marcas exclusivas de disenador",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "relacionado_con": [
+              "old-money",
+              "perfumeria"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "boutique"
+            },
+            {
+              "shop": "fashion"
+            }
+          ],
+          "palabras_clave": [
+            "disenador",
+            "lujo",
+            "boutique",
+            "outlet"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "perfumeria",
+          "nombre": "Perfumeria",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "relacionado_con": [
+              "marcas-disenador"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "perfumery"
+            }
+          ],
+          "palabras_clave": [
+            "perfumeria",
+            "perfumes",
+            "fragancias"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Tambien conectado con el emprendimiento de perfumes."
+        },
+        {
+          "id": "mercados-de-pulgas",
+          "nombre": "Mercados de pulgas",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o bajo",
+            "horario": "fines de semana"
+          },
+          "osm": [
+            {
+              "amenity": "marketplace",
+              "flea_market": "yes"
+            },
+            {
+              "amenity": "marketplace"
+            }
+          ],
+          "palabras_clave": [
+            "mercado de pulgas",
+            "mercado de las pulgas",
+            "usaquen",
+            "vintage"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        }
+      ]
+    },
+    {
+      "area": "tecnologia-y-sonido",
+      "gustos": [
+        {
+          "id": "tecnologia-de-punta",
+          "nombre": "Tecnologia de punta",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "relacionado_con": [
+              "inteligencia-artificial"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "electronics"
+            },
+            {
+              "shop": "computer"
+            },
+            {
+              "shop": "mobile_phone"
+            }
+          ],
+          "palabras_clave": [
+            "tecnologia",
+            "gadgets",
+            "apple",
+            "tienda de tecnologia"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "audio-alta-definicion",
+          "nombre": "Sonido de alta definicion",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027"
+          },
+          "osm": [
+            {
+              "shop": "hifi"
+            },
+            {
+              "shop": "electronics"
+            }
+          ],
+          "palabras_clave": [
+            "hi-fi",
+            "audiofilo",
+            "audifonos",
+            "audio alta definicion"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        }
+      ]
+    },
+    {
+      "area": "comida",
+      "gustos": [
+        {
+          "id": "comida-asiatica",
+          "nombre": "Comida asiatica",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "tipo": [
+              "japonesa",
+              "china",
+              "coreana",
+              "tailandesa"
+            ]
+          },
+          "osm": [
+            {
+              "amenity": "restaurant",
+              "cuisine": "asian"
+            },
+            {
+              "amenity": "restaurant",
+              "cuisine": "japanese"
+            },
+            {
+              "amenity": "restaurant",
+              "cuisine": "chinese"
+            },
+            {
+              "amenity": "restaurant",
+              "cuisine": "korean"
+            },
+            {
+              "amenity": "restaurant",
+              "cuisine": "thai"
+            },
+            {
+              "amenity": "restaurant",
+              "cuisine": "sushi"
+            }
+          ],
+          "palabras_clave": [
+            "sushi",
+            "ramen",
+            "asiatico"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "buenos-restaurantes",
+          "nombre": "Buenos restaurantes",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027"
+          },
+          "osm": [
+            {
+              "amenity": "restaurant"
+            }
+          ],
+          "palabras_clave": [
+            "restaurante gourmet",
+            "alta cocina"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "hamburguesas",
+          "nombre": "Hamburguesas",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027"
+          },
+          "osm": [
+            {
+              "amenity": "restaurant",
+              "cuisine": "burger"
+            },
+            {
+              "amenity": "fast_food",
+              "cuisine": "burger"
+            }
+          ],
+          "palabras_clave": [
+            "hamburguesa",
+            "burger"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        }
+      ]
+    },
+    {
+      "area": "eventos-y-negocios",
+      "gustos": [
+        {
+          "id": "ecommerce",
+          "nombre": "E-commerce",
+          "nivel": 5,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "tipo": [
+              "eventos",
+              "meetups"
+            ],
+            "relacionado_con": [
+              "convenciones-alto-valor"
+            ]
+          },
+          "osm": [
+            {
+              "amenity": "events_venue"
+            },
+            {
+              "amenity": "conference_centre"
+            }
+          ],
+          "palabras_clave": [
+            "ecommerce",
+            "comercio electronico",
+            "dropshipping",
+            "evento e-commerce"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "inteligencia-artificial",
+          "nombre": "Inteligencia artificial",
+          "nivel": 5,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "tipo": [
+              "eventos",
+              "meetups"
+            ],
+            "relacionado_con": [
+              "tecnologia-de-punta"
+            ]
+          },
+          "osm": [
+            {
+              "amenity": "conference_centre"
+            },
+            {
+              "office": "coworking"
+            }
+          ],
+          "palabras_clave": [
+            "inteligencia artificial",
+            "IA",
+            "meetup IA",
+            "machine learning"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "habilidades-blandas",
+          "nombre": "Habilidades blandas",
+          "nivel": 5,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "tipo": [
+              "talleres",
+              "eventos"
+            ]
+          },
+          "osm": [
+            {
+              "amenity": "events_venue"
+            }
+          ],
+          "palabras_clave": [
+            "habilidades blandas",
+            "liderazgo",
+            "oratoria",
+            "networking"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "convenciones-alto-valor",
+          "nombre": "Convenciones de alto valor",
+          "nivel": 5,
+          "preferencias": {
+            "presupuesto": "pago, desde feb 2027",
+            "tipo": [
+              "convenciones",
+              "congresos"
+            ]
+          },
+          "osm": [
+            {
+              "amenity": "conference_centre"
+            },
+            {
+              "amenity": "events_venue"
+            }
+          ],
+          "palabras_clave": [
+            "convencion",
+            "congreso",
+            "cumbre",
+            "summit",
+            "feria de negocios"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "filosofia",
+          "nombre": "Filosofia",
+          "nivel": 5,
+          "preferencias": {
+            "presupuesto": "gratis o bajo"
+          },
+          "osm": [
+            {
+              "amenity": "library"
+            },
+            {
+              "amenity": "events_venue"
+            }
+          ],
+          "palabras_clave": [
+            "filosofia",
+            "cafe filosofico",
+            "conferencia filosofia"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        }
+      ]
+    },
+    {
+      "area": "cultura",
+      "gustos": [
+        {
+          "id": "comedia-shows",
+          "nombre": "Shows de comedia",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "gratis o publico primero; pago desde feb 2027"
+          },
+          "osm": [
+            {
+              "amenity": "theatre"
+            },
+            {
+              "amenity": "comedy_club"
+            }
+          ],
+          "palabras_clave": [
+            "stand up",
+            "comedia",
+            "show de comedia",
+            "humor"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        }
+      ]
+    },
+    {
+      "area": "viajes",
+      "gustos": [
+        {
+          "id": "viajar",
+          "nombre": "Viajar",
+          "nivel": 4,
+          "preferencias": {
+            "presupuesto": "pago, desde feb 2027"
+          },
+          "osm": [],
+          "palabras_clave": [
+            "viajes",
+            "agencia de viajes",
+            "turismo",
+            "destinos"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        }
+      ]
+    }
+  ]
 }
