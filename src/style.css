@@ -356,3 +356,86 @@ input[type="checkbox"], input[type="range"] { accent-color: var(--verde); }
 
 .subcapas { padding-left: 22px; border-left: 1px dashed var(--borde); margin: 2px 0 6px 6px; }
 .subcapas .capa { padding: 3px 0; font-size: 12.5px; }
+
+/* ---------- Ciudad en capas 3D ---------- */
+.etiquetas-capas { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+.etiqueta-capa {
+  position: absolute; left: 0; top: 0; pointer-events: auto; cursor: pointer;
+  transform-origin: 0 0; margin: -26px 0 0 -4px; white-space: nowrap;
+  font: 600 11.5px/1 var(--mono); letter-spacing: 0.04em; text-transform: uppercase;
+  color: #0b0b0b; background: var(--c); border: 0; border-radius: 3px; padding: 4px 8px;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--c) 55%, transparent);
+  transition: opacity 200ms;
+}
+.etiqueta-capa::after { content: ""; position: absolute; left: 4px; top: 100%; width: 1px; height: 22px; background: var(--c); }
+.etiqueta-capa.cargando::before { content: "⋯ "; }
+.etiqueta-capa.error { background: #555; color: #ddd; }
+.laminas .lamina { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+.laminas .lamina .capa { flex: 1; min-width: 0; }
+.rango { display: flex; align-items: center; gap: 8px; margin: 10px 0 4px; font-size: 12.5px; color: var(--suave); }
+.rango input { flex: 1; }
+.rango output { color: var(--texto); min-width: 7ch; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- Vidrio: controles semitransparentes con desenfoque ---------- */
+:root {
+  --vidrio: rgba(18, 19, 21, 0.5);
+  --vidrio-borde: rgba(255, 255, 255, 0.14);
+  --vidrio-brillo: rgba(255, 255, 255, 0.09);
+  --resorte: cubic-bezier(0.22, 1.25, 0.36, 1);
+  --fluido: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+:root[data-tema="matrix"] {
+  --vidrio: rgba(2, 16, 8, 0.5);
+  --vidrio-borde: rgba(0, 255, 102, 0.24);
+  --vidrio-brillo: rgba(0, 255, 102, 0.07);
+}
+.panel,
+.boton-mapa,
+.menu,
+.visor,
+.nota-base,
+.maplibregl-ctrl-group {
+  background: linear-gradient(155deg, var(--vidrio-brillo), transparent 45%), var(--vidrio) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.7);
+  backdrop-filter: blur(22px) saturate(1.7);
+  border: 1px solid var(--vidrio-borde) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+.panel { border-radius: 18px; animation: aparecer 650ms var(--resorte) both; }
+.panel__cabecera { border-bottom-color: var(--vidrio-borde); }
+.buscador input { background: rgba(0, 0, 0, 0.28); border-color: var(--vidrio-borde); transition: background 250ms var(--fluido), box-shadow 250ms var(--fluido), border-color 250ms; }
+.buscador input:focus { background: rgba(0, 0, 0, 0.42); }
+.boton-mapa { border-radius: 12px; transition: transform 260ms var(--resorte), box-shadow 220ms var(--fluido), background 220ms; }
+.boton-mapa:hover { transform: translateY(-2px) scale(1.04); }
+.boton-mapa:active { transform: scale(0.92); }
+.maplibregl-ctrl-group { border-radius: 12px !important; overflow: hidden; }
+.menu { border-radius: 14px; transform-origin: top right; animation: menu-entra 280ms var(--resorte) both; }
+.visor { border-radius: 16px; }
+.tarjeta { background: rgba(255, 255, 255, 0.045); border-color: var(--vidrio-borde); transition: transform 280ms var(--resorte), background 220ms var(--fluido); }
+.tarjeta:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.08); }
+.boton, .chip { transition: transform 240ms var(--resorte), box-shadow 220ms var(--fluido), background 220ms var(--fluido), color 220ms, border-color 220ms; }
+.boton:hover, .chip:hover { transform: translateY(-1px); }
+.lista li { transition: background 200ms var(--fluido); border-radius: 6px; }
+.lista li:hover { background: rgba(255, 255, 255, 0.035); }
+.tab { scroll-behavior: smooth; }
+
+/* Indicador de pestaña que se desliza. */
+.pestanas { position: relative; }
+.pestanas button,
+.pestanas button[aria-selected="true"] { border-bottom-color: transparent; }
+.pestanas .indicador {
+  position: absolute; left: 0; bottom: -1px; height: 2px; width: 0; border-radius: 2px;
+  background: var(--verde); box-shadow: var(--brillo);
+  transition: transform 420ms var(--resorte), width 420ms var(--resorte);
+}
+
+@keyframes aparecer { from { opacity: 0; transform: translateY(16px) scale(0.98); } }
+@keyframes menu-entra { from { opacity: 0; transform: scale(0.94) translateY(-4px); } }
+
+@media (max-width: 720px) {
+  .panel { border-radius: 20px 20px 0 0; transition: height 460ms var(--resorte); }
+  .etiqueta-capa { font-size: 9.5px; padding: 3px 6px; max-width: 46vw; overflow: hidden; text-overflow: ellipsis; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .panel, .boton-mapa, .menu, .visor { background: rgba(18, 19, 21, 0.92) !important; }
+}

@@ -251,3 +251,30 @@ export function plantillaRaster(c: CapaRaster): string {
   // {bbox-epsg-3857} no debe codificarse.
   return `${ARCGIS_BASE}/${c.servicio}/export?bbox={bbox-epsg-3857}&${p}`;
 }
+
+/** Caja de la Bogotá urbana usada por la vista en capas (oeste, sur, este, norte). */
+export const CAJA_CIUDAD: [number, number, number, number] = [-74.23, 4.47, -73.99, 4.84];
+
+function aMercator(lng: number, lat: number): [number, number] {
+  return [(lng * 20037508.34) / 180, Math.log(Math.tan(((90 + lat) * Math.PI) / 360)) * 6378137];
+}
+
+/** Imagen de toda la ciudad para una capa (export de ArcGIS), con la misma proporción que la caja. */
+export function urlImagenCiudad(c: CapaRaster, ancho = 1024): string {
+  const [o, s, e, n] = CAJA_CIUDAD;
+  const [x0, y0] = aMercator(o, s);
+  const [x1, y1] = aMercator(e, n);
+  const alto = Math.round((ancho * (y1 - y0)) / (x1 - x0));
+  const p = new URLSearchParams({
+    bbox: `${Math.round(x0)},${Math.round(y0)},${Math.round(x1)},${Math.round(y1)}`,
+    bboxSR: "3857",
+    imageSR: "3857",
+    size: `${ancho},${alto}`,
+    format: "png32",
+    transparent: "true",
+    f: "image",
+  });
+  if (c.capas) p.set("layers", c.capas);
+  if (c.filtros) p.set("layerDefs", JSON.stringify(c.filtros));
+  return `${ARCGIS_BASE}/${c.servicio}/export?${p}`;
+}

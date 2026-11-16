@@ -16,6 +16,7 @@ import { iniciarCamaras } from "./camaras/ui";
 import { borrarCasa, guardarCasa, leerCasa, textoDistancia, type Casa } from "./lugares/casa";
 import { BASES, VistaSatelite, type Base } from "./mapa/satelite";
 import { iniciarPines } from "./mapa/pines";
+import { iniciarCapas3D } from "./capas3d/ui";
 import { CLAVE_WINDY, enlacesEnVivo, webcamsCerca } from "./fuentes/webcams";
 import { Lugares, type MiLugar } from "./lugares/store";
 import { aviso, descargar, esc, metros } from "./ui/html";
@@ -182,11 +183,22 @@ const tabs = {
 };
 type Tab = keyof typeof tabs;
 
+function moverIndicador() {
+  const b = document.querySelector<HTMLButtonElement>('.pestanas button[aria-selected="true"]');
+  const ind = document.querySelector<HTMLElement>(".pestanas .indicador");
+  if (!b || !ind) return;
+  ind.style.width = `${b.offsetWidth}px`;
+  ind.style.transform = `translateX(${b.offsetLeft}px)`;
+}
+addEventListener("resize", moverIndicador);
+requestAnimationFrame(moverIndicador);
+
 function abrirTab(t: Tab) {
   const cambia = tabs[t].hidden;
   for (const [k, el] of Object.entries(tabs)) el.hidden = k !== t;
   if (cambia) animar(tabs[t]);
   document.querySelectorAll<HTMLButtonElement>(".pestanas button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === t)));
+  moverIndicador();
   if (panel.classList.contains("contraido")) panel.classList.remove("contraido");
 }
 document.querySelectorAll<HTMLButtonElement>(".pestanas button").forEach((b) => b.addEventListener("click", () => abrirTab(b.dataset.tab as Tab)));
@@ -321,6 +333,15 @@ satelite.alCambiar = (b, nota) => {
   pintarMenuSat();
 };
 botonSat.addEventListener("click", () => alternarMenu(menuSat, botonSat));
+const capas3d = iniciarCapas3D({
+  mapa,
+  satelite,
+  alSuelo: (id, activo) => {
+    alternarRaster(id, activo);
+    if (!tabs.capas.hidden) pintarCapas();
+  },
+  enSuelo: (id) => activasRaster.has(id),
+});
 pintarMenuSat();
 mapa.once("load", pintarCasa);
 
@@ -482,7 +503,7 @@ function pintarCapas() {
   const grupos = new Map<string, CapaPOI[]>();
   for (const c of CAPAS_POI) grupos.set(c.grupo, [...(grupos.get(c.grupo) ?? []), c]);
   const z = mapa.getZoom();
-  let h = `<label class="capa"><input type="checkbox" id="pines-3d" ${pinesMapa.activo ? "checked" : ""}/>Pines 3D en cada punto<small>desde zoom 11.5</small></label>
+  let h = `${capas3d.html()}<h2>Puntos y capas</h2><label class="capa"><input type="checkbox" id="pines-3d" ${pinesMapa.activo ? "checked" : ""}/>Pines 3D en cada punto<small>desde zoom 11.5</small></label>
   <p class="nota">Datos oficiales en vivo del servidor de Catastro Bogotá / IDECA.</p>`;
   for (const [g, cs] of grupos) {
     h += `<h3>${esc(g)}</h3>`;
@@ -497,6 +518,7 @@ function pintarCapas() {
     h += `<label class="capa"><input type="checkbox" data-raster="${c.id}" ${activasRaster.has(c.id) ? "checked" : ""}/>${esc(c.nombre)}</label>`;
   }
   tabs.capas.innerHTML = h;
+  capas3d.conectar(tabs.capas, pintarCapas);
   tabs.capas.querySelector<HTMLInputElement>("#pines-3d")?.addEventListener("change", (e) => pinesMapa.alternar((e.target as HTMLInputElement).checked));
   tabs.capas.querySelectorAll<HTMLInputElement>("[data-poi]").forEach((i) => i.addEventListener("change", () => alternarPOI(i.dataset.poi!, i.checked)));
   tabs.capas.querySelectorAll<HTMLInputElement>("[data-raster]").forEach((i) => i.addEventListener("change", () => alternarRaster(i.dataset.raster!, i.checked)));
@@ -507,7 +529,7 @@ function alternarRaster(id: string, on: boolean) {
   if (on) {
     activasRaster.add(id);
     if (!mapa.getSource(id)) mapa.addSource(id, { type: "raster", tiles: [plantillaRaster(c)], tileSize: 256 });
-    mapa.addLayer({ id, type: "raster", source: id, paint: { "raster-opacity": c.opacidad } }, ANCLA_DATOS);
+    if (!mapa.getLayer(id)) mapa.addLayer({ id, type: "raster", source: id, paint: { "raster-opacity": c.opacidad } }, ANCLA_DATOS);
   } else {
     activasRaster.delete(id);
     if (mapa.getLayer(id)) mapa.removeLayer(id);
