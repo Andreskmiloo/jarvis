@@ -131,6 +131,7 @@ export function cargarLocalidades(): Promise<Localidad[]> {
 
 export class Cupulas {
   private total = 0;
+  private ultimoQ = -1;
   activo = false;
 
   constructor(private mapa: Mapa, private antesDe?: string) {}
@@ -142,6 +143,7 @@ export class Cupulas {
     // Los conteos se comparan entre localidades; las mallas usan el tope físico de la variable.
     const { domos, centros } = geojsonCupulas(locs, valores, modo === "suma" ? Math.max(1, maximo) : serie.tope);
     this.total = serie.etiquetas.length;
+    this.ultimoQ = -1;
     const m = this.mapa;
     const antes = this.antesDe && m.getLayer(this.antesDe) ? this.antesDe : undefined;
     m.addSource("cupulas", { type: "geojson", data: domos });
@@ -184,12 +186,16 @@ export class Cupulas {
   pintar(cuadro: number, t: number, palpita: boolean) {
     if (!this.activo || !this.mapa.getLayer("cupulas")) return;
     const m = this.mapa;
-    const peso = expresionPeso(cuadro, this.total);
-    // La cúpula "respira" un 6 % y la onda de radar sale del centro cada 2,6 s.
-    const respira = palpita ? 1 + 0.06 * Math.sin(t / 520) : 1;
-    m.setPaintProperty("cupulas", "fill-extrusion-height", ["*", ["get", "k"], respira, ["+", 0.08, ["*", 0.92, peso]]]);
-    m.setPaintProperty("cupulas", "fill-extrusion-color", RAMPA(peso));
-    m.setPaintProperty("cupulas-onda", "circle-stroke-color", RAMPA(peso));
+    // La cúpula (cara: fill-extrusion) solo cambia cuando el cuadro avanza ~0,1; la onda de
+    // radar (barata: un círculo) es la que late cada 2,6 s.
+    const q = Math.round(cuadro * 10) / 10;
+    if (q !== this.ultimoQ) {
+      this.ultimoQ = q;
+      const peso = expresionPeso(q, this.total);
+      m.setPaintProperty("cupulas", "fill-extrusion-height", ["*", ["get", "k"], ["+", 0.08, ["*", 0.92, peso]]]);
+      m.setPaintProperty("cupulas", "fill-extrusion-color", RAMPA(peso));
+      m.setPaintProperty("cupulas-onda", "circle-stroke-color", RAMPA(peso));
+    }
     if (!palpita) return;
     const fase = (t % 2600) / 2600;
     const px = expresionRadio(1) as unknown as [string, unknown, unknown, number, number, number, number];

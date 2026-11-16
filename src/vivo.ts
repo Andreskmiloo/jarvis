@@ -7,7 +7,8 @@ import { camaras, camarasOSM, CLASES_CAMARA, type ClaseCamara, fechaLocal, hace,
 import { animar } from "./ui/anim";
 import { aviso, esc } from "./ui/html";
 import { distancia } from "./zona/resumen";
-import { pines } from "./mapa/pines";
+import { elegirIcono, pines } from "./mapa/pines";
+import { puedeAnimar } from "./mapa/ritmo";
 import { CapaAviones } from "./mapa/aviones";
 import { aviones, URL_PUENTE, type Avion } from "./fuentes/aviones";
 
@@ -64,7 +65,7 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
         source: "vivo-camaras",
         layout: { visibility: "none" },
         paint: {
-          "circle-radius": 4.5,
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 4.5, 9, 4.5, 10.5, 2.5], // con pin encima basta un punto
           "circle-color": ["get", "color"],
           "circle-stroke-width": 1,
           "circle-stroke-color": "#001a0a",
@@ -101,7 +102,7 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
         id: "vivo-fallas",
         type: "circle",
         source: "vivo-fallas",
-        paint: { "circle-radius": 5, "circle-color": "#ff2a4f", "circle-stroke-width": 1.5, "circle-stroke-color": "#fff" },
+        paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 5, 9, 5, 10.5, 2.5], "circle-color": "#ff2a4f", "circle-stroke-width": 1.5, "circle-stroke-color": "#fff" },
       },
       antes,
     );
@@ -118,13 +119,23 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
     let ultimo = 0;
     const paso = (t: number) => {
       requestAnimationFrame(paso);
-      if (t - ultimo < 60 || document.hidden || !visibles.fallas || !sem?.fallas.length || !mapa.getLayer("vivo-fallas-pulso")) return;
+      if (t - ultimo < 110 || !puedeAnimar() || !visibles.fallas || !fallasEnVista() || !mapa.getLayer("vivo-fallas-pulso")) return;
       ultimo = t;
       const k = (t % 1400) / 1400;
-      mapa.setPaintProperty("vivo-fallas-pulso", "circle-radius", 6 + 18 * k);
+      mapa.setPaintProperty("vivo-fallas-pulso", "circle-radius", 6 + 12 * k);
       mapa.setPaintProperty("vivo-fallas-pulso", "circle-opacity", 0.55 * (1 - k));
     };
     requestAnimationFrame(paso);
+  }
+
+  // Solo se anima si alguna falla está dentro de la vista (si no, el mapa descansa).
+  let enVista = { t: 0, v: false };
+  function fallasEnVista(): boolean {
+    const ahora = performance.now();
+    if (ahora - enVista.t < 1000) return enVista.v;
+    const b = mapa.getBounds();
+    enVista = { t: ahora, v: !!sem?.fallas.some((f) => b.contains([f.lng, f.lat])) };
+    return enVista.v;
   }
 
   function camsVisibles(): Camara[] {
@@ -136,6 +147,7 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
       nombre: c.clase === "webcam" ? `▶ ${c.direccion}` : c.tipo,
       sub: `${c.clase === "webcam" ? "Toca para ver en vivo" : c.direccion} · ${c.estado}${c.detalle ? ` · ${c.detalle}` : ""}${c.video ? "" : " · sin video público"}`,
       color: CLASES_CAMARA[c.clase].color,
+      clase: c.clase,
       ...(c.video ? { video: c.video, titulo: c.direccion } : {}),
     };
   }
@@ -155,7 +167,7 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
     const pp = pines();
     if (pp) {
       pp.poner("fallas", visibles.fallas ? fc((sem?.fallas ?? []).map((f) => punto(f.lng, f.lat, { nombre: `Semáforo ${f.estado.toLowerCase()}`, sub: `${f.direccion} · ${f.localidad}` }))) : fc([]), { color: "#ff2a4f", escala: 1.15 });
-      pp.poner("camaras", fc(camsVisibles().map((c) => punto(c.lng, c.lat, propsCamara(c)))), { color: (p) => String(p.color), escala: 0.9 });
+      pp.poner("camaras", fc(camsVisibles().map((c) => punto(c.lng, c.lat, propsCamara(c)))), { color: (p) => String(p.color), icono: (p) => elegirIcono(String(p.clase)), escala: 0.9 });
       pp.poner("sismos", visibles.sismos ? fc(sis.map((x) => punto(x.lng, x.lat, { nombre: `Sismo M${x.magnitud.toFixed(1)}`, sub: x.lugar }))) : fc([]), { color: "#ffaa00" });
     }
     mapa.setLayoutProperty("vivo-fallas", "visibility", visibles.fallas ? "visible" : "none");

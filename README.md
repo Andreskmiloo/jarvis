@@ -3,17 +3,19 @@
 Mi asistente personal para la vida. Primer módulo: **Ojo de Dios**, un lector de zonas de Bogotá en 3D con datos públicos lo más recientes posible (2026), mis lugares y mis gustos.
 
 ## Qué hace
+- **Acceso y Tierra 3D**: al abrir ves la Tierra como esfera (imagen satelital Sentinel-2 2024 y atmósfera) girando detrás del login; al entrar, la cámara vuela del espacio a Bogotá como en Google Earth. El botón 🌍 te lleva de nuevo a la Tierra completa y otra vez a Bogotá. ⏻ cierra sesión.
 - **Mapa 3D con relieve real** (cerros orientales incluidos) y edificios en volumen. Tema blanco y negro por defecto; botón ◐ para tema Matrix. Botón 2D/3D y giro ⟳.
 - **Mi casa** (botón ⌂): la marcas con tu ubicación o tocando el mapa. Se guarda solo en tu navegador; cada ficha dice a cuántos km estás de casa y tus lugares se ordenan por distancia.
 - **Vista desde el satélite** (botón 🛰): Sentinel-2 de 2026 (10 m), MODIS del día (NASA), nubes en vivo de GOES-East cada 10 min (NASA/NOAA) y detalle de Esri (enero 2024, rotulado).
 - **Zona**: buscas un lugar o localidad y la cámara "cae" sobre él. Muestra localidad, UPZ, barrio, estrato vigente, valor del suelo m² y uso predominante **de 2026**, clima y aire ahora, transporte y parques a menos de 500 m, semáforos en falla y cámaras cercanas, y webcams públicas.
 - **Ciudad en capas 3D** (pestaña Capas): Bogotá como una pila de láminas flotando sobre el relieve real; cada lámina es una capa de datos de toda la ciudad (estrato, uso y valor del suelo 2026, densidad de población, árboles, comparendos, TransMilenio, Metro, ciclovía, UPZ, localidades) y se ondula con los cerros y valles. Prendes o apagas láminas, ajustas separación y relieve, las juntas o separas con animación, y con ⤓ bajas una al suelo. "Modelo de ciudad" cambia lo de abajo: Mapa, Satélite 2026, Relieve o Edificios 3D.
 - **Controles de vidrio**: panel, botones y menús semitransparentes con desenfoque y animaciones suaves.
-- **Pines 3D**: cada punto de interés (cámaras, semáforos, estaciones, parques, tus lugares y gustos) se dibuja como un alfiler 3D del color de su categoría. Se apagan en Capas.
+- **Pines con figura**: cada punto es un alfiler parado sobre el mapa con el icono de lo que es: 📷 cámara, 🎥 webcam en vivo, 📸 fotomulta, 🚦 semáforo en falla, 🛍 centro comercial, 🚌 TransMilenio, 🚇 Metro, 🌳 parque, ⚽ cancha, 🏐 vóley, 🏀 baloncesto, 🍦 heladería, ☕ café, 🏛 museo, 🎭 teatro, 🎬 cine, ⭐/✅ tus lugares. Se apagan en Capas.
+- **Centros comerciales** encendidos desde el inicio: los 257 del nomenclátor oficial de Bogotá más los de OpenStreetMap, guardados con la página.
 - **Aviones en vivo**: posición ADS-B real (OpenSky Network) cada 15 s, dibujados en 3D sobre la sabana y animados entre lecturas. Necesitan el puente gratis (abajo).
 - **Vivo**: semáforos en falla en tiempo real (se refresca cada 60 s), siniestros de tránsito de los últimos 30 días, cámaras de tráfico y fotodetección (ubicación y estado), sismos recientes.
 - **Zonas de calor en cámara lenta**: cúpulas por localidad que crecen y cambian de color hora a hora, con palpitación de radar (o manta continua). Modos: siniestros 30 días, PM2.5, lluvia prevista, radar de lluvia real. Play/pausa, línea de tiempo y velocidad ×0,5 a ×4.
-- **Gustos**: busca en OpenStreetMap lo que te gusta (vóley, helado, café…) con horario y si cobra; marca "ya fui" o "quiero ir".
+- **Gustos**: lo que te gusta (vóley, fútbol, helado, café…) sale al instante de los **lugares guardados** con la página (`public/data/lugares/`, con horario y si cobra cuando OpenStreetMap lo tiene); "Buscar en vivo" consulta Overpass y, si no responde, Photon. Marca "ya fui" o "quiero ir".
 - **Lugares**: tus sitios guardados en el navegador; exportar/importar JSON.
 - **Capas**: datos oficiales de Catastro/IDECA (TransMilenio, SITP, Metro, parques IDRD, cultura, coropletas de estrato y valor del suelo…).
 
@@ -23,6 +25,22 @@ npm install
 npm run dev
 ```
 Tests: `npm test` · Build: `npm run build`.
+
+## Lugares guardados
+`node scripts/guardar-lugares.mjs` descarga de OpenStreetMap (Overpass) los lugares de cada gusto de `src/intereses/catalogo.json` y los guarda en `public/data/lugares/<gusto>.json`; los centros comerciales se completan con el nomenclátor oficial. Vóley, fútbol y baloncesto salen de las canchas con su etiqueta de deporte. El workflow lo corre en cada publicación y cada lunes; si Overpass falla se conserva la copia anterior. `--solo=voley,helado` refresca solo algunos; `--conservar` no repite los que ya están.
+
+## Acceso (usuario y contraseña)
+La pantalla de acceso es un **candado de cortesía**: la página es estática y pública, así que no protege datos de verdad (tus lugares y tu casa siguen solo en tu navegador). En el código no está la contraseña, solo su huella SHA-256. Para cambiarla:
+```bash
+printf 'ojo-de-dios:NUEVA_CONTRASEÑA' | sha256sum
+```
+y pega el resultado en `HUELLA` de `src/acceso.ts` (usuarios en `USUARIOS`).
+
+## Rendimiento
+- Desde el espacio no hay relieve (no se nota y cuesta mucho); se enciende al llegar a escala de ciudad.
+- Las animaciones (cúpulas, pulso de semáforos, aviones) se pausan mientras mueves el mapa y solo corren si hay algo en la vista.
+- Los pines son una capa de símbolos: no se recalculan al hacer zoom.
+- Una sola fuente de relieve para terreno y sombras; en celular, menos resolución de pantalla y edificios 3D desde más cerca.
 
 ## Publicación (GitHub Pages)
 El workflow `.github/workflows/pages.yml` prueba, construye y publica en cada push a `main` o a `claude/bogota-heat-map-5w1g6k`. Pasos únicos en GitHub (requieren ser dueño del repo):

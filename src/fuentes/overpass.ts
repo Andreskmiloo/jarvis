@@ -10,6 +10,7 @@ export const ESPEJOS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ];
 
 const escapar = (s: string) => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -82,7 +83,8 @@ export async function buscar(combos: Etiquetas[], caja: Caja = CAJA_BOGOTA, sign
   let ultimo: unknown;
   for (const url of ESPEJOS) {
     try {
-      const r = await fetch(url, { method: "POST", body, signal });
+      const tiempo = AbortSignal.timeout(18_000);
+      const r = await fetch(url, { method: "POST", body, signal: signal ? AbortSignal.any([signal, tiempo]) : tiempo });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const d = (await r.json()) as { elements: ElementoOSM[] };
       return d.elements.map(normalizar).filter((x): x is LugarOSM => x !== null);

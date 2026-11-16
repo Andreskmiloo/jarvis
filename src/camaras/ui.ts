@@ -46,7 +46,7 @@ export function iniciarCamaras(mapa: Mapa, cont: HTMLElement, registrarCapa: (id
       id: "camaras-propias",
       type: "circle",
       source: "camaras-propias",
-      paint: { "circle-radius": 7, "circle-color": "#00e5ff", "circle-stroke-width": 2, "circle-stroke-color": "#fff" },
+      paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 7, 9, 7, 10.5, 2.5], "circle-color": "#00e5ff", "circle-stroke-width": 2, "circle-stroke-color": "#fff" },
     });
     registrarCapa("camaras-propias");
   }

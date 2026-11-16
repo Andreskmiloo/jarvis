@@ -68,6 +68,8 @@ export function iniciarCapas3D(d: DepsCapas3D) {
     apilado.separacion = 0; // "explota" desde una sola lámina
     apilado.objetivo = separacion;
     apilado.relieve = relieve;
+    // El apilado se dibuja con la matriz plana (Mercator): en esta vista se deja el globo.
+    mapa.setProjection({ type: "mercator" });
     mapa.addLayer(apilado);
     mapa.easeTo({ center: movil ? [-74.06, 4.7] : [-74.105, 4.64], zoom: movil ? 9.25 : 10.35, pitch: movil ? 58 : 64, bearing: movil ? -12 : -28, duration: 1800 });
   }
@@ -75,6 +77,7 @@ export function iniciarCapas3D(d: DepsCapas3D) {
   function salir() {
     if (mapa.getLayer("capas-3d")) mapa.removeLayer("capas-3d");
     apilado = null;
+    mapa.setProjection({ type: "globe" });
   }
 
   /** Baja una lámina al suelo (se pinta sobre el mapa) o la devuelve a la pila. */

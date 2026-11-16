@@ -23,7 +23,9 @@ export interface CapaZona {
 export interface CapaPOI {
   id: string;
   nombre: string;
-  grupo: "Movilidad" | "Deporte y parques" | "Cultura" | "Servicios";
+  grupo: "Movilidad" | "Deporte y parques" | "Cultura" | "Servicios" | "Comercio";
+  /** Si existe, la capa sale de un archivo guardado con la página (sin servidor externo). */
+  archivo?: string;
   ruta: string;
   color: string;
   /** Zoom mínimo para pedirla (capas densas). */
@@ -103,6 +105,17 @@ export const CAPAS_ZONA: CapaZona[] = [
 
 export const CAPAS_POI: CapaPOI[] = [
   {
+    id: "centros-comerciales",
+    nombre: "Centros comerciales",
+    grupo: "Comercio",
+    ruta: "",
+    archivo: "centros-comerciales",
+    color: "#ff9f1c",
+    zoomMin: 0,
+    titulo: (a) => txt(a.NOMBRE),
+    detalle: (a) => [a.DIRECCION ? `Dirección: ${txt(a.DIRECCION)}` : "", `Fuente: ${txt(a.FUENTE)}`].filter(Boolean),
+  },
+  {
     id: "tm-estaciones",
     nombre: "Estaciones TransMilenio",
     grupo: "Movilidad",
@@ -157,7 +170,7 @@ export const CAPAS_POI: CapaPOI[] = [
     grupo: "Deporte y parques",
     ruta: "recreaciondeporte/canchasintetica/MapServer/0",
     color: "#229954",
-    zoomMin: 10,
+    zoomMin: 9,
     titulo: (a) => titulo(a.PARQUE),
     detalle: (a) => [`Dirección: ${txt(a["DIRECCIÓN"])}`, `Tipo de parque: ${txt(a.TIPO_PARQU)}`],
   },

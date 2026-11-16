@@ -1,5 +1,6 @@
 // Estilo vectorial "Matrix" con relieve 3D. Teselas de OpenFreeMap (sin clave,
 // esquema OpenMapTiles) y elevación Terrarium (AWS Open Data).
+import { MOVIL } from "./ritmo";
 import type { FilterSpecification, LayerSpecification, StyleSpecification } from "maplibre-gl";
 
 export type Tema = "mono" | "matrix";
@@ -67,6 +68,8 @@ const PALETAS: Record<Tema, Paleta> = {
 export const ANCLA_DATOS = "vias-menores";
 export const CAPA_EDIFICIOS = "edificios-3d";
 export const EXAGERACION = 1.7;
+/** En celular los edificios 3D aparecen un poco más cerca: ahorra mucha GPU. */
+const Z_EDIFICIOS = MOVIL ? 14.5 : 13.5;
 
 const FUENTE = "ofm";
 const letra = ["Noto Sans Regular"];
@@ -101,14 +104,17 @@ export function estiloMapa(tema: Tema): StyleSpecification {
         maxzoom: 13,
         attribution: "Relieve: Mapzen/AWS Terrain Tiles · Datos: Catastro Bogotá/IDECA, Sec. Movilidad, Open-Meteo",
       },
-      sombras: {
-        type: "raster-dem",
-        tiles: ["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],
-        encoding: "terrarium",
+      // Imagen satelital para ver la Tierra desde lejos (como Google Earth). Se apaga al acercarse.
+      tierra: {
+        type: "raster",
+        tiles: ["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg"],
         tileSize: 256,
-        maxzoom: 13,
+        maxzoom: 12,
+        attribution: "Sentinel-2 cloudless 2024 © EOX IT Services (datos Copernicus)",
       },
     },
+    // La Tierra como esfera; MapLibre pasa sola a plano al acercarse mucho.
+    projection: { type: "globe" },
     sky: {
       "sky-color": V.cielo,
       "horizon-color": V.horizonte,
@@ -116,16 +122,29 @@ export function estiloMapa(tema: Tema): StyleSpecification {
       "sky-horizon-blend": 0.6,
       "horizon-fog-blend": 0.8,
       "fog-ground-blend": 0.85,
-      "atmosphere-blend": 0,
+      // Atmósfera azul alrededor del globo, desaparece al llegar a la ciudad.
+      "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 0.9, 8, 0],
     },
     layers: [
       { id: "fondo", type: "background", paint: { "background-color": V.fondo } },
       { id: "parques", type: "fill", source: FUENTE, "source-layer": "landuse", filter: ["in", ["get", "class"], ["literal", ["park", "cemetery", "pitch", "stadium"]]], paint: { "fill-color": V.parque, "fill-opacity": 0.8 } },
+      {
+        id: "tierra",
+        type: "raster",
+        source: "tierra",
+        maxzoom: 11.5,
+        paint: {
+          "raster-opacity": ["interpolate", ["linear"], ["zoom"], 8, 1, 11, 0],
+          "raster-saturation": tema === "mono" ? -1 : -0.4,
+          "raster-contrast": 0.1,
+          "raster-fade-duration": 200,
+        },
+      },
       { id: "bosque", type: "fill", source: FUENTE, "source-layer": "landcover", filter: ["in", ["get", "class"], ["literal", ["wood", "grass"]]], paint: { "fill-color": V.parque, "fill-opacity": 0.45 } },
       {
         id: "relieve-sombra",
         type: "hillshade",
-        source: "sombras",
+        source: "relieve", // una sola fuente de relieve para terreno y sombras: la mitad de descargas
         paint: {
           "hillshade-exaggeration": 0.75,
           "hillshade-shadow-color": "#000000",
@@ -134,7 +153,7 @@ export function estiloMapa(tema: Tema): StyleSpecification {
           "hillshade-illumination-direction": 315,
         },
       },
-      { id: "agua", type: "fill", source: FUENTE, "source-layer": "water", paint: { "fill-color": V.agua } },
+      { id: "agua", type: "fill", source: FUENTE, "source-layer": "water", paint: { "fill-color": V.agua, "fill-opacity": ["interpolate", ["linear"], ["zoom"], 7, 0, 10, 1] } },
       { id: "rios", type: "line", source: FUENTE, "source-layer": "waterway", paint: { "line-color": V.rio, "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.6, 16, 3] } },
       via(ANCLA_DATOS, ["in", ["get", "class"], ["literal", ["minor", "service", "track", "path"]]], V.viaMenor, [12, 0.4, 18, 6], 0.9, 12),
       via("vias-medias", ["in", ["get", "class"], ["literal", ["secondary", "tertiary"]]], V.viaMedia, [9, 0.4, 18, 12], 0.55),
@@ -146,10 +165,10 @@ export function estiloMapa(tema: Tema): StyleSpecification {
         type: "fill-extrusion",
         source: FUENTE,
         "source-layer": "building",
-        minzoom: 13.5,
+        minzoom: Z_EDIFICIOS,
         paint: {
           "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 6], 0, V.edificios[0], 40, V.edificios[1], 150, V.edificios[2]],
-          "fill-extrusion-height": ["interpolate", ["linear"], ["zoom"], 13.5, 0, 14.5, ["coalesce", ["get", "render_height"], 6]],
+          "fill-extrusion-height": ["interpolate", ["linear"], ["zoom"], Z_EDIFICIOS, 0, Z_EDIFICIOS + 1, ["coalesce", ["get", "render_height"], 6]],
           "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
           "fill-extrusion-opacity": 0.78,
         },
@@ -186,3 +205,5 @@ export function estiloMapa(tema: Tema): StyleSpecification {
 /** Vista inicial: Bogotá desde el occidente, mirando hacia los cerros. */
 export const VISTA_3D = { center: [-74.085, 4.648] as [number, number], zoom: 11.6, pitch: 62, bearing: 78 };
 export const VISTA_2D = { pitch: 0, bearing: 0 };
+/** La Tierra completa, con Colombia al frente. */
+export const VISTA_TIERRA = { center: [-68, 6] as [number, number], zoom: 1.7, pitch: 0, bearing: 0 };

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { avanzar, leerAviones, urlAviones } from "../src/fuentes/aviones";
 import { leerVideodetectores, WEBCAMS_CONOCIDAS } from "../src/fuentes/envivo";
 import { flecha, geojsonAviones } from "../src/mapa/aviones";
-import { geometriaPines, metrosPorPixel, poligono } from "../src/mapa/pines";
+import { claveImagen, elegirIcono, geojsonPines, metrosPorPixel, poligono } from "../src/mapa/pines";
 
 describe("aviones", () => {
   const estado = ["aa490a", "AVA283  ", "United States", 100, 100, -74.2, 4.75, 2758, false, 100, 90, -3, null, 2800, null, false, 0];
@@ -38,13 +38,21 @@ describe("aviones", () => {
 });
 
 describe("pines 3D y cámaras", () => {
-  it("tamaño constante en pantalla y dos piezas por pin", () => {
+  it("cada pin lleva la figura de lo que es", () => {
     expect(metrosPorPixel(0, 0)).toBeCloseTo(78271.5, 0);
-    expect(metrosPorPixel(4.6, 12) * 2).toBeCloseTo(metrosPorPixel(4.6, 11), 6);
     expect(poligono(-74, 4.6, 10, 6)).toHaveLength(7);
-    const fc = geometriaPines([{ lng: -74, lat: 4.6, color: "#f00", escala: 1, props: { nombre: "x" } }], 14);
-    expect(fc.features.map((f) => f.properties!.__parte)).toEqual(["tallo", "cabeza"]);
-    expect(fc.features[1].properties!.__base).toBe(fc.features[0].properties!.__alto);
+    expect(elegirIcono("centros-comerciales")).toBe("🛍");
+    expect(elegirIcono(undefined, "voley")).toBe("🏐");
+    expect(elegirIcono("nada")).toBe("📍");
+    const punto = (lat: number, p: Record<string, unknown>) => ({ type: "Feature" as const, geometry: { type: "Point" as const, coordinates: [-74, lat] }, properties: p });
+    const fc = geojsonPines([
+      ["centros-comerciales", { puntos: [punto(4.6, { nombre: "Andino" })], estilo: { color: "#ff9f1c" } }],
+      ["camaras", { puntos: [punto(4.7, { clase: "webcam" })], estilo: { color: "#f0f", icono: (p) => elegirIcono(String(p.clase)), escala: 0.9 } }],
+    ]);
+    expect(fc.features.map((f) => f.properties!.__img)).toEqual([claveImagen("🛍", "#ff9f1c"), claveImagen("🎥", "#f0f")]);
+    expect(fc.features[1].properties!.__escala).toBe(0.9);
+    // los de más al sur (más cerca de la cámara) se dibujan encima
+    expect(fc.features[0].properties!.__orden).toBeGreaterThan(fc.features[1].properties!.__orden);
   });
 
   it("videodetectores solo con ubicación y la webcam conocida trae reproductor", () => {

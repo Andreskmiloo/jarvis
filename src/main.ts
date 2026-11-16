@@ -8,19 +8,23 @@ import { geojsonCaja } from "./fuentes/arcgis";
 import { buscarDireccion } from "./fuentes/nominatim";
 import { categoriaAire, describirClima } from "./fuentes/openmeteo";
 import { buscar, CAJA_BOGOTA, type Caja, type LugarOSM } from "./fuentes/overpass";
+import { aLugaresOSM, cargarGuardados, dentroDeCaja, geojsonGuardados } from "./fuentes/guardados";
+import { buscarPhoton } from "./fuentes/photon";
 import { cargarPerfil, type Gusto } from "./intereses/perfil";
-import { ANCLA_DATOS, CAPA_EDIFICIOS, estiloMapa, EXAGERACION, type Tema, VISTA_2D, VISTA_3D } from "./mapa/estilo";
+import { ANCLA_DATOS, CAPA_EDIFICIOS, estiloMapa, EXAGERACION, type Tema, VISTA_2D, VISTA_3D, VISTA_TIERRA } from "./mapa/estilo";
+import { conectarRitmo } from "./mapa/ritmo";
 import { animar } from "./ui/anim";
 import { iniciarVivo } from "./vivo";
 import { iniciarCamaras } from "./camaras/ui";
 import { borrarCasa, guardarCasa, leerCasa, textoDistancia, type Casa } from "./lugares/casa";
 import { BASES, VistaSatelite, type Base } from "./mapa/satelite";
-import { iniciarPines } from "./mapa/pines";
+import { elegirIcono, iniciarPines } from "./mapa/pines";
 import { iniciarCapas3D } from "./capas3d/ui";
 import { CLAVE_WINDY, enlacesEnVivo, webcamsCerca } from "./fuentes/webcams";
 import { Lugares, type MiLugar } from "./lugares/store";
 import { aviso, descargar, esc, metros } from "./ui/html";
 import { distancia, resumir, type Resumen } from "./zona/resumen";
+import { cerrarSesion, iniciarAcceso } from "./acceso";
 
 // ---------- Estado ----------
 const iniciales = import.meta.glob<unknown>("/data/mis-lugares*.json", { eager: true, import: "default" });
@@ -30,6 +34,8 @@ const activasPOI = new Set<string>();
 const activasRaster = new Set<string>();
 let gustoActivo: Gusto | null = null;
 let resultados: LugarOSM[] = [];
+/** De dónde salieron los resultados del gusto activo (se muestra en la lista). */
+let fuenteResultados = "";
 let soloGratis = false;
 let filtroLugares: "todos" | "visitados" | "pendientes" = "todos";
 let modoAgregar = false;
@@ -63,23 +69,76 @@ const movil = matchMedia("(max-width: 720px)").matches;
 const mapa = new maplibregl.Map({
   container: "mapa",
   style: estiloMapa(tema),
-  ...VISTA_3D,
-  zoom: movil ? VISTA_3D.zoom - 0.9 : VISTA_3D.zoom,
+  // Arranca viendo la Tierra entera; al entrar vuela hasta Bogotá.
+  ...VISTA_TIERRA,
+  zoom: movil ? VISTA_TIERRA.zoom - 0.5 : VISTA_TIERRA.zoom,
   maxPitch: 78,
   // En pantallas densas se limita la resolución: se ve igual y va más fluido.
-  pixelRatio: Math.min(devicePixelRatio, movil ? 1.5 : 2),
+  pixelRatio: Math.min(devicePixelRatio, movil ? 1.25 : 2),
   attributionControl: { compact: true },
 });
+conectarRitmo(mapa);
+const VISTA_BOGOTA = { ...VISTA_3D, zoom: movil ? VISTA_3D.zoom - 0.9 : VISTA_3D.zoom };
+
+// La Tierra gira despacio detrás de la pantalla de acceso.
+let girando = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+let ultimoGiro = 0;
+function girar(t: number) {
+  if (!girando) return;
+  if (t - ultimoGiro > 33 && !document.hidden) {
+    const c = mapa.getCenter();
+    mapa.jumpTo({ center: [c.lng - (ultimoGiro ? (t - ultimoGiro) * 0.004 : 0), c.lat] });
+  }
+  if (t - ultimoGiro > 33) ultimoGiro = t;
+  requestAnimationFrame(girar);
+}
+requestAnimationFrame(girar);
+
+/** Vuelo tipo Google Earth: del espacio a Bogotá en 3D. */
+function volarABogota(duracion = 5200) {
+  girando = false;
+  enTierra = false;
+  botonTierra.setAttribute("aria-pressed", "false");
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return mapa.jumpTo({ ...VISTA_BOGOTA, padding: PADDING });
+  mapa.flyTo({ ...VISTA_BOGOTA, padding: PADDING, duration: duracion, curve: 1.6, essential: true, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2) });
+}
+let enTierra = true;
+const botonTierra = document.getElementById("boton-tierra")!;
+botonTierra.addEventListener("click", () => {
+  if (enTierra) return volarABogota(4200);
+  enTierra = true;
+  botonTierra.setAttribute("aria-pressed", "true");
+  if (capas3d.activo()) capas3d.salir();
+  mapa.flyTo({ ...VISTA_TIERRA, padding: SIN_PADDING, zoom: movil ? VISTA_TIERRA.zoom - 0.5 : VISTA_TIERRA.zoom, duration: 4200, curve: 1.6, essential: true });
+});
+
+// Pantalla de carga y acceso: el mapa sigue cargando detrás; al entrar, vuelo a Bogotá.
+void iniciarAcceso(new Promise((ok) => mapa.once("load", ok))).then(() => volarABogota());
+document.getElementById("boton-salir")?.addEventListener("click", () => {
+  if (confirm("¿Cerrar sesión en este dispositivo?")) cerrarSesion();
+});
 // El panel tapa parte del mapa: el "centro" útil se corre para que nada quede debajo.
-mapa.setPadding(movil ? { top: 0, left: 0, right: 0, bottom: innerHeight * 0.42 } : { top: 0, left: 410, right: 0, bottom: 0 });
+const PADDING = movil ? { top: 0, left: 0, right: 0, bottom: innerHeight * 0.42 } : { top: 0, left: 410, right: 0, bottom: 0 };
+const SIN_PADDING = { top: 0, left: 0, right: 0, bottom: 0 };
+// La Tierra queda centrada detrás del acceso; el corrimiento por el panel llega con el vuelo.
 
 let en3d = true;
-function relieve(activo: boolean) {
+/** Desde el espacio el relieve no se nota y cuesta muchísimo: solo se enciende a escala de ciudad. */
+const ZOOM_RELIEVE = 7.5;
+let terrenoPuesto = false;
+function ajustarTerreno() {
+  const quiere = en3d && mapa.getZoom() >= ZOOM_RELIEVE;
+  if (quiere === terrenoPuesto) return;
+  terrenoPuesto = quiere;
   try {
-    mapa.setTerrain(activo ? { source: "relieve", exaggeration: EXAGERACION } : null);
+    mapa.setTerrain(quiere ? { source: "relieve", exaggeration: EXAGERACION } : null);
   } catch {
     /* equipo sin soporte de relieve: el mapa sigue en plano */
   }
+}
+mapa.on("zoom", ajustarTerreno);
+function relieve(activo: boolean) {
+  ajustarTerreno();
   if (mapa.getLayer(CAPA_EDIFICIOS)) mapa.setLayoutProperty(CAPA_EDIFICIOS, "visibility", activo ? "visible" : "none");
 }
 const boton3d = document.getElementById("boton-3d")!;
@@ -112,7 +171,7 @@ mapa.on("load", () => {
     type: "circle",
     source: "mis-lugares",
     paint: {
-      "circle-radius": 7,
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 7, 9, 7, 10.5, 2.5],
       "circle-color": ["case", ["get", "visitado"], "#1e8449", "#f39c12"],
       "circle-stroke-width": 2,
       "circle-stroke-color": "#fff",
@@ -125,7 +184,7 @@ mapa.on("load", () => {
       type: "circle",
       source: "intereses",
       paint: {
-        "circle-radius": 6,
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 6, 9, 6, 10.5, 2.5],
         "circle-color": ["match", ["get", "estado"], "visitado", "#1e8449", "pendiente", "#f39c12", "#8e44ad"],
         "circle-stroke-width": 1.5,
         "circle-stroke-color": "#fff",
@@ -139,6 +198,8 @@ mapa.on("load", () => {
     mapa.on("mouseenter", id, () => (mapa.getCanvas().style.cursor = "pointer"));
     mapa.on("mouseleave", id, () => (mapa.getCanvas().style.cursor = ""));
   }
+  // Centros comerciales encendidos desde el inicio (salen del archivo guardado, sin servidor).
+  alternarPOI("centros-comerciales", true);
   pintarCapas();
   pintarIntereses();
   pintarLugares();
@@ -503,8 +564,8 @@ function pintarCapas() {
   const grupos = new Map<string, CapaPOI[]>();
   for (const c of CAPAS_POI) grupos.set(c.grupo, [...(grupos.get(c.grupo) ?? []), c]);
   const z = mapa.getZoom();
-  let h = `${capas3d.html()}<h2>Puntos y capas</h2><label class="capa"><input type="checkbox" id="pines-3d" ${pinesMapa.activo ? "checked" : ""}/>Pines 3D en cada punto<small>desde zoom 11.5</small></label>
-  <p class="nota">Datos oficiales en vivo del servidor de Catastro Bogotá / IDECA.</p>`;
+  let h = `${capas3d.html()}<h2>Puntos y capas</h2><label class="capa"><input type="checkbox" id="pines-3d" ${pinesMapa.activo ? "checked" : ""}/>Pines 3D en cada punto<small>desde zoom 9</small></label>
+  <p class="nota">Datos oficiales en vivo de Catastro Bogotá / IDECA. Centros comerciales: guardados con la página (oficial + OpenStreetMap).</p>`;
   for (const [g, cs] of grupos) {
     h += `<h3>${esc(g)}</h3>`;
     for (const c of cs) {
@@ -545,7 +606,7 @@ function alternarPOI(id: string, on: boolean) {
       const antes = "intereses";
       mapa.addLayer({ id: `${id}-area`, type: "fill", source: id, filter: ["==", ["geometry-type"], "Polygon"], paint: { "fill-color": c.color, "fill-opacity": 0.35, "fill-outline-color": c.color } }, antes);
       mapa.addLayer({ id: `${id}-linea`, type: "line", source: id, filter: ["==", ["geometry-type"], "LineString"], paint: { "line-color": c.color, "line-width": 3 } }, antes);
-      mapa.addLayer({ id: `${id}-punto`, type: "circle", source: id, filter: ["==", ["geometry-type"], "Point"], paint: { "circle-radius": 5, "circle-color": c.color, "circle-stroke-width": 1, "circle-stroke-color": "#fff" } }, antes);
+      mapa.addLayer({ id: `${id}-punto`, type: "circle", source: id, filter: ["==", ["geometry-type"], "Point"], paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 5, 9, 5, 10.5, 2.5], "circle-color": c.color, "circle-stroke-width": 1, "circle-stroke-color": "#fff" } }, antes);
       for (const l of [`${id}-area`, `${id}-punto`]) {
         capasInteractivas.push(l);
         mapa.on("mouseenter", l, () => (mapa.getCanvas().style.cursor = "pointer"));
@@ -556,6 +617,7 @@ function alternarPOI(id: string, on: boolean) {
     cargarPOI(c);
   } else {
     activasPOI.delete(id);
+    archivosPuestos.delete(id);
     pinesMapa.quitar(id);
     for (const s of ["area", "linea", "punto"]) if (mapa.getLayer(`${id}-${s}`)) mapa.setLayoutProperty(`${id}-${s}`, "visibility", "none");
   }
@@ -563,7 +625,23 @@ function alternarPOI(id: string, on: boolean) {
 }
 
 const controlesPOI = new Map<string, AbortController>();
+const archivosPuestos = new Set<string>();
 async function cargarPOI(c: CapaPOI) {
+  if (c.archivo) {
+    // Archivo guardado: se pone una sola vez para toda la ciudad.
+    if (archivosPuestos.has(c.id)) return;
+    archivosPuestos.add(c.id);
+    const a = await cargarGuardados(c.archivo);
+    if (!a) {
+      archivosPuestos.delete(c.id);
+      return aviso(`${c.nombre}: no encontré el archivo guardado`);
+    }
+    const fc = geojsonGuardados(a);
+    fc.features.forEach((f) => (f.properties = { ...f.properties, __capa: c.id }));
+    (mapa.getSource(c.id) as GeoJSONSource | undefined)?.setData(fc);
+    if (activasPOI.has(c.id)) pinesMapa.poner(c.id, fc, { color: c.color });
+    return;
+  }
   if (mapa.getZoom() < c.zoomMin) return;
   controlesPOI.get(c.id)?.abort();
   const ctl = new AbortController();
@@ -655,7 +733,8 @@ function pintarIntereses() {
     const lista = visibles()
       .map((l) => ({ l, d: Math.round(distancia(ref.lat, ref.lng, l.lat, l.lng)) }))
       .sort((a, b) => a.d - b.d);
-    h += `<p class="nota">${lista.length} resultados de OpenStreetMap${g.capas?.length ? " + capas oficiales activadas en el mapa" : ""}.</p><ul class="lista">`;
+    h += `<p class="nota">${lista.length} resultados · ${esc(fuenteResultados || "OpenStreetMap")}${g.capas?.length ? " + capas oficiales activadas en el mapa" : ""}.</p>
+    <div class="acciones"><button class="boton sec peq" data-en-vivo>↻ Buscar en vivo (más reciente)</button></div><ul class="lista">`;
     for (const { l, d } of lista.slice(0, 80)) {
       const est = estadoDe(l);
       const badges = [
@@ -679,6 +758,7 @@ function pintarIntereses() {
   }
   tabs.intereses.innerHTML = h;
   tabs.intereses.querySelectorAll<HTMLButtonElement>("[data-gusto]").forEach((b) => b.addEventListener("click", () => elegirGusto(b.dataset.gusto!)));
+  tabs.intereses.querySelector("[data-en-vivo]")?.addEventListener("click", () => gustoActivo && buscarEnVivo(gustoActivo));
   tabs.intereses.querySelector<HTMLInputElement>("#solo-gratis")?.addEventListener("change", (e) => {
     soloGratis = (e.target as HTMLInputElement).checked;
     actualizarIntereses();
@@ -715,11 +795,21 @@ function pintarIntereses() {
 
 function actualizarIntereses() {
   (mapa.getSource("intereses") as GeoJSONSource | undefined)?.setData(geoIntereses());
-  pinesMapa.poner("intereses", geoIntereses(), { color: (p) => (p.estado === "visitado" ? "#1e8449" : p.estado === "pendiente" ? "#f39c12" : "#b06cff") });
+  pinesMapa.poner("intereses", geoIntereses(), {
+    color: (p) => (p.estado === "visitado" ? "#1e8449" : p.estado === "pendiente" ? "#f39c12" : "#b06cff"),
+    icono: (p) => (p.estado === "visitado" ? "✅" : elegirIcono(gustoActivo?.icono, gustoActivo?.id)),
+  });
   pintarIntereses();
 }
 
 let controlIntereses: AbortController | null = null;
+
+/** Caja de búsqueda: la vista si estás cerca, si no toda Bogotá. */
+function cajaBusqueda(): Caja {
+  const b = mapa.getBounds();
+  return mapa.getZoom() >= 12.5 ? [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()] : CAJA_BOGOTA;
+}
+
 async function elegirGusto(id: string) {
   const g = perfil.areas.flatMap((a) => a.gustos).find((x) => x.id === id) ?? null;
   if (gustoActivo?.id === id) {
@@ -729,30 +819,63 @@ async function elegirGusto(id: string) {
   }
   gustoActivo = g;
   resultados = [];
+  fuenteResultados = "";
   pintarIntereses();
   if (!g) return;
   for (const c of g.capas ?? []) if (!activasPOI.has(c)) alternarPOI(c, true);
-  if (!g.osm?.length) return aviso("Este gusto no tiene etiquetas de OpenStreetMap todavía");
   controlIntereses?.abort();
   controlIntereses = new AbortController();
-  const b = mapa.getBounds();
-  const caja: Caja = mapa.getZoom() >= 12.5 ? [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()] : CAJA_BOGOTA;
-  tabs.intereses.insertAdjacentHTML("beforeend", `<p class="cargando" id="buscando">Buscando ${esc(g.nombre)} en OpenStreetMap</p>`);
-  try {
-    resultados = await buscar(g.osm, caja, controlIntereses.signal);
+  const signal = controlIntereses.signal;
+  // 1) Lugares guardados con la página: instantáneo y sin servidor.
+  const a = await cargarGuardados(g.id);
+  if (signal.aborted) return;
+  if (a?.lugares.length) {
+    const caja = cajaBusqueda();
+    const todos = aLugaresOSM(a);
+    const enVista = todos.filter((l) => dentroDeCaja(l, caja));
+    resultados = enVista.length ? enVista : todos;
+    fuenteResultados = `guardados ${a.generado.slice(0, 10)} · ${a.fuente}${enVista.length && enVista.length < todos.length ? ` · en esta vista (${todos.length} en Bogotá)` : ""}`;
     actualizarIntereses();
-    if (!resultados.length) aviso("Sin resultados en esta zona; aleja el mapa para buscar en toda Bogotá");
+    return;
+  }
+  // 2) Sin archivo guardado: en vivo.
+  await buscarEnVivo(g);
+}
+
+/** Overpass (todas las etiquetas) y, si no responde, Photon como respaldo parcial. */
+async function buscarEnVivo(g: Gusto) {
+  if (!g.osm?.length && !g.photon) return aviso("Este gusto no tiene etiquetas de OpenStreetMap todavía");
+  controlIntereses?.abort();
+  controlIntereses = new AbortController();
+  const signal = controlIntereses.signal;
+  const caja = cajaBusqueda();
+  document.getElementById("buscando")?.remove();
+  tabs.intereses.insertAdjacentHTML("beforeend", `<p class="cargando" id="buscando">Buscando ${esc(g.nombre)} en vivo en OpenStreetMap</p>`);
+  let error = "";
+  try {
+    if (!g.osm?.length) throw new Error("sin etiquetas");
+    resultados = await buscar(g.osm, caja, signal);
+    fuenteResultados = "OpenStreetMap en vivo (Overpass)";
   } catch (e) {
-    if (!controlIntereses.signal.aborted) {
+    if (signal.aborted) return;
+    error = e instanceof Error ? e.message : String(e);
+    try {
+      if (!g.photon) throw new Error("sin respaldo");
+      resultados = await buscarPhoton(g.photon.include, caja, g.photon.nombre, signal);
+      fuenteResultados = "resultados parciales (respaldo Photon, máx. 50, sin horario ni cobro)";
+    } catch (e2) {
+      if (signal.aborted) return;
       document.getElementById("buscando")?.remove();
-      aviso("OpenStreetMap no respondió, intenta de nuevo");
+      return aviso(`OpenStreetMap no respondió (${error}; respaldo: ${e2 instanceof Error ? e2.message : e2}). Intenta de nuevo.`);
     }
   }
+  actualizarIntereses();
+  if (!resultados.length) aviso("Sin resultados en esta zona; aleja el mapa para buscar en toda Bogotá");
 }
 
 // ---------- Mis lugares ----------
 function pinesLugares() {
-  pinesMapa.poner("mis-lugares", geoLugares(), { color: (p) => (p.visitado ? "#2ecc71" : "#f39c12"), escala: 1.2 });
+  pinesMapa.poner("mis-lugares", geoLugares(), { color: (p) => (p.visitado ? "#2ecc71" : "#f39c12"), icono: (p) => (p.visitado ? "✅" : "⭐"), escala: 1.2 });
 }
 
 function geoLugares(): GeoJSON.FeatureCollection {

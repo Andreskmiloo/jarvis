@@ -1,0 +1,107 @@
+{
+ "generado": "2026-11-16T17:37:48.292Z",
+ "gustos": [
+  {
+   "id": "canchas",
+   "n": 5388,
+   "fuente": "OpenStreetMap (Overpass)",
+   "generado": "2026-11-16T17:07:10.272Z"
+  },
+  {
+   "id": "voley",
+   "n": 161,
+   "fuente": "OpenStreetMap (Overpass, canchas con deporte)",
+   "generado": "2026-11-16T17:07:10.272Z"
+  },
+  {
+   "id": "futbol",
+   "n": 1079,
+   "fuente": "OpenStreetMap (Overpass, canchas con deporte)",
+   "generado": "2026-11-16T17:07:10.272Z"
+  },
+  {
+   "id": "baloncesto",
+   "n": 1301,
+   "fuente": "OpenStreetMap (Overpass, canchas con deporte)",
+   "generado": "2026-11-16T17:07:10.272Z"
+  },
+  {
+   "id": "gimnasio",
+   "n": 427,
+   "fuente": "OpenStreetMap (Overpass)",
+   "generado": "2026-11-16T17:07:10.272Z"
+  },
+  {
+   "id": "ciclismo",
+   "n": 0,
+   "fuente": "OpenStreetMap (Photon, sin etiquetas de deporte ni horario)",
+   "generado": "2026-11-16T17:37:48.292Z"
+  },
+  {
+   "id": "centros-comerciales",
+   "n": 296,
+   "fuente": "OpenStreetMap (Overpass) + nomenclátor oficial de Bogotá",
+   "generado": "2026-11-16T17:07:10.272Z"
+  },
+  {
+   "id": "supermercados",
+   "n": 1765,
+   "fuente": "OpenStreetMap (Overpass)",
+   "generado": "2026-11-16T17:07:10.272Z"
+  },
+  {
+   "id": "helado",
+   "n": 130,
+   "fuente": "OpenStreetMap (Overpass)",
+   "generado": "2026-11-16T17:07:10.272Z"
+  },
+  {
+   "id": "cafe",
+   "n": 1463,
+   "fuente": "OpenStreetMap (Overpass)",
+   "generado": "2026-11-16T17:37:48.292Z"
+  },
+  {
+   "id": "panaderia",
+   "n": 1304,
+   "fuente": "OpenStreetMap (Photon, sin etiquetas de deporte ni horario)",
+   "generado": "2026-11-16T17:37:48.292Z"
+  },
+  {
+   "id": "museos",
+   "n": 58,
+   "fuente": "OpenStreetMap (Photon, sin etiquetas de deporte ni horario)",
+   "generado": "2026-11-16T17:37:48.292Z"
+  },
+  {
+   "id": "cine",
+   "n": 49,
+   "fuente": "OpenStreetMap (Photon, sin etiquetas de deporte ni horario)",
+   "generado": "2026-11-16T17:37:48.292Z"
+  },
+  {
+   "id": "teatro",
+   "n": 96,
+   "fuente": "OpenStreetMap (Overpass)",
+   "generado": "2026-11-16T17:37:48.292Z"
+  },
+  {
+   "id": "bibliotecas",
+   "n": 89,
+   "fuente": "OpenStreetMap (Overpass)",
+   "generado": "2026-11-16T17:37:48.292Z"
+  },
+  {
+   "id": "parques",
+   "n": 1176,
+   "fuente": "OpenStreetMap (Photon, sin etiquetas de deporte ni horario)",
+   "generado": "2026-11-16T17:37:48.292Z"
+  },
+  {
+   "id": "miradores",
+   "n": 30,
+   "fuente": "OpenStreetMap (Photon, sin etiquetas de deporte ni horario)",
+   "generado": "2026-11-16T17:37:48.292Z"
+  }
+ ]
+}

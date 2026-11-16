@@ -1,4 +1,5 @@
 // Mapa de calor animado sobre MapLibre: interpola entre cuadros y "respira".
+import { puedeAnimar } from "../mapa/ritmo";
 import type { Map as Mapa } from "maplibre-gl";
 import type { CuadroRadar } from "../fuentes/envivo";
 import { Cupulas, type Localidad } from "./cupulas";
@@ -37,7 +38,7 @@ export class Calor {
   private radarActual = -1;
   private reducido = matchMedia("(prefers-reduced-motion: reduce)").matches;
   /** ms entre repintados: más espaciados en teléfonos, donde el relieve 3D cuesta más. */
-  private intervalo = matchMedia("(max-width: 720px)").matches ? 140 : 75;
+  private intervalo = matchMedia("(max-width: 720px)").matches ? 220 : 120;
   alCuadro: (etiqueta: string, cuadro: number, total: number) => void = () => {};
 
   private cupulas: Cupulas;
@@ -147,7 +148,7 @@ export class Calor {
       this.ultimo = t;
       // Con movimiento reducido se avanza a saltos, sin respiración.
       this.cuadro = (this.cuadro + (dt * this.velocidad) / (this.radar.length ? 1300 : MS_POR_CUADRO)) % this.total;
-      this.pintar(t, false);
+      if (puedeAnimar()) this.pintar(t, false); // quieto mientras arrastras el mapa
       this.raf = requestAnimationFrame(paso);
     };
     this.raf = requestAnimationFrame(paso);

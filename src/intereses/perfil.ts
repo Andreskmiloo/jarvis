@@ -1,5 +1,6 @@
 // Perfil de gustos. Formato acordado con la sesión de recopilación (data/perfil-gustos.json).
 import type { Etiquetas } from "../fuentes/overpass";
+import catalogo from "./catalogo.json";
 
 export interface LugarConocido {
   nombre: string;
@@ -19,6 +20,12 @@ export interface Gusto {
   notas?: string;
   /** Capas oficiales de Bogotá (ids de CAPAS_POI) que también aplican. */
   capas?: string[];
+  /** Respaldo con Photon: categorías OSM y filtro por nombre (regex). */
+  photon?: { include: string[]; nombre?: string };
+  /** Emoji del pin (si no, se deduce del id). */
+  icono?: string;
+  /** Capa oficial que se mezcla en los lugares guardados. */
+  oficial?: string;
 }
 
 export interface Area {
@@ -32,45 +39,8 @@ export interface Perfil {
   areas: Area[];
 }
 
-/** Intereses de arranque mientras se llena el perfil real. */
-export const PERFIL_BASE: Perfil = {
-  version: 1,
-  areas: [
-    {
-      area: "deporte",
-      gustos: [
-        { id: "voley", nombre: "Vóley", osm: [{ sport: "volleyball" }, { sport: "beachvolleyball" }], capas: ["parques"] },
-        { id: "futbol", nombre: "Fútbol", osm: [{ leisure: "pitch", sport: "soccer" }], capas: ["canchas-sinteticas"] },
-        { id: "gimnasio", nombre: "Gimnasio", osm: [{ leisure: "fitness_centre" }, { leisure: "fitness_station" }] },
-        { id: "ciclismo", nombre: "Bici", osm: [{ amenity: "bicycle_rental" }, { shop: "bicycle" }], capas: ["cicloparqueaderos"] },
-      ],
-    },
-    {
-      area: "comida",
-      gustos: [
-        { id: "helado", nombre: "Helado", osm: [{ amenity: "ice_cream" }, { shop: "ice_cream" }, { cuisine: "ice_cream" }] },
-        { id: "cafe", nombre: "Café", osm: [{ amenity: "cafe" }] },
-        { id: "panaderia", nombre: "Panadería", osm: [{ shop: "bakery" }] },
-      ],
-    },
-    {
-      area: "cultura",
-      gustos: [
-        { id: "museos", nombre: "Museos", osm: [{ tourism: "museum" }], capas: ["museos"] },
-        { id: "cine", nombre: "Cine", osm: [{ amenity: "cinema" }], capas: ["cines"] },
-        { id: "teatro", nombre: "Teatro", osm: [{ amenity: "theatre" }], capas: ["teatros"] },
-        { id: "bibliotecas", nombre: "Bibliotecas", osm: [{ amenity: "library" }] },
-      ],
-    },
-    {
-      area: "naturaleza",
-      gustos: [
-        { id: "parques", nombre: "Parques", osm: [{ leisure: "park" }], capas: ["parques"] },
-        { id: "miradores", nombre: "Miradores", osm: [{ tourism: "viewpoint" }] },
-      ],
-    },
-  ],
-};
+/** Intereses de arranque mientras se llena el perfil real (catálogo compartido con el script de lugares). */
+export const PERFIL_BASE: Perfil = { version: 1, areas: (catalogo as unknown as { areas: Area[] }).areas };
 
 export function esPerfil(x: unknown): x is Perfil {
   if (!x || typeof x !== "object") return false;

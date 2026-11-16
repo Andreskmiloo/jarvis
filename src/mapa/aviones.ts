@@ -1,5 +1,6 @@
 // Capa 3D de aviones: cada avión es una flecha extruida que vuela a su altitud real,
 // con una línea vertical hasta el suelo, y se mueve suave entre lecturas.
+import { puedeAnimar } from "./ritmo";
 import type { GeoJSONSource, Map as Mapa } from "maplibre-gl";
 import { avanzar, type Avion } from "../fuentes/aviones";
 import { metrosPorPixel, poligono } from "./pines";
@@ -78,12 +79,22 @@ export class CapaAviones {
     cancelAnimationFrame(this.raf);
     const paso = (t: number) => {
       this.raf = requestAnimationFrame(paso);
-      if (t - this.ultimo < 250 || document.hidden) return; // 4 cuadros/s bastan para que se vea fluido
+      if (t - this.ultimo < 500 || !puedeAnimar() || !this.algunoEnVista()) return; // 2 cuadros/s bastan
       this.ultimo = t;
       const seg = Date.now() / 1000 - this.hora;
       (this.mapa.getSource("aviones") as GeoJSONSource | undefined)?.setData(geojsonAviones(this.lista, seg, this.mapa.getZoom()));
     };
     this.raf = requestAnimationFrame(paso);
+  }
+
+  private vista = { t: 0, v: false };
+  private algunoEnVista(): boolean {
+    const ahora = performance.now();
+    if (ahora - this.vista.t > 2000) {
+      const b = this.mapa.getBounds();
+      this.vista = { t: ahora, v: this.lista.some((a) => b.contains([a.lng, a.lat])) };
+    }
+    return this.vista.v;
   }
 
   visible(v: boolean) {

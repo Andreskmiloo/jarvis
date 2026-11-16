@@ -1,6 +1,7 @@
 // Ficha de una zona: junta todas las fuentes públicas en un punto.
 import { CAPAS_POI, CAPAS_ZONA, type CapaPOI } from "../config/capas";
 import { atributosCercanos, geojsonRadio } from "../fuentes/arcgis";
+import { cargarGuardados, geojsonGuardados } from "../fuentes/guardados";
 import { aire, clima, type Aire, type Clima } from "../fuentes/openmeteo";
 
 export interface Dato {
@@ -48,7 +49,7 @@ export function centro(g: GeoJSON.Geometry): [number, number] | null {
   return [s[0] / pts.length, s[1] / pts.length];
 }
 
-const CERCANOS = ["tm-estaciones", "sitp", "metro", "parques", "canchas-sinteticas", "cicloparqueaderos", "banos"];
+const CERCANOS = ["tm-estaciones", "sitp", "metro", "centros-comerciales", "parques", "canchas-sinteticas", "cicloparqueaderos", "banos"];
 
 export async function resumir(lat: number, lng: number, radio = 500, signal?: AbortSignal): Promise<Resumen> {
   const errores: string[] = [];
@@ -67,7 +68,7 @@ export async function resumir(lat: number, lng: number, radio = 500, signal?: Ab
   const aireP = atrapar("Aire", aire(lat, lng, signal));
   const cercaP = Promise.all(
     CAPAS_POI.filter((c) => CERCANOS.includes(c.id)).map(async (capa): Promise<Cercano | null> => {
-      const fc = await atrapar(capa.nombre, geojsonRadio(capa.ruta, lng, lat, radio, signal));
+      const fc = capa.archivo ? await cercaGuardados(capa.archivo, lat, lng, radio) : await atrapar(capa.nombre, geojsonRadio(capa.ruta, lng, lat, radio, signal));
       if (!fc) return null;
       const ejemplos = fc.features
         .map((f) => {
@@ -92,4 +93,15 @@ export async function resumir(lat: number, lng: number, radio = 500, signal?: Ab
     cerca: cerca.filter((c): c is Cercano => c !== null),
     errores,
   };
+}
+
+/** Puntos de un archivo guardado a menos de `radio` metros. */
+async function cercaGuardados(archivo: string, lat: number, lng: number, radio: number): Promise<GeoJSON.FeatureCollection | undefined> {
+  const a = await cargarGuardados(archivo);
+  if (!a) return undefined;
+  const fc = geojsonGuardados(a);
+  return { ...fc, features: fc.features.filter((f) => {
+    const [x, y] = (f.geometry as GeoJSON.Point).coordinates;
+    return distancia(lat, lng, y, x) <= radio;
+  }) };
 }
