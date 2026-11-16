@@ -776,6 +776,39 @@
           "notas": "Nombres interpretados del mensaje; confirmar Bivol y Davis."
         }
       ]
+    },
+    {
+      "area": "vida-nocturna",
+      "gustos": [
+        {
+          "id": "discotecas",
+          "nombre": "Discotecas",
+          "nivel": 4,
+          "preferencias": {
+            "zona": "Calle 85 (Bogota)",
+            "presupuesto": "pago, desde feb 2027",
+            "horario": "noches de fin de semana",
+            "relacionado_con": [
+              "billar",
+              "comedia-shows"
+            ]
+          },
+          "osm": [
+            {
+              "amenity": "nightclub"
+            }
+          ],
+          "palabras_clave": [
+            "discoteca",
+            "club",
+            "calle 85",
+            "zona rosa",
+            "rumba"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Le gustan 'algunas' discotecas de la 85; faltan nombres, generos de musica y con quien va."
+        }
+      ]
     }
   ]
 }
