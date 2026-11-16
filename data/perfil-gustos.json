@@ -689,6 +689,93 @@
           "notas": ""
         }
       ]
+    },
+    {
+      "area": "deportes-de-combate",
+      "gustos": [
+        {
+          "id": "ufc-mma",
+          "nombre": "UFC / MMA",
+          "nivel": 4,
+          "preferencias": {
+            "peleadores_admirados": [
+              "Conor McGregor",
+              "Jon Jones"
+            ],
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "relacionado_con": [
+              "boxeo"
+            ]
+          },
+          "osm": [
+            {
+              "leisure": "sports_centre",
+              "sport": "mixed_martial_arts"
+            },
+            {
+              "leisure": "fitness_centre",
+              "sport": "mixed_martial_arts"
+            },
+            {
+              "amenity": "bar",
+              "sport": "mixed_martial_arts"
+            }
+          ],
+          "palabras_clave": [
+            "ufc",
+            "mma",
+            "gimnasio mma",
+            "pelea ufc",
+            "bar donde pasan ufc"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Nivel provisional; falta saber si entrena y donde ve las peleas."
+        },
+        {
+          "id": "boxeo",
+          "nombre": "Boxeo",
+          "nivel": 4,
+          "preferencias": {
+            "peleadores_admirados": [
+              "Canelo Alvarez",
+              "Gervonta Davis",
+              "Mike Tyson",
+              "Ryan Garcia",
+              "Dmitry Bivol",
+              "Tyson Fury",
+              "Terence Crawford",
+              "Floyd Mayweather"
+            ],
+            "presupuesto": "gratis o publico primero; pago desde feb 2027",
+            "relacionado_con": [
+              "ufc-mma"
+            ]
+          },
+          "osm": [
+            {
+              "leisure": "sports_centre",
+              "sport": "boxing"
+            },
+            {
+              "leisure": "fitness_centre",
+              "sport": "boxing"
+            },
+            {
+              "amenity": "gym",
+              "sport": "boxing"
+            }
+          ],
+          "palabras_clave": [
+            "boxeo",
+            "gimnasio de boxeo",
+            "funcion de boxeo",
+            "pelea de boxeo",
+            "bar donde pasan boxeo"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Nombres interpretados del mensaje; confirmar Bivol y Davis."
+        }
+      ]
     }
   ]
 }
