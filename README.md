@@ -26,6 +26,19 @@ npm run dev
 ```
 Tests: `npm test` · Build: `npm run build`.
 
+## Planeta (pestaña Vivo)
+- **Satélites en órbita**: ~600 satélites con posición real (SGP4 con `satellite.js`, TLE de CelesTrak). Toca uno para ver su órbita y cuándo pasa sobre tu casa; la tarjeta dice cuántos hay encima ahora y el próximo paso de la Estación Espacial.
+- **Día y noche**: la sombra de la noche y la línea del amanecer/atardecer sobre el globo (cálculo astronómico en el navegador).
+- **Incendios**: focos de calor de las últimas 24 h en Colombia (NASA FIRMS VIIRS 375 m), con el más cercano a tu casa.
+- **Eventos naturales** (NASA EONET), **clima espacial** (índice Kp de NOAA) y **noticias de Bogotá** (GDELT).
+- **Ahora aquí**: cada ficha de zona suma satélites encima, incendio y evento más cercanos y noticias de ese barrio.
+
+## Jarvis (botón J)
+Asistente que mueve el mapa: "llévame a Chapinero y dime el estrato", "canchas de vóley gratis cerca de mi casa a las que no he ido", "¿qué pasa sobre mi casa?", "muéstrame la Tierra". Usa la API de Claude con **tu propia clave** (console.anthropic.com → API Keys), guardada solo en tu navegador y enviada directo a Anthropic; cada pregunta gasta de tu saldo. Sus herramientas son las mismas funciones del mapa (volar, leer zona, buscar gustos, capas, vistas, tus lugares, planeta). Si el modelo declina una petición por política, la API reintenta con otro modelo (fallback del servidor).
+
+## Atajos
+J Jarvis · G globo/Bogotá · D día y noche · S satélites · I incendios · E eventos · V pestaña Vivo · ? ayuda · Esc cerrar.
+
 ## Lugares guardados
 `node scripts/guardar-lugares.mjs` descarga de OpenStreetMap (Overpass) los lugares de cada gusto de `src/intereses/catalogo.json` y los guarda en `public/data/lugares/<gusto>.json`; los centros comerciales se completan con el nomenclátor oficial. Vóley, fútbol y baloncesto salen de las canchas con su etiqueta de deporte. El workflow lo corre en cada publicación y cada lunes; si Overpass falla se conserva la copia anterior. `--solo=voley,helado` refresca solo algunos; `--conservar` no repite los que ya están.
 
@@ -35,6 +48,9 @@ La pantalla de acceso es un **candado de cortesía**: la página es estática y 
 printf 'ojo-de-dios:NUEVA_CONTRASEÑA' | sha256sum
 ```
 y pega el resultado en `HUELLA` de `src/acceso.ts` (usuarios en `USUARIOS`).
+
+## Créditos
+Varias ideas vienen de [OSIRIS](https://github.com/simplifaisoul/osiris) (MIT), reimplementadas para Bogotá: ver `docs/creditos.md`.
 
 ## Rendimiento
 - Desde el espacio no hay relieve (no se nota y cuesta mucho); se enciende al llegar a escala de ciudad.

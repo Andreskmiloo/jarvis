@@ -14,6 +14,7 @@ import { cargarPerfil, type Gusto } from "./intereses/perfil";
 import { ANCLA_DATOS, CAPA_EDIFICIOS, estiloMapa, EXAGERACION, type Tema, VISTA_2D, VISTA_3D, VISTA_TIERRA } from "./mapa/estilo";
 import { conectarRitmo, nitidezAdaptativa } from "./mapa/ritmo";
 import { iniciarPlaneta } from "./espacio/ui";
+import { iniciarJarvis } from "./jarvis/ui";
 import { animar } from "./ui/anim";
 import { iniciarVivo } from "./vivo";
 import { iniciarCamaras } from "./camaras/ui";
@@ -1018,3 +1019,122 @@ lugares.alCambiar(() => {
 pintarCapas();
 pintarIntereses();
 pintarLugares();
+
+// ---------- Jarvis: el asistente usa las mismas funciones del mapa ----------
+async function resolverLugar(lugar?: string, lat?: number, lng?: number): Promise<{ lat: number; lng: number; nombre: string }> {
+  if (lat !== undefined && lng !== undefined) return { lat, lng, nombre: `${lat.toFixed(4)}, ${lng.toFixed(4)}` };
+  const q = (lugar ?? "").trim();
+  if (!q || /^(mi )?casa$/i.test(q)) {
+    if (!casa) throw new Error("No has marcado tu casa (botón ⌂)");
+    return { lat: casa.lat, lng: casa.lng, nombre: "tu casa" };
+  }
+  const [r] = await buscarDireccion(/bogot/i.test(q) ? q : `${q}, Bogotá`);
+  if (!r) throw new Error(`No encontré "${q}"`);
+  return { lat: r.lat, lng: r.lng, nombre: r.nombre };
+}
+
+const jarvisUI = iniciarJarvis({
+  async volarA(lugar) {
+    const p = await resolverLugar(lugar);
+    caerEn(p.lat, p.lng, p.nombre === "tu casa" ? 16.5 : 15);
+    return `Volé a ${p.nombre} (${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}).`;
+  },
+  async leerZona(lugar, lat, lng) {
+    const p = await resolverLugar(lugar, lat, lng);
+    caerEn(p.lat, p.lng, 15.5);
+    void leerZona(p.lat, p.lng); // la ficha en pantalla
+    const r = await resumir(p.lat, p.lng, 500);
+    const datos = r.zona.map((d) => `${d.etiqueta}: ${d.valor}`);
+    if (r.clima) datos.push(`Clima: ${Math.round(r.clima.temperatura)} °C, ${describirClima(r.clima.codigo)}, lluvia próx. 3 h ${r.clima.probLluviaProx3h}%`);
+    if (r.aire) datos.push(`Aire: índice US ${r.aire.indiceUS} (${categoriaAire(r.aire.indiceUS).texto}), PM2.5 ${r.aire.pm25}`);
+    for (const c of r.cerca) datos.push(`${c.capa.nombre} a menos de 500 m: ${c.total}${c.ejemplos.length ? ` (${c.ejemplos.map((e) => `${e.nombre} ${e.metros} m`).join(", ")})` : ""}`);
+    if (casa) datos.push(`Distancia a la casa: ${textoDistancia(distancia(p.lat, p.lng, casa.lat, casa.lng))}`);
+    if (r.errores.length) datos.push(`Fuentes que no respondieron: ${r.errores.join("; ")}`);
+    return `Zona en ${p.nombre}:\n${datos.join("\n")}`;
+  },
+  async buscarGusto(id, gratis) {
+    if (gustoActivo?.id !== id) await elegirGusto(id);
+    if (gratis !== soloGratis) {
+      soloGratis = !!gratis;
+      actualizarIntereses();
+    }
+    abrirTab("intereses");
+    const ref = casa ?? referencia();
+    const lista = visibles()
+      .map((l) => ({ l, d: distancia(ref.lat, ref.lng, l.lat, l.lng) }))
+      .sort((a, b) => a.d - b.d)
+      .slice(0, 10);
+    if (!lista.length) return `No hay resultados de ${id} en esta vista.`;
+    return `${visibles().length} lugares de "${gustoActivo?.nombre ?? id}" (${fuenteResultados}). Los más cercanos a ${casa ? "la casa" : "la vista"}:\n${lista
+      .map(({ l, d }) => `- ${l.nombre} · ${(d / 1000).toFixed(1)} km${l.cobra ? ` · cobra: ${l.cobra}` : ""}${l.horario ? ` · ${l.horario}` : ""}${l.direccion ? ` · ${l.direccion}` : ""} · ${estadoDe(l) === "visitado" ? "ya fue" : estadoDe(l) === "pendiente" ? "quiere ir" : "no ha ido"}`)
+      .join("\n")}`;
+  },
+  async capa(id, on) {
+    if (["satelites", "noche", "incendios", "eventos"].includes(id)) planeta.alternar(id as "satelites", on);
+    else if (id === "pines-3d") pinesMapa.alternar(on);
+    else if (CAPAS_POI.some((c) => c.id === id)) {
+      if (activasPOI.has(id) !== on) alternarPOI(id, on);
+    } else if (CAPAS_RASTER.some((c) => c.id === id)) {
+      alternarRaster(id, on);
+      pintarCapas();
+    } else throw new Error(`No conozco la capa ${id}`);
+    return `Capa ${id} ${on ? "encendida" : "apagada"}.`;
+  },
+  async vista(tipo) {
+    if (tipo === "tierra") {
+      if (!enTierra) botonTierra.click();
+    } else if (tipo === "bogota") volarABogota(4200);
+    else if (tipo === "satelite_hd") await satelite.poner("esri");
+    else if (tipo === "satelite_2026") await satelite.poner("sentinel");
+    else if (tipo === "mapa") await satelite.poner("mapa");
+    else if (tipo === "capas3d") {
+      abrirTab("capas");
+      capas3d.entrar();
+    }
+    return `Vista: ${tipo}.`;
+  },
+  async misDatos() {
+    const ls = lugares.todos();
+    const gustos = perfil.areas.flatMap((a) => a.gustos.map((g) => `${g.nombre} (${g.id}${g.nivel ? `, nivel ${g.nivel}` : ""}${g.preferencias ? `, ${JSON.stringify(g.preferencias)}` : ""})`));
+    return [
+      casa ? `Casa: ${casa.lat.toFixed(4)}, ${casa.lng.toFixed(4)}` : "Casa: no marcada",
+      `Lugares guardados (${ls.length}): ${ls.map((l) => `${l.nombre} [${l.categoria}, ${l.visitado ? "ya fue" : "quiere ir"}${casa ? `, ${(distancia(casa.lat, casa.lng, l.lat, l.lng) / 1000).toFixed(1)} km` : ""}]`).join("; ") || "ninguno"}`,
+      `Gustos: ${gustos.join("; ")}`,
+    ].join("\n");
+  },
+  async planeta(lat, lng) {
+    const p = lat !== undefined && lng !== undefined ? { lat, lng } : casa ?? { lat: 4.65, lng: -74.08 };
+    const l = await planeta.resumen(p.lat, p.lng);
+    return l.length ? l.join("\n") : "Nada destacado encima ni alrededor.";
+  },
+  catalogo: () => ({
+    gustos: perfil.areas.flatMap((a) => a.gustos.map((g) => g.id)),
+    capas: [...CAPAS_POI.map((c) => c.id), ...CAPAS_RASTER.map((c) => c.id), "satelites", "noche", "incendios", "eventos", "pines-3d"],
+  }),
+});
+document.getElementById("boton-jarvis")?.addEventListener("click", () => jarvisUI.abrir());
+
+// ---------- Atajos de teclado ----------
+const ATAJOS: Record<string, [string, () => void]> = {
+  j: ["Jarvis", () => jarvisUI.abrir()],
+  g: ["Globo / volver a Bogotá", () => botonTierra.click()],
+  d: ["Día y noche", () => planeta.alternar("noche")],
+  s: ["Satélites", () => planeta.alternar("satelites")],
+  i: ["Incendios", () => planeta.alternar("incendios")],
+  e: ["Eventos NASA", () => planeta.alternar("eventos")],
+  v: ["Pestaña Vivo", () => abrirTab("vivo")],
+  "?": ["Ver atajos", () => aviso(Object.entries(ATAJOS).map(([k, [n]]) => `${k.toUpperCase()} ${n}`).join(" · ") + " · Esc cerrar", 7000)],
+};
+addEventListener("keydown", (e) => {
+  const t = e.target as HTMLElement;
+  if (e.metaKey || e.ctrlKey || e.altKey || t.closest("input, textarea, select, [contenteditable]")) return;
+  if (e.key === "Escape") {
+    document.querySelectorAll<HTMLElement>(".menu, #jarvis").forEach((m) => (m.hidden = true));
+    return;
+  }
+  const a = ATAJOS[e.key.toLowerCase()];
+  if (a) {
+    e.preventDefault();
+    a[1]();
+  }
+});
