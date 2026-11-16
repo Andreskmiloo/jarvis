@@ -12,6 +12,9 @@ import { cargarPerfil, type Gusto } from "./intereses/perfil";
 import { ANCLA_DATOS, CAPA_EDIFICIOS, estiloMapa, EXAGERACION, type Tema, VISTA_2D, VISTA_3D } from "./mapa/estilo";
 import { animar } from "./ui/anim";
 import { iniciarVivo } from "./vivo";
+import { iniciarCamaras } from "./camaras/ui";
+import { borrarCasa, guardarCasa, leerCasa, textoDistancia, type Casa } from "./lugares/casa";
+import { BASES, VistaSatelite, type Base } from "./mapa/satelite";
 import { CLAVE_WINDY, enlacesEnVivo, webcamsCerca } from "./fuentes/webcams";
 import { Lugares, type MiLugar } from "./lugares/store";
 import { aviso, descargar, esc, metros } from "./ui/html";
@@ -28,6 +31,8 @@ let resultados: LugarOSM[] = [];
 let soloGratis = false;
 let filtroLugares: "todos" | "visitados" | "pendientes" = "todos";
 let modoAgregar = false;
+let modoCasa = false;
+let casa: Casa | null = leerCasa();
 let ultimoPunto: { lat: number; lng: number } | null = null;
 let controlZona: AbortController | null = null;
 
@@ -136,8 +141,16 @@ mapa.on("load", () => {
 
 mapa.on("click", (e: MapMouseEvent) => {
   const f = mapa.queryRenderedFeatures(e.point, { layers: capasInteractivas.filter((l) => mapa.getLayer(l)) })[0];
-  if (f && !modoAgregar) return popupDe(f, e.lngLat);
+  if (f?.properties?.camara && !modoAgregar && !modoCasa) return camarasUI.abrir(String(f.properties.camara));
+  if (f && !modoAgregar && !modoCasa) return popupDe(f, e.lngLat);
   const { lat, lng } = e.lngLat;
+  if (camarasUI.tocar(lat, lng)) return;
+  if (modoCasa) {
+    modoCasa = false;
+    mapa.getCanvas().style.cursor = "";
+    fijarCasa(lat, lng);
+    return;
+  }
   if (modoAgregar) {
     modoAgregar = false;
     mapa.getCanvas().style.cursor = "";
@@ -191,11 +204,117 @@ document.getElementById("buscador")!.addEventListener("submit", async (e) => {
   }
 });
 
-const vivo = iniciarVivo(mapa, tabs.vivo, (id) => {
+const registrar = (id: string) => {
+  capasInteractivas.push(id);
+  mapa.on("mouseenter", id, () => (mapa.getCanvas().style.cursor = "pointer"));
+  mapa.on("mouseleave", id, () => (mapa.getCanvas().style.cursor = ""));
+};
+const camarasUI = iniciarCamaras(mapa, document.getElementById("vivo-camaras")!, registrar);
+const vivo = iniciarVivo(mapa, document.getElementById("vivo-datos")!, (id) => {
   capasInteractivas.push(id);
   mapa.on("mouseenter", id, () => (mapa.getCanvas().style.cursor = "pointer"));
   mapa.on("mouseleave", id, () => (mapa.getCanvas().style.cursor = ""));
 });
+
+// ---------- Menús flotantes ----------
+function alternarMenu(menu: HTMLElement, boton: HTMLElement) {
+  const abrir = menu.hidden;
+  document.querySelectorAll<HTMLElement>(".menu").forEach((m) => (m.hidden = true));
+  if (!abrir) return;
+  const r = boton.getBoundingClientRect();
+  menu.style.top = `${r.top}px`;
+  menu.style.right = `${innerWidth - r.left + 8}px`;
+  menu.hidden = false;
+  animar(menu);
+}
+document.addEventListener("click", (e) => {
+  if (!(e.target as HTMLElement).closest(".menu, .boton-mapa")) document.querySelectorAll<HTMLElement>(".menu").forEach((m) => (m.hidden = true));
+});
+
+// ---------- Mi casa ----------
+const elCasa = Object.assign(document.createElement("div"), { className: "casa", title: "Mi casa", textContent: "⌂" });
+const marcadorCasa = new maplibregl.Marker({ element: elCasa });
+const menuCasa = document.getElementById("menu-casa")!;
+const botonCasa = document.getElementById("boton-casa")!;
+
+function pintarCasa() {
+  if (casa) marcadorCasa.setLngLat([casa.lng, casa.lat]).addTo(mapa);
+  else marcadorCasa.remove();
+  botonCasa.classList.toggle("activo", !!casa);
+  menuCasa.innerHTML = `<b>Mi casa</b>
+    ${casa ? `<button data-casa="ir">Ir a mi casa</button>` : `<p class="nota">Sin marcar. Se guarda solo en este navegador.</p>`}
+    <button data-casa="gps">${casa ? "Mover a mi ubicación" : "Usar mi ubicación"}</button>
+    <button data-casa="tocar">${casa ? "Mover tocando el mapa" : "Marcar tocando el mapa"}</button>
+    ${casa ? `<button data-casa="borrar">Borrar</button>` : ""}`;
+  menuCasa.querySelectorAll<HTMLButtonElement>("[data-casa]").forEach((b) =>
+    b.addEventListener("click", () => {
+      menuCasa.hidden = true;
+      const accion = b.dataset.casa;
+      if (accion === "ir" && casa) caerEn(casa.lat, casa.lng, 16.5);
+      else if (accion === "tocar") {
+        modoCasa = true;
+        mapa.getCanvas().style.cursor = "crosshair";
+        panel.classList.add("contraido");
+        aviso("Toca el mapa donde está tu casa", 4000);
+      } else if (accion === "gps") {
+        if (!navigator.geolocation) return aviso("Este navegador no da ubicación");
+        aviso("Buscando tu ubicación…");
+        navigator.geolocation.getCurrentPosition(
+          (p) => fijarCasa(p.coords.latitude, p.coords.longitude),
+          () => aviso("No pude obtener tu ubicación; márcala tocando el mapa", 4000),
+          { enableHighAccuracy: true, timeout: 15000 },
+        );
+      } else if (accion === "borrar") {
+        borrarCasa();
+        casa = null;
+        pintarCasa();
+        pintarLugares();
+        aviso("Casa borrada");
+      }
+    }),
+  );
+}
+
+function fijarCasa(lat: number, lng: number) {
+  casa = guardarCasa(lat, lng);
+  pintarCasa();
+  pintarLugares();
+  aviso("⌂ Casa guardada en este navegador");
+  caerEn(lat, lng, 16.5);
+}
+botonCasa.addEventListener("click", () => alternarMenu(menuCasa, botonCasa));
+
+// ---------- Satélite ----------
+const satelite = new VistaSatelite(mapa);
+const menuSat = document.getElementById("menu-sat")!;
+const botonSat = document.getElementById("boton-sat")!;
+const notaBase = document.getElementById("nota-base")!;
+
+function pintarMenuSat() {
+  menuSat.innerHTML = `<b>Vista</b>${BASES.map(
+    (b) => `<button data-base="${b.id}" aria-pressed="${satelite.actual === b.id}">${esc(b.nombre)}<small>${esc(b.detalle)}</small></button>`,
+  ).join("")}`;
+  menuSat.querySelectorAll<HTMLButtonElement>("[data-base]").forEach((b) =>
+    b.addEventListener("click", () => {
+      menuSat.hidden = true;
+      notaBase.hidden = false;
+      notaBase.textContent = "Conectando con el satélite…";
+      satelite.poner(b.dataset.base as Base);
+    }),
+  );
+}
+satelite.alCambiar = (b, nota) => {
+  botonSat.classList.toggle("activo", b !== "mapa");
+  notaBase.hidden = !nota;
+  notaBase.textContent = nota;
+  // Las vistas de NASA cubren regiones enteras: se aleja la cámara y se baja la inclinación
+  // para que la niebla del horizonte no tape el suelo.
+  if (b === "goes" || b === "modis") mapa.easeTo({ zoom: Math.min(mapa.getZoom(), b === "goes" ? 6.5 : 9), pitch: b === "goes" ? 15 : 35, duration: 1600 });
+  pintarMenuSat();
+};
+botonSat.addEventListener("click", () => alternarMenu(menuSat, botonSat));
+pintarMenuSat();
+mapa.once("load", pintarCasa);
 
 // ---------- Caída ----------
 /** Llega a un lugar "cayendo" desde arriba: sube, se inclina y aterriza con una onda. */
@@ -250,7 +369,7 @@ async function leerZona(lat: number, lng: number) {
 
 function htmlZona(r: Resumen): string {
   const partes: string[] = [];
-  partes.push(`<h2 data-descifrar>${esc(r.zona.find((d) => d.etiqueta === "Barrio")?.valor ?? "Zona")}</h2><p class="nota">${r.lat.toFixed(5)}, ${r.lng.toFixed(5)} · leído a las ${new Date().toLocaleTimeString("es-CO")}</p>`);
+  partes.push(`<h2 data-descifrar>${esc(r.zona.find((d) => d.etiqueta === "Barrio")?.valor ?? "Zona")}</h2><p class="nota">${r.lat.toFixed(5)}, ${r.lng.toFixed(5)} · leído a las ${new Date().toLocaleTimeString("es-CO")}${casa ? ` · <b>${esc(textoDistancia(distancia(r.lat, r.lng, casa.lat, casa.lng)))}</b>` : ""}</p>`);
   partes.push(
     r.zona.length
       ? `<dl class="datos">${r.zona.map((d) => `<dt>${esc(d.etiqueta)}</dt><dd>${esc(d.valor)}</dd>`).join("")}</dl>`
@@ -623,8 +742,11 @@ function pintarLugares() {
   <div class="chips" style="margin:10px 0">${(["todos", "visitados", "pendientes"] as const)
     .map((f) => `<button class="chip" data-filtro="${f}" aria-pressed="${filtroLugares === f}">${f === "todos" ? "Todos" : f === "visitados" ? "Ya fui" : "Pendientes"}</button>`)
     .join("")}</div><ul class="lista">`;
-  for (const l of lista.sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))) {
-    h += `<li><div class="fila"><button class="enlace" data-ver="${l.id}">${esc(l.nombre)}</button><span class="sub">${esc(l.categoria)}</span></div>
+  const dCasa = (l: MiLugar) => (casa ? distancia(casa.lat, casa.lng, l.lat, l.lng) : 0);
+  const orden = casa ? (a: MiLugar, b: MiLugar) => dCasa(a) - dCasa(b) : (a: MiLugar, b: MiLugar) => a.nombre.localeCompare(b.nombre, "es");
+  if (casa) h += `<p class="nota">Ordenados por distancia a tu casa.</p>`;
+  for (const l of lista.sort(orden)) {
+    h += `<li><div class="fila"><button class="enlace" data-ver="${l.id}">${esc(l.nombre)}</button><span class="sub">${esc(l.categoria)}${casa ? ` · ${(dCasa(l) / 1000).toFixed(1)} km` : ""}</span></div>
       ${l.notas ? `<div class="sub">${esc(l.notas)}</div>` : ""}
       <div class="acciones">
         <button class="boton peq ${l.visitado ? "" : "sec"}" data-alternar="${l.id}">${l.visitado ? "✓ Ya fui" : "Pendiente"}</button>

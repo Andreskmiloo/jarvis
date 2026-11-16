@@ -316,3 +316,40 @@ input[type="checkbox"], input[type="range"] { accent-color: var(--verde); }
 
 .webcam { margin: 8px 0; }
 .webcam iframe, .webcam img { display: block; width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--borde); border-radius: var(--radio); background: #000; margin-top: 4px; object-fit: cover; }
+
+/* ---------- Mi casa, satélite, visor ---------- */
+.boton-mapa.activo { border-color: var(--verde); box-shadow: var(--brillo); background: var(--verde); color: var(--sobre); }
+.menu {
+  position: fixed;
+  z-index: 6;
+  min-width: 220px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--brillo);
+  backdrop-filter: blur(10px);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.menu[hidden] { display: none; }
+.menu > b { color: var(--verde); padding: 2px 6px 6px; text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; }
+.menu > *:not(b) { animation: entra 200ms ease-out both; }
+.menu button { display: flex; flex-direction: column; align-items: flex-start; text-align: left; background: none; border: 1px solid transparent; border-radius: var(--radio); color: var(--texto); font: inherit; padding: 7px 8px; cursor: pointer; transition: background var(--rapido), border-color var(--rapido); }
+.menu button:hover { background: var(--superficie-2); border-color: var(--borde); }
+.menu button[aria-pressed="true"] { border-color: var(--verde); color: var(--verde); }
+.menu small { color: var(--suave); font-size: 11px; }
+.nota-base { position: fixed; left: 50%; transform: translateX(-50%); top: 12px; z-index: 3; background: var(--superficie); border: 1px solid var(--borde); color: var(--texto); font-size: 11.5px; padding: 5px 12px; border-radius: 999px; max-width: calc(100vw - 32px); text-align: center; backdrop-filter: blur(8px); }
+@media (min-width: 721px) { .nota-base { left: calc(50% + 205px); } }
+.casa { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 700 18px/1 var(--mono); color: var(--sobre); background: var(--verde); border: 2px solid var(--fondo); box-shadow: 0 0 0 0 var(--verde); animation: casa 2.8s ease-out infinite; }
+@keyframes casa { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.55); } 100% { box-shadow: 0 0 0 22px rgba(255, 255, 255, 0); } }
+:root[data-tema="matrix"] .casa { animation-name: casa-verde; }
+@keyframes casa-verde { 0% { box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.6); } 100% { box-shadow: 0 0 0 22px rgba(0, 255, 102, 0); } }
+.form-camara { display: grid; gap: 6px; margin: 8px 0; }
+.form-camara input { padding: 8px 10px; border-radius: var(--radio); border: 1px solid var(--borde); background: rgba(0, 0, 0, 0.4); color: var(--texto); font: inherit; }
+.visor { position: fixed; right: 64px; bottom: 24px; width: min(420px, calc(100vw - 32px)); z-index: 7; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); box-shadow: var(--brillo); padding: 8px; backdrop-filter: blur(10px); animation: entra 220ms ease-out both; }
+.visor[hidden] { display: none; }
+.visor__barra { margin-bottom: 6px; }
+.visor__video iframe, .visor__video video, .visor__video img { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: var(--radio); background: #000; object-fit: cover; }
+@media (max-width: 720px) { .visor { right: 16px; left: 16px; width: auto; bottom: auto; top: 56px; } }

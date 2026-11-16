@@ -29,17 +29,22 @@
       <section id="tab-zona" class="tab" role="tabpanel">
         <p class="vacio">Toca cualquier punto del mapa para leer la zona: localidad, UPZ, barrio, estrato, valor del suelo, clima, aire y qué hay cerca.</p>
       </section>
-      <section id="tab-vivo" class="tab" role="tabpanel" hidden></section>
+      <section id="tab-vivo" class="tab" role="tabpanel" hidden><div id="vivo-datos"></div><div id="vivo-camaras"></div></section>
       <section id="tab-intereses" class="tab" role="tabpanel" hidden></section>
       <section id="tab-lugares" class="tab" role="tabpanel" hidden></section>
       <section id="tab-capas" class="tab" role="tabpanel" hidden></section>
     </aside>
 
     <div class="vista">
+      <button id="boton-casa" class="boton-mapa" title="Mi casa">⌂</button>
+      <button id="boton-sat" class="boton-mapa" title="Vista desde el satélite">🛰</button>
       <button id="boton-3d" class="boton-mapa" aria-pressed="true" title="Cambiar entre relieve 3D y plano">2D</button>
       <button id="boton-tema" class="boton-mapa" title="Cambiar tema: blanco y negro o Matrix">◐</button>
       <button id="boton-orbita" class="boton-mapa" title="Girar la vista 90°">⟳</button>
     </div>
+    <div id="menu-sat" class="menu" hidden role="menu"></div>
+    <div id="menu-casa" class="menu" hidden role="menu"></div>
+    <div id="nota-base" class="nota-base" hidden></div>
     <div id="aviso" class="aviso" role="status" aria-live="polite" hidden></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
