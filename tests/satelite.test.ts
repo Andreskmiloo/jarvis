@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { analizarEnlace } from "../src/camaras/propias";
 import { textoDistancia } from "../src/lugares/casa";
-import { busquedaSentinel, DESDE, fechaModis, plantillaGoes, plantillaModis, plantillaSentinel } from "../src/mapa/satelite";
+import { BASES, busquedaSentinel, DESDE, fechaModis, opacidadConTope, plantillaGoes, plantillaModis, plantillaSentinel, TOPE_ZOOM } from "../src/mapa/satelite";
 
 describe("satélite", () => {
   it("Sentinel-2: solo 2026, más recientes primero y con pocas nubes", () => {
@@ -11,7 +11,7 @@ describe("satélite", () => {
     expect(b.filter.args.find((a) => a.op === ">=")!.args[1]).toBe(DESDE);
     expect(b.sortby[0]).toEqual({ field: "datetime", direction: "desc" });
     const t = plantillaSentinel("abc");
-    expect(t).toContain("/mosaic/abc/tiles/WebMercatorQuad/{z}/{x}/{y}@1x?");
+    expect(t).toContain("/mosaic/abc/tiles/WebMercatorQuad/{z}/{x}/{y}@2x?");
     expect(new URLSearchParams(t.split("?")[1]).get("assets")).toBe("visual");
   });
 
@@ -23,6 +23,18 @@ describe("satélite", () => {
 
   it("GOES pide el último cuadro de 10 min con margen de publicación", () => {
     expect(plantillaGoes(new Date("2026-11-16T12:47:30Z"))).toContain("/default/2026-11-16T12:00:00Z/");
+  });
+});
+
+describe("satélite nítido", () => {
+  it("HD es la primera opción después del mapa", () => {
+    expect(BASES.map((b) => b.id).slice(0, 3)).toEqual(["mapa", "esri", "sentinel"]);
+  });
+
+  it("cada fuente se apaga antes de pixelarse", () => {
+    expect(TOPE_ZOOM).toEqual({ sentinel: 14, modis: 10, goes: 8 });
+    expect(opacidadConTope(undefined)).toBe(1);
+    expect(opacidadConTope(10)).toEqual(["interpolate", ["linear"], ["zoom"], 8.8, 1, 10, 0]);
   });
 });
 

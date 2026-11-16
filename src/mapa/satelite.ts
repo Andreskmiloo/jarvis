@@ -1,6 +1,7 @@
 // Vista desde el satélite: Sentinel-2 de 2026 (ESA, vía Microsoft Planetary Computer),
 // MODIS del día y GOES-East cada 10 minutos (NASA GIBS), y detalle de Esri (2024, rotulado).
 import type { Map as Mapa } from "maplibre-gl";
+import type * as maplibregl from "maplibre-gl";
 import { CAJA_BOGOTA } from "../fuentes/overpass";
 
 export type Base = "mapa" | "sentinel" | "modis" | "goes" | "esri";
@@ -13,11 +14,22 @@ export interface OpcionBase {
 
 export const BASES: OpcionBase[] = [
   { id: "mapa", nombre: "Mapa", detalle: "Vectorial OpenStreetMap" },
-  { id: "sentinel", nombre: "Satélite 2026", detalle: "Sentinel-2 · 10 m" },
-  { id: "modis", nombre: "Hoy", detalle: "MODIS Terra · 250 m" },
-  { id: "goes", nombre: "Nubes en vivo", detalle: "GOES-East · cada 10 min" },
-  { id: "esri", nombre: "Detalle 2024", detalle: "WorldView-3 · 31 cm · ene 2024" },
+  { id: "esri", nombre: "Satélite HD", detalle: "Nítido hasta la calle · ~30 cm · Esri" },
+  { id: "sentinel", nombre: "Satélite 2026", detalle: "Colores de este año · 10 m (de cerca pasa a HD)" },
+  { id: "modis", nombre: "Hoy", detalle: "MODIS Terra · 250 m · vista regional" },
+  { id: "goes", nombre: "Nubes en vivo", detalle: "GOES-East · 2 km · cada 10 min" },
 ];
+
+/**
+ * Zoom hasta el que cada fuente se ve bien. Más cerca se estiraría (pixelado): Sentinel se
+ * mezcla con HD y MODIS/GOES se desvanecen hacia el mapa.
+ */
+export const TOPE_ZOOM: Partial<Record<Base, number>> = { sentinel: 14, modis: 10, goes: 8 };
+
+/** Opacidad por zoom: 1 hasta un poco antes del tope y 0 en el tope (MODIS, GOES). */
+export function opacidadConTope(tope: number | undefined): number | maplibregl.ExpressionSpecification {
+  return tope === undefined ? 1 : ["interpolate", ["linear"], ["zoom"], tope - 1.2, 1, tope, 0];
+}
 
 const PC = "https://planetarycomputer.microsoft.com/api";
 const GIBS = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best";
@@ -49,7 +61,7 @@ export function busquedaSentinel(): Record<string, unknown> {
 
 export function plantillaSentinel(idMosaico: string): string {
   const p = new URLSearchParams({ collection: "sentinel-2-l2a", assets: "visual", asset_bidx: "visual|1,2,3", nodata: "0", format: "png" });
-  return `${PC}/data/v1/mosaic/${idMosaico}/tiles/WebMercatorQuad/{z}/{x}/{y}@1x?${p}`;
+  return `${PC}/data/v1/mosaic/${idMosaico}/tiles/WebMercatorQuad/{z}/{x}/{y}@2x?${p}`;
 }
 
 /** Fecha de ayer en Bogotá (la imagen MODIS del día se completa a media tarde). */
@@ -109,8 +121,10 @@ export class VistaSatelite {
   async poner(b: Base) {
     const m = this.mapa;
     clearInterval(this.goesTimer);
-    if (m.getLayer("satelite")) m.removeLayer("satelite");
-    if (m.getSource("satelite")) m.removeSource("satelite");
+    for (const id of ["satelite-hd", "satelite"]) {
+      if (m.getLayer(id)) m.removeLayer(id);
+      if (m.getSource(id)) m.removeSource(id);
+    }
     this.actual = b;
     this.suelo(b === "mapa");
     if (b === "mapa") return this.alCambiar(b, "");
@@ -122,21 +136,21 @@ export class VistaSatelite {
       if (b === "sentinel") {
         const s = await prepararSentinel();
         plantilla = s.plantilla;
-        maxzoom = 16;
-        nota = s.fecha ? `Sentinel-2 · escena más reciente ${s.fecha} (${s.escenas} escenas desde ago 2026 con ≤${NUBES_MAX}% nubes)` : "Sentinel-2 · 2026";
+        maxzoom = TOPE_ZOOM.sentinel!; // 10 m reales: más allá solo se estiraría
+        nota = `${s.fecha ? `Sentinel-2 · escena más reciente ${s.fecha} (${s.escenas} escenas desde ago 2026 con ≤${NUBES_MAX}% nubes)` : "Sentinel-2 · 2026"} · al acercarte pasa a Satélite HD`;
       } else if (b === "modis") {
         plantilla = plantillaModis();
         maxzoom = 9;
-        nota = `MODIS Terra · ${fechaModis()} · NASA GIBS`;
+        nota = `MODIS Terra · ${fechaModis()} · NASA GIBS · resolución 250 m: para ver calles usa Satélite HD`;
       } else if (b === "goes") {
         plantilla = plantillaGoes();
         maxzoom = 7;
-        nota = "GOES-East GeoColor · último cuadro · se actualiza cada 10 min";
+        nota = "GOES-East GeoColor · último cuadro · cada 10 min · resolución 2 km: para ver calles usa Satélite HD";
         this.goesTimer = window.setInterval(() => this.actual === "goes" && this.poner("goes"), 600_000);
       } else {
         plantilla = PLANTILLA_ESRI;
         maxzoom = 19;
-        nota = "Esri World Imagery · WorldView-3 de enero 2024 (no hay imagen de detalle más reciente)";
+        nota = "Satélite HD · Esri World Imagery (WorldView-3, ene 2024): la imagen nítida más reciente sin clave";
       }
     } catch (e) {
       this.actual = "mapa";
@@ -146,7 +160,12 @@ export class VistaSatelite {
     if (this.actual !== b) return;
     m.addSource("satelite", { type: "raster", tiles: [plantilla], tileSize: 256, maxzoom, attribution: atribucion(b) });
     m.addLayer({ id: "satelite", type: "raster", source: "satelite", paint: { "raster-opacity": 0, "raster-opacity-transition": { duration: 700 }, "raster-fade-duration": 250 } }, "relieve-sombra");
-    m.setPaintProperty("satelite", "raster-opacity", 1);
+    m.setPaintProperty("satelite", "raster-opacity", b === "sentinel" ? 1 : opacidadConTope(TOPE_ZOOM[b]));
+    if (b === "sentinel") {
+      // Híbrido: colores de 2026 de lejos y detalle HD de cerca, sin pixelado.
+      m.addSource("satelite-hd", { type: "raster", tiles: [PLANTILLA_ESRI], tileSize: 256, maxzoom: 19, attribution: atribucion("esri") });
+      m.addLayer({ id: "satelite-hd", type: "raster", source: "satelite-hd", minzoom: 12.5, paint: { "raster-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0, 14.5, 1], "raster-fade-duration": 250 } }, "relieve-sombra");
+    }
     this.alCambiar(b, nota);
   }
 

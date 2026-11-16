@@ -12,7 +12,7 @@ import { aLugaresOSM, cargarGuardados, dentroDeCaja, geojsonGuardados } from "./
 import { buscarPhoton } from "./fuentes/photon";
 import { cargarPerfil, type Gusto } from "./intereses/perfil";
 import { ANCLA_DATOS, CAPA_EDIFICIOS, estiloMapa, EXAGERACION, type Tema, VISTA_2D, VISTA_3D, VISTA_TIERRA } from "./mapa/estilo";
-import { conectarRitmo } from "./mapa/ritmo";
+import { conectarRitmo, nitidezAdaptativa } from "./mapa/ritmo";
 import { animar } from "./ui/anim";
 import { iniciarVivo } from "./vivo";
 import { iniciarCamaras } from "./camaras/ui";
@@ -74,10 +74,12 @@ const mapa = new maplibregl.Map({
   zoom: movil ? VISTA_TIERRA.zoom - 0.5 : VISTA_TIERRA.zoom,
   maxPitch: 78,
   // En pantallas densas se limita la resolución: se ve igual y va más fluido.
-  pixelRatio: Math.min(devicePixelRatio, movil ? 1.25 : 2),
+  // Empieza nítido; mientras se mueve baja la resolución (ver nitidezAdaptativa).
+  pixelRatio: Math.min(devicePixelRatio, 2),
   attributionControl: { compact: true },
 });
 conectarRitmo(mapa);
+nitidezAdaptativa(mapa);
 const VISTA_BOGOTA = { ...VISTA_3D, zoom: movil ? VISTA_3D.zoom - 0.9 : VISTA_3D.zoom };
 
 // La Tierra gira despacio detrás de la pantalla de acceso.
