@@ -29,6 +29,8 @@ jobs:
         env:
           # Opcional: clave gratuita de la Webcams API de Windy (Settings → Secrets → Actions).
           VITE_WINDY_KEY: ${{ secrets.VITE_WINDY_KEY }}
+          # URL del puente de aviones (Settings → Secrets and variables → Actions → Variables).
+          VITE_AVIONES_URL: ${{ vars.VITE_AVIONES_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

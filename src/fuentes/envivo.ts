@@ -86,7 +86,21 @@ export interface Camara {
   lat: number;
   lng: number;
   detalle?: string;
+  /** Familia, para el color del pin y el filtro. */
+  clase: ClaseCamara;
+  /** Si es una webcam pública: enlace del reproductor. */
+  video?: string;
 }
+
+export type ClaseCamara = "transito" | "foto" | "detector" | "osm" | "webcam";
+
+export const CLASES_CAMARA: Record<ClaseCamara, { nombre: string; color: string }> = {
+  webcam: { nombre: "Webcam pública en vivo", color: "#ff3df2" },
+  transito: { nombre: "Tráfico (Centro de Gestión)", color: "#00e5ff" },
+  foto: { nombre: "Fotodetección", color: "#ffc400" },
+  detector: { nombre: "Videodetector de semáforo", color: "#7c8cff" },
+  osm: { nombre: "Vigilancia (OpenStreetMap)", color: "#ff8a3d" },
+};
 
 export function leerCamarasCGT(features: { attributes: Attrs }[]): Camara[] {
   return features
@@ -97,6 +111,7 @@ export function leerCamarasCGT(features: { attributes: Attrs }[]): Camara[] {
       estado: String(a.ESTADO ?? "—"),
       lat: Number(a.LATITUD),
       lng: Number(a.LONGITUD),
+      clase: "transito" as const,
     }))
     .filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lng));
 }
@@ -111,22 +126,73 @@ export function leerFotodeteccion(features: { attributes: Attrs }[]): Camara[] {
       lat: Number(a.LATITUD),
       lng: Number(a.LONGITUD),
       detalle: a.VELOCIDAD_FISCALIZACION ? `Límite ${a.VELOCIDAD_FISCALIZACION} km/h` : undefined,
+      clase: "foto" as const,
     }))
     .filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lng) && c.lat !== 0);
 }
 
+/** Videodetectores de la red semafórica: solo ubicación y sentido (los campos internos no se piden). */
+export function leerVideodetectores(features: { attributes: Attrs; geometry?: { x: number; y: number } }[]): Camara[] {
+  return features
+    .filter((f) => f.geometry && f.geometry.y > 3 && f.geometry.y < 6)
+    .map(({ attributes: a, geometry: g }) => ({
+      id: `vd-${a.OBJECTID}`,
+      direccion: `Intersección · costado ${a.COSTADO ?? "—"}`,
+      tipo: "Videodetector de semáforo",
+      estado: `sentido ${a.SENTIDO ?? "—"}`,
+      lat: g!.y,
+      lng: g!.x,
+      clase: "detector" as const,
+    }));
+}
+
+/**
+ * Webcams públicas que transmiten hoy, verificadas a mano en el directorio de Windy
+ * (16 nov 2026). Con VITE_WINDY_KEY la app busca más con la API oficial.
+ */
+export const WEBCAMS_CONOCIDAS: Camara[] = [
+  {
+    id: "windy-1793906875",
+    direccion: "Teusaquillo, mirando al sur (cerros y centro)",
+    tipo: "Webcam pública · Windy",
+    estado: "activa",
+    lat: 4.63089,
+    lng: -74.06857,
+    clase: "webcam",
+    video: "https://webcams.windy.com/webcams/public/embed/player/1793906875/day",
+  },
+];
+
 export async function camaras(signal?: AbortSignal): Promise<Camara[]> {
   const q = "query?where=1%3D1&outFields=*&returnGeometry=false&resultRecordCount=2000&f=json";
-  const [cgt, foto] = await Promise.allSettled([
+  const vd = new URLSearchParams({ where: "1=1", outFields: "OBJECTID,COSTADO,SENTIDO", returnGeometry: "true", outSR: "4326", resultRecordCount: "2000", f: "json" });
+  const [cgt, foto, det] = await Promise.allSettled([
     json<{ features: { attributes: Attrs }[] }>(`${SDM}/Camaras_PP/FeatureServer/0/${q}`, signal),
     json<{ features: { attributes: Attrs }[] }>(`${SIMUR}/DatosAbiertos/CamarasSalvavidas/FeatureServer/0/${q}`, signal),
+    json<{ features: { attributes: Attrs; geometry?: { x: number; y: number } }[] }>(`${SIMUR}/Subdireccion_Semaforizacion/VIDEODETECTORES/FeatureServer/0/query?${vd}`, signal),
   ]);
   const lista = [
+    ...WEBCAMS_CONOCIDAS,
     ...(cgt.status === "fulfilled" ? leerCamarasCGT(cgt.value.features ?? []) : []),
     ...(foto.status === "fulfilled" ? leerFotodeteccion(foto.value.features ?? []) : []),
+    ...(det.status === "fulfilled" ? leerVideodetectores(det.value.features ?? []) : []),
   ];
-  if (!lista.length) throw new Error("sin respuesta de las capas de cámaras");
   return lista;
+}
+
+/** Cámaras de vigilancia que la comunidad ha mapeado en OpenStreetMap (ubicación, sin video). */
+export async function camarasOSM(signal?: AbortSignal): Promise<Camara[]> {
+  const { buscar, CAJA_BOGOTA } = await import("./overpass");
+  const l = await buscar([{ man_made: "surveillance" }], CAJA_BOGOTA, signal);
+  return l.map((x) => ({
+    id: `osm-${x.id}`,
+    direccion: x.direccion || x.nombre.replace("(sin nombre en OSM)", "Cámara de vigilancia"),
+    tipo: `Vigilancia${x.etiquetas["surveillance"] ? ` · ${x.etiquetas["surveillance"]}` : ""}`,
+    estado: x.etiquetas["operator"] ? `opera ${x.etiquetas["operator"]}` : "sin operador registrado",
+    lat: x.lat,
+    lng: x.lng,
+    clase: "osm" as const,
+  }));
 }
 
 // ---------- Siniestros de los últimos 30 días (SIMUR, Centro de Gestión de Tránsito) ----------

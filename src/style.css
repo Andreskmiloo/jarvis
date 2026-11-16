@@ -353,3 +353,6 @@ input[type="checkbox"], input[type="range"] { accent-color: var(--verde); }
 .visor__barra { margin-bottom: 6px; }
 .visor__video iframe, .visor__video video, .visor__video img { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: var(--radio); background: #000; object-fit: cover; }
 @media (max-width: 720px) { .visor { right: 16px; left: 16px; width: auto; bottom: auto; top: 56px; } }
+
+.subcapas { padding-left: 22px; border-left: 1px dashed var(--borde); margin: 2px 0 6px 6px; }
+.subcapas .capa { padding: 3px 0; font-size: 12.5px; }

@@ -1,10 +1,13 @@
 // Sección "Mis cámaras" de la pestaña Vivo y visor flotante.
 import type { GeoJSONSource, Map as Mapa } from "maplibre-gl";
 import { aviso, esc } from "../ui/html";
+import { pines } from "../mapa/pines";
 import { analizarEnlace, guardarCamaras, leerCamaras, reproducir, type CamaraPropia } from "./propias";
 
 export interface UICamaras {
   abrir(id: string): void;
+  /** Abre en el visor cualquier reproductor externo (webcam pública, Waze…). */
+  abrirExterna(titulo: string, url: string): void;
   /** El siguiente toque en el mapa ubica la cámara pendiente; devuelve true si lo consumió. */
   tocar(lat: number, lng: number): boolean;
 }
@@ -33,6 +36,7 @@ export function iniciarCamaras(mapa: Mapa, cont: HTMLElement, registrarCapa: (id
 
   function volcar() {
     (mapa.getSource("camaras-propias") as GeoJSONSource | undefined)?.setData(geo());
+    pines()?.poner("camaras-propias", geo(), { color: "#00e5ff", escala: 1.1 });
     pintar();
   }
 
@@ -96,12 +100,22 @@ export function iniciarCamaras(mapa: Mapa, cont: HTMLElement, registrarCapa: (id
     );
   }
 
+  function abrirExterna(titulo: string, url: string) {
+    detener();
+    visor.querySelector("#visor-titulo")!.textContent = titulo;
+    visor.hidden = false;
+    detener = reproducir(visor.querySelector<HTMLElement>("#visor-video")!, { id: "externa", nombre: titulo, url, tipo: "pagina", lat: 0, lng: 0 });
+  }
+
   if (mapa.loaded()) crearCapa();
   else mapa.once("load", crearCapa);
   pintar();
 
+  setTimeout(() => pines()?.poner("camaras-propias", geo(), { color: "#00e5ff", escala: 1.1 }), 0);
+
   return {
     abrir,
+    abrirExterna,
     tocar(lat, lng) {
       if (!pendiente) return false;
       const c = { ...pendiente, lat, lng };

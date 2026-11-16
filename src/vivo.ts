@@ -3,10 +3,13 @@ import type { GeoJSONSource, Map as Mapa } from "maplibre-gl";
 import { Calor, VELOCIDADES } from "./calor/calor";
 import { cargarLocalidades } from "./calor/cupulas";
 import { cargarMalla, serieSiniestros, type Serie } from "./calor/series";
-import { camaras, fechaLocal, hace, radar, semaforos, siniestrosRecientes, sismos, type Camara, type EstadoSemaforos, type Siniestro, type Sismo } from "./fuentes/envivo";
+import { camaras, camarasOSM, CLASES_CAMARA, type ClaseCamara, fechaLocal, hace, radar, semaforos, siniestrosRecientes, sismos, type Camara, type EstadoSemaforos, type Siniestro, type Sismo } from "./fuentes/envivo";
 import { animar } from "./ui/anim";
 import { aviso, esc } from "./ui/html";
 import { distancia } from "./zona/resumen";
+import { pines } from "./mapa/pines";
+import { CapaAviones } from "./mapa/aviones";
+import { aviones, URL_PUENTE, type Avion } from "./fuentes/aviones";
 
 type Modo = "siniestros" | "pm2_5" | "precipitation" | "radar";
 const MODOS: { id: Modo; nombre: string }[] = [
@@ -21,14 +24,21 @@ export interface Vivo {
   cercaDe(lat: number, lng: number, radio: number): { fallas: number; camaras: Camara[] };
 }
 
-export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: string) => void): Vivo {
+export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: string) => void, abrirWaze: (lat: number, lng: number) => void): Vivo {
   let sem: EstadoSemaforos | null = null;
   let cams: Camara[] = [];
   let sis: Sismo[] = [];
   let sin: Siniestro[] = [];
+  let avs: Avion[] = [];
+  let errorAv = "";
+  let horaAv = 0;
+  let horaOpenSky = 0;
+  let capaAv: CapaAviones | null = null;
   let actualizado = 0;
   let errorSem = "";
-  const visibles = { fallas: true, camaras: false, sismos: false };
+  const visibles = { fallas: true, camaras: true, sismos: false, aviones: true };
+  // Clases de cámara visibles: los videodetectores (1.784) arrancan apagados para no saturar.
+  const clasesVisibles = new Set<ClaseCamara>(["webcam", "transito", "foto", "osm"]);
   let modo: Modo | null = null;
   let notaModo = "";
   let cargandoModo = false;
@@ -55,7 +65,7 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
         layout: { visibility: "none" },
         paint: {
           "circle-radius": 4.5,
-          "circle-color": ["case", ["get", "opera"], "#00e5ff", "#5f6f66"],
+          "circle-color": ["get", "color"],
           "circle-stroke-width": 1,
           "circle-stroke-color": "#001a0a",
         },
@@ -95,7 +105,9 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
       },
       antes,
     );
-    ["vivo-camaras", "vivo-sismos", "vivo-fallas"].forEach(registrarCapa);
+    capaAv = new CapaAviones(mapa);
+    if (avs.length) capaAv.poner(avs, horaOpenSky); // la primera lectura pudo llegar antes que la capa
+    ["vivo-camaras", "vivo-sismos", "vivo-fallas", "aviones"].forEach(registrarCapa);
     pulsar();
     volcar();
   }
@@ -115,21 +127,42 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
     requestAnimationFrame(paso);
   }
 
+  function camsVisibles(): Camara[] {
+    return visibles.camaras ? cams.filter((c) => clasesVisibles.has(c.clase)) : [];
+  }
+
+  function propsCamara(c: Camara): Record<string, unknown> {
+    return {
+      nombre: c.clase === "webcam" ? `▶ ${c.direccion}` : c.tipo,
+      sub: `${c.clase === "webcam" ? "Toca para ver en vivo" : c.direccion} · ${c.estado}${c.detalle ? ` · ${c.detalle}` : ""}${c.video ? "" : " · sin video público"}`,
+      color: CLASES_CAMARA[c.clase].color,
+      ...(c.video ? { video: c.video, titulo: c.direccion } : {}),
+    };
+  }
+
   function volcar() {
     if (!mapa.getSource("vivo-fallas")) return;
     (mapa.getSource("vivo-fallas") as GeoJSONSource).setData(
       fc((sem?.fallas ?? []).map((f) => punto(f.lng, f.lat, { nombre: `Semáforo ${f.estado.toLowerCase()}`, sub: `${f.direccion} · ${f.localidad}${f.tiempo && f.tiempo !== "0:00:00" ? ` · lleva ${f.tiempo}` : ""}` }))),
     );
     (mapa.getSource("vivo-camaras") as GeoJSONSource).setData(
-      fc(cams.map((c) => punto(c.lng, c.lat, { nombre: c.tipo, sub: `${c.direccion} · ${c.estado}${c.detalle ? ` · ${c.detalle}` : ""} · sin video público`, opera: /OPERA|ACTIV/i.test(c.estado) }))),
+      fc(camsVisibles().map((c) => punto(c.lng, c.lat, propsCamara(c)))),
     );
     (mapa.getSource("vivo-sismos") as GeoJSONSource).setData(
       fc(sis.map((s) => punto(s.lng, s.lat, { nombre: `Sismo M${s.magnitud.toFixed(1)}`, sub: `${s.lugar} · ${hace(s.fecha)} · ${Math.round(s.profundidad)} km de profundidad`, mag: s.magnitud }))),
     );
+    // Pines 3D: un alfiler por semáforo en falla, cámara y sismo visibles.
+    const pp = pines();
+    if (pp) {
+      pp.poner("fallas", visibles.fallas ? fc((sem?.fallas ?? []).map((f) => punto(f.lng, f.lat, { nombre: `Semáforo ${f.estado.toLowerCase()}`, sub: `${f.direccion} · ${f.localidad}` }))) : fc([]), { color: "#ff2a4f", escala: 1.15 });
+      pp.poner("camaras", fc(camsVisibles().map((c) => punto(c.lng, c.lat, propsCamara(c)))), { color: (p) => String(p.color), escala: 0.9 });
+      pp.poner("sismos", visibles.sismos ? fc(sis.map((x) => punto(x.lng, x.lat, { nombre: `Sismo M${x.magnitud.toFixed(1)}`, sub: x.lugar }))) : fc([]), { color: "#ffaa00" });
+    }
     mapa.setLayoutProperty("vivo-fallas", "visibility", visibles.fallas ? "visible" : "none");
     mapa.setLayoutProperty("vivo-fallas-pulso", "visibility", visibles.fallas ? "visible" : "none");
     mapa.setLayoutProperty("vivo-camaras", "visibility", visibles.camaras ? "visible" : "none");
     mapa.setLayoutProperty("vivo-sismos", "visibility", visibles.sismos ? "visible" : "none");
+    capaAv?.visible(visibles.aviones);
   }
 
   // ---------- Datos ----------
@@ -145,9 +178,31 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
     pintar(animado);
   }
 
+  async function refrescarAviones() {
+    try {
+      const r = await aviones();
+      avs = r.lista;
+      horaAv = Date.now();
+      errorAv = "";
+      horaOpenSky = r.hora;
+      capaAv?.poner(r.lista, r.hora);
+    } catch (e) {
+      errorAv = URL_PUENTE ? (e instanceof Error ? e.message : String(e)) : "falta el puente";
+    }
+    pintar();
+  }
+
   async function cargarFijos() {
     const [c, s, a] = await Promise.allSettled([camaras(), sismos(), siniestrosRecientes()]);
     if (c.status === "fulfilled") cams = c.value;
+    // OpenStreetMap tarda más: se suma cuando llegue.
+    camarasOSM()
+      .then((osm) => {
+        cams = [...cams, ...osm];
+        volcar();
+        pintar();
+      })
+      .catch(() => {});
     if (s.status === "fulfilled") sis = s.value;
     if (a.status === "fulfilled") sin = a.value;
     volcar();
@@ -217,10 +272,18 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
       <div class="tarjeta"><b data-contar="${cams.length}">${cams.length || "—"}</b><span>cámaras ubicadas</span></div>
       <div class="tarjeta"><b data-contar="${sin.length}">${sin.length || "—"}</b><span>siniestros en 30 días</span></div>
       <div class="tarjeta"><b data-contar="${sis.length}">${sis.length}</b><span>sismos 30 d · 400 km</span></div>
+      <div class="tarjeta"><b data-contar="${avs.filter((x) => !x.enTierra).length}">${errorAv ? "—" : avs.filter((x) => !x.enTierra).length}</b><span>aviones volando ahora</span></div>
     </div>`;
     if (errorSem) h += `<p class="errores">Semáforos: ${esc(errorSem)}</p>`;
     h += `<label class="capa"><input type="checkbox" data-ver="fallas" ${visibles.fallas ? "checked" : ""}/><i style="background:#ff2a4f"></i>Semáforos en falla<small>Sec. Movilidad · 60 s</small></label>
-      <label class="capa"><input type="checkbox" data-ver="camaras" ${visibles.camaras ? "checked" : ""}/><i style="background:#00e5ff"></i>Cámaras de tráfico y fotodetección<small>ubicación</small></label>
+      <label class="capa"><input type="checkbox" data-ver="camaras" ${visibles.camaras ? "checked" : ""}/><i style="background:#00e5ff"></i>Cámaras<small>${cams.length} ubicadas</small></label>
+      <div class="subcapas">${(Object.keys(CLASES_CAMARA) as ClaseCamara[])
+        .map((k) => {
+          const n = cams.filter((c) => c.clase === k).length;
+          return `<label class="capa"><input type="checkbox" data-clase="${k}" ${clasesVisibles.has(k) ? "checked" : ""} ${visibles.camaras ? "" : "disabled"}/><i style="background:${CLASES_CAMARA[k].color}"></i>${CLASES_CAMARA[k].nombre}<small>${n || "—"}</small></label>`;
+        })
+        .join("")}</div>
+      <label class="capa"><input type="checkbox" data-ver="aviones" ${visibles.aviones ? "checked" : ""}/><i style="background:#ffffff"></i>Aviones en vivo (ADS-B)<small>${horaAv ? `OpenSky · ${esc(hace(horaAv))}` : "OpenSky"}</small></label>
       <label class="capa"><input type="checkbox" data-ver="sismos" ${visibles.sismos ? "checked" : ""}/><i style="background:#ffaa00"></i>Sismos recientes<small>USGS</small></label>`;
     if (fallas.length) {
       h += `<ul class="lista">${fallas
@@ -241,20 +304,47 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
         <div class="rampa"><span>menos</span><i></i><span>más</span></div>
         <p class="nota">${esc(notaModo)}</p>`;
     }
+    if (errorAv)
+      h += `<p class="nota">Aviones: ${
+        URL_PUENTE
+          ? `sin respuesta (${esc(errorAv)}).`
+          : "OpenSky no deja leer sus datos desde otras páginas. Activa el puente gratis de <code>workers/aviones-proxy.js</code> (instrucciones en el README) y la capa se enciende sola."
+      }</p>`;
+    else if (avs.length) {
+      h += `<h3>Aviones ahora</h3><ul class="lista">${[...avs]
+        .sort((a, b) => Number(a.enTierra) - Number(b.enTierra) || b.altitud - a.altitud)
+        .slice(0, 10)
+        .map((x, i) => `<li><div class="fila"><button class="enlace" data-avion="${i}">✈ ${esc(x.vuelo)}</button><span class="sub">${x.enTierra ? "en tierra" : `${Math.round(x.altitud).toLocaleString("es-CO")} m · ${Math.round(x.velocidad * 3.6)} km/h`}</span></div></li>`)
+        .join("")}</ul>`;
+    }
     if (sin.length) {
       h += `<h3>Últimos siniestros reportados</h3><ul class="lista">${sin
         .slice(0, 8)
         .map((x, i) => `<li><div class="fila"><button class="enlace" data-sin="${i}">${esc(x.direccion)}</button><span class="etiqueta ${/MUERT|HERID/i.test(x.gravedad) ? "no" : ""}">${esc(x.gravedad.toLowerCase())}</span></div><div class="sub">${esc(fechaLocal(x.fecha))} · ${String(x.hora).padStart(2, "0")}:00 · ${esc(x.clase.toLowerCase())} · ${esc(x.localidad)}</div></li>`)
         .join("")}</ul>`;
     }
-    h += `<h3>Sobre las cámaras</h3><p class="nota">Bogotá no publica el video de sus cámaras: el mapa muestra dónde están y si operan. Para ver una calle usa Street View o Mapillary desde la ficha de zona.</p>`;
+    h += `<h3>Sobre las cámaras</h3><p class="nota">Las cámaras del Distrito (tráfico, fotodetección, videodetectores, C4) no publican video: el mapa muestra dónde están. Las <b style="color:${CLASES_CAMARA.webcam.color}">webcams públicas</b> sí se ven en vivo al tocarlas. Tráfico en vivo: botón Waze abajo.</p>
+      <div class="acciones"><button class="boton" data-waze>Tráfico en vivo (Waze) aquí</button></div>`;
     cont.innerHTML = h;
     if (animado) animar(cont);
 
+    cont.querySelector("[data-waze]")?.addEventListener("click", () => {
+      const c = mapa.getCenter();
+      abrirWaze(c.lat, c.lng);
+    });
     cont.querySelector("[data-refrescar]")?.addEventListener("click", () => refrescarSemaforos(true));
     cont.querySelectorAll<HTMLInputElement>("[data-ver]").forEach((i) =>
       i.addEventListener("change", () => {
         visibles[i.dataset.ver as keyof typeof visibles] = i.checked;
+        pintar();
+        volcar();
+      }),
+    );
+    cont.querySelectorAll<HTMLInputElement>("[data-clase]").forEach((i) =>
+      i.addEventListener("change", () => {
+        const k = i.dataset.clase as ClaseCamara;
+        if (i.checked) clasesVisibles.add(k);
+        else clasesVisibles.delete(k);
         volcar();
       }),
     );
@@ -262,6 +352,13 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
       b.addEventListener("click", () => {
         const f = fallas[Number(b.dataset.falla)];
         mapa.flyTo({ center: [f.lng, f.lat], zoom: 16, duration: 900 });
+      }),
+    );
+    const avOrden = [...avs].sort((a, b) => Number(a.enTierra) - Number(b.enTierra) || b.altitud - a.altitud);
+    cont.querySelectorAll<HTMLButtonElement>("[data-avion]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const x = avOrden[Number(b.dataset.avion)];
+        mapa.flyTo({ center: [x.lng, x.lat], zoom: 11.8, pitch: 55, duration: 1800 });
       }),
     );
     cont.querySelectorAll<HTMLButtonElement>("[data-sin]").forEach((b) =>
@@ -304,6 +401,9 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
   refrescarSemaforos(true);
   cargarFijos();
   setInterval(() => !document.hidden && refrescarSemaforos(), REFRESCO_MS);
+  refrescarAviones();
+  // OpenSky actualiza cada ~10 s; el puente cachea 10 s. Entre lecturas la capa interpola.
+  setInterval(() => !document.hidden && visibles.aviones && refrescarAviones(), 15_000);
 
   return {
     cercaDe(lat, lng, radio) {

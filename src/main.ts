@@ -15,6 +15,7 @@ import { iniciarVivo } from "./vivo";
 import { iniciarCamaras } from "./camaras/ui";
 import { borrarCasa, guardarCasa, leerCasa, textoDistancia, type Casa } from "./lugares/casa";
 import { BASES, VistaSatelite, type Base } from "./mapa/satelite";
+import { iniciarPines } from "./mapa/pines";
 import { CLAVE_WINDY, enlacesEnVivo, webcamsCerca } from "./fuentes/webcams";
 import { Lugares, type MiLugar } from "./lugares/store";
 import { aviso, descargar, esc, metros } from "./ui/html";
@@ -95,6 +96,8 @@ document.getElementById("boton-orbita")!.addEventListener("click", () => {
 mapa.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
 mapa.addControl(new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: false }), "top-right");
 
+const pinesMapa = iniciarPines(mapa);
+if (import.meta.env.DEV) (window as unknown as { __mapa: unknown }).__mapa = mapa; // depuración local
 const elMarcador = Object.assign(document.createElement("div"), { className: "mira" });
 const marcador = new maplibregl.Marker({ element: elMarcador });
 const capasInteractivas: string[] = [];
@@ -129,7 +132,8 @@ mapa.on("load", () => {
     },
     "mis-lugares",
   );
-  capasInteractivas.push("mis-lugares", "intereses");
+  capasInteractivas.push("mis-lugares", "intereses", "pines-3d");
+  pinesLugares();
   for (const id of ["mis-lugares", "intereses"]) {
     mapa.on("mouseenter", id, () => (mapa.getCanvas().style.cursor = "pointer"));
     mapa.on("mouseleave", id, () => (mapa.getCanvas().style.cursor = ""));
@@ -142,6 +146,7 @@ mapa.on("load", () => {
 mapa.on("click", (e: MapMouseEvent) => {
   const f = mapa.queryRenderedFeatures(e.point, { layers: capasInteractivas.filter((l) => mapa.getLayer(l)) })[0];
   if (f?.properties?.camara && !modoAgregar && !modoCasa) return camarasUI.abrir(String(f.properties.camara));
+  if (f?.properties?.video && !modoAgregar && !modoCasa) return camarasUI.abrirExterna(String(f.properties.titulo ?? "Webcam en vivo"), String(f.properties.video));
   if (f && !modoAgregar && !modoCasa) return popupDe(f, e.lngLat);
   const { lat, lng } = e.lngLat;
   if (camarasUI.tocar(lat, lng)) return;
@@ -210,11 +215,14 @@ const registrar = (id: string) => {
   mapa.on("mouseleave", id, () => (mapa.getCanvas().style.cursor = ""));
 };
 const camarasUI = iniciarCamaras(mapa, document.getElementById("vivo-camaras")!, registrar);
+function abrirWaze(lat: number, lng: number) {
+  camarasUI.abrirExterna("Tráfico en vivo · Waze", `https://embed.waze.com/iframe?zoom=15&lat=${lat.toFixed(5)}&lon=${lng.toFixed(5)}&ct=livemap&pin=1`);
+}
 const vivo = iniciarVivo(mapa, document.getElementById("vivo-datos")!, (id) => {
   capasInteractivas.push(id);
   mapa.on("mouseenter", id, () => (mapa.getCanvas().style.cursor = "pointer"));
   mapa.on("mouseleave", id, () => (mapa.getCanvas().style.cursor = ""));
-});
+}, abrirWaze);
 
 // ---------- Menús flotantes ----------
 function alternarMenu(menu: HTMLElement, boton: HTMLElement) {
@@ -362,6 +370,8 @@ async function leerZona(lat: number, lng: number) {
     animar(tabs.zona);
     if (CLAVE_WINDY) pintarWebcams(lat, lng, controlZona.signal);
     tabs.zona.querySelector("[data-guardar]")?.addEventListener("click", () => guardarPunto(lat, lng));
+    tabs.zona.querySelector("[data-waze-zona]")?.addEventListener("click", () => abrirWaze(lat, lng));
+    tabs.zona.querySelectorAll<HTMLButtonElement>("[data-webcam]").forEach((b) => b.addEventListener("click", () => camarasUI.abrirExterna(b.dataset.titulo ?? "Webcam", b.dataset.webcam!)));
   } catch (e) {
     if (!controlZona.signal.aborted) tabs.zona.innerHTML = `<p class="errores">No pude leer la zona: ${esc(e)}</p>`;
   }
@@ -418,6 +428,12 @@ function htmlZona(r: Resumen): string {
   }
 
   const ll = `${r.lat},${r.lng}`;
+  const enVivoCerca = vivo.cercaDe(r.lat, r.lng, 3000).camaras.filter((c) => c.video);
+  partes.push(`<h3>Tráfico ahora</h3><div class="acciones"><button class="boton" data-waze-zona>Ver Waze en vivo aquí</button></div>`);
+  if (enVivoCerca.length)
+    partes.push(`<h3>Webcams en vivo a menos de 3 km</h3><div class="acciones">${enVivoCerca
+      .map((c) => `<button class="boton peq" data-webcam="${esc(c.video!)}" data-titulo="${esc(c.direccion)}">▶ ${esc(c.direccion)} · ${metros(Math.round(distancia(r.lat, r.lng, c.lat, c.lng)))}</button>`)
+      .join("")}</div>`);
   partes.push(`<h3>Cámaras en vivo</h3><div id="webcams">${
     CLAVE_WINDY ? `<p class="cargando">Buscando webcams públicas</p>` : ""
   }</div><div class="acciones">${enlacesEnVivo(r.lat, r.lng)
@@ -466,7 +482,8 @@ function pintarCapas() {
   const grupos = new Map<string, CapaPOI[]>();
   for (const c of CAPAS_POI) grupos.set(c.grupo, [...(grupos.get(c.grupo) ?? []), c]);
   const z = mapa.getZoom();
-  let h = `<p class="nota">Datos oficiales en vivo del servidor de Catastro Bogotá / IDECA.</p>`;
+  let h = `<label class="capa"><input type="checkbox" id="pines-3d" ${pinesMapa.activo ? "checked" : ""}/>Pines 3D en cada punto<small>desde zoom 11.5</small></label>
+  <p class="nota">Datos oficiales en vivo del servidor de Catastro Bogotá / IDECA.</p>`;
   for (const [g, cs] of grupos) {
     h += `<h3>${esc(g)}</h3>`;
     for (const c of cs) {
@@ -480,6 +497,7 @@ function pintarCapas() {
     h += `<label class="capa"><input type="checkbox" data-raster="${c.id}" ${activasRaster.has(c.id) ? "checked" : ""}/>${esc(c.nombre)}</label>`;
   }
   tabs.capas.innerHTML = h;
+  tabs.capas.querySelector<HTMLInputElement>("#pines-3d")?.addEventListener("change", (e) => pinesMapa.alternar((e.target as HTMLInputElement).checked));
   tabs.capas.querySelectorAll<HTMLInputElement>("[data-poi]").forEach((i) => i.addEventListener("change", () => alternarPOI(i.dataset.poi!, i.checked)));
   tabs.capas.querySelectorAll<HTMLInputElement>("[data-raster]").forEach((i) => i.addEventListener("change", () => alternarRaster(i.dataset.raster!, i.checked)));
 }
@@ -516,6 +534,7 @@ function alternarPOI(id: string, on: boolean) {
     cargarPOI(c);
   } else {
     activasPOI.delete(id);
+    pinesMapa.quitar(id);
     for (const s of ["area", "linea", "punto"]) if (mapa.getLayer(`${id}-${s}`)) mapa.setLayoutProperty(`${id}-${s}`, "visibility", "none");
   }
   pintarCapas();
@@ -532,6 +551,7 @@ async function cargarPOI(c: CapaPOI) {
     const fc = await geojsonCaja(c.ruta, [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], ctl.signal);
     fc.features.forEach((f) => (f.properties = { ...f.properties, __capa: c.id }));
     (mapa.getSource(c.id) as GeoJSONSource | undefined)?.setData(fc);
+    pinesMapa.poner(c.id, fc, { color: c.color });
   } catch (e) {
     if (!ctl.signal.aborted) aviso(`${c.nombre}: sin respuesta del servidor`);
   }
@@ -673,6 +693,7 @@ function pintarIntereses() {
 
 function actualizarIntereses() {
   (mapa.getSource("intereses") as GeoJSONSource | undefined)?.setData(geoIntereses());
+  pinesMapa.poner("intereses", geoIntereses(), { color: (p) => (p.estado === "visitado" ? "#1e8449" : p.estado === "pendiente" ? "#f39c12" : "#b06cff") });
   pintarIntereses();
 }
 
@@ -708,6 +729,10 @@ async function elegirGusto(id: string) {
 }
 
 // ---------- Mis lugares ----------
+function pinesLugares() {
+  pinesMapa.poner("mis-lugares", geoLugares(), { color: (p) => (p.visitado ? "#2ecc71" : "#f39c12"), escala: 1.2 });
+}
+
 function geoLugares(): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
@@ -809,6 +834,7 @@ function pintarLugares() {
 
 lugares.alCambiar(() => {
   (mapa.getSource("mis-lugares") as GeoJSONSource | undefined)?.setData(geoLugares());
+  pinesLugares();
   pintarLugares();
   if (gustoActivo) actualizarIntereses();
 });
