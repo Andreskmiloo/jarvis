@@ -24,7 +24,7 @@ decir con claridad dónde comprar. Responde siempre en español.
    Falabella, Amazon, AliExpress, Mercado Libre (si hay `ML_ACCESS_TOKEN`) y la TRM del día.
    Descarta resultados que no sean el producto pedido (accesorios, repuestos, otros modelos).
 
-3. **Búsqueda web** para cada tienda `acceso: web` o `cuenta` de las categorías elegidas. Lanza las
+3. **Búsqueda web** (sigue la sección `como_buscar` de `ofertas/tiendas.yaml` para saber qué vía usar en cada fuente) para cada tienda `acceso: web` o `cuenta` de las categorías elegidas. Lanza las
    búsquedas en paralelo (varias llamadas en el mismo turno). Patrones:
    - `site:<dominio> <producto> precio`
    - Mercado Libre sin token: `site:mercadolibre.com.co <producto>` y `site:articulo.mercadolibre.com.co <producto>`

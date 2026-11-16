@@ -136,9 +136,36 @@ cupones_y_cashback:
   - { nombre: Grupos Telegram de ofertas Colombia (referencia), dominio: "", acceso: web }
   - { nombre: Promociones bancarias, dominio: "", acceso: web, nota: "Bancolombia, Davivienda, BBVA, Nu, Lulo, RappiCard, Falabella CMR (precio CMR), Banco de Bogotá: buscar '<tienda> descuento <banco> noviembre'" }
   - { nombre: Cupones AliExpress (códigos de tienda y de plataforma), dominio: aliexpress.com, acceso: web }
-  - { nombre: Eventos: Hiperofertas Alkosto, Black Friday, Cyber Lunes, Día sin IVA, 11.11, Hot Sale, dominio: "", acceso: web, nota: "Indicar si conviene esperar al próximo evento" }
+  - { nombre: "Eventos (Hiperofertas Alkosto, Black Friday, Cyber Lunes, Día sin IVA, 11.11, Hot Sale)", dominio: "", acceso: web, nota: "Indicar si conviene esperar al próximo evento" }
 
 historial_precios:
   - { nombre: camelcamelcamel (Amazon), dominio: camelcamelcamel.com, acceso: web }
   - { nombre: Keepa (Amazon), dominio: keepa.com, acceso: web }
   - { nombre: Historial propio, dominio: ofertas/historial.json, acceso: api }
+
+# ---------------------------------------------------------------------------
+# CÓMO BUSCAR (probado el 16-nov-2026 + revisión de proyectos en GitHub)
+# El agente elige la vía más rápida y confiable para cada fuente.
+como_buscar:
+  api_directa:   # node ofertas/buscar.js — segundos, precios exactos
+    - "Tiendas VTEX: Nike CO, Arturo Calle, Studio F, Vélez, Offcorss, Olímpica, Jumbo, Pepe Ganga, Panamericana"
+    - "TRM oficial: datos.gov.co (Superfinanciera)"
+    - "Mercado Libre: API oficial solo con ML_ACCESS_TOKEN (sin token responde 403)"
+  navegador:     # Playwright headless, incluido en buscar.js
+    - "Falabella: lee __NEXT_DATA__ del listado (precio evento y normal, vendedor, calificación)"
+    - "Amazon y AliExpress: tarjetas del listado (AliExpress filtra repuestos: descártalos)"
+    - "Fichas de producto (Falabella, Ktronix, Jumbo, Pepe Ganga): abre la URL para confirmar specs (Ah, Wh, W, km/h); Ktronix muestra precio en la ficha aunque bloquea el buscador; su foto está en cdn.dam.ktronix.com"
+  busqueda_web:  # WebSearch con site: + abrir el resultado
+    - "Éxito: site:exito.com <producto> (las publicaciones '-mp' son de vendedores externos)"
+    - "Mercado Libre sin token: tiendas oficiales mercadolibre.com.co/tienda/<marca> y site:articulo.mercadolibre.com.co"
+    - "TuCarro (vehículos): site:articulo.tucarro.com.co \"<marca modelo>\" Bogotá precio (técnica de dablon/car-listings-scraper); abrir cada aviso"
+    - "Alkosto/Ktronix: site:alkosto.com o site:ktronix.com <producto>; abrir la ficha"
+    - "Shein, Temu, Farfetch, eBay: site: + cupones; no intentes scraping (anti-bot fuerte, los scrapers de GitHub usan APIs de pago)"
+  no_automatizable:
+    - "Facebook Marketplace: bloquea el acceso automático. Para vehículos usa TuCarro; para lo demás, búsqueda web y marcar 'verificar manualmente'"
+  referencia_github:  # proyectos revisados, por si se quiere ampliar
+    - "Cybrarist/Discount-Bandit (762★): rastreador de precios autoalojado (Amazon, AliExpress, eBay)"
+    - "dgtlmoon/changedetection.io (35k★): vigila cambios de precio en cualquier página; útil si se monta un servidor propio"
+    - "sudheer-ranga/aliexpress-product-scraper (331★): detalle de producto AliExpress en JSON"
+    - "dablon/car-listings-scraper: vehículos en TuCarro/Mercado Libre Colombia vía site: + abrir aviso"
+    - "Sconstante/PriceHive: comparador de tecnología en 5 tiendas colombianas con Playwright (mismo enfoque que buscar.js)"
