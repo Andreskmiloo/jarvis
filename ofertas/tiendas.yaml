@@ -1,0 +1,144 @@
+# Catálogo de tiendas por categoría para el agente cazador-ofertas.
+# acceso:
+#   api        -> la consulta ofertas/buscar.js directamente (rápido y exacto)
+#   navegador  -> la consulta ofertas/buscar.js con navegador headless
+#   web        -> el agente la busca con WebSearch/WebFetch (site:dominio "producto")
+#   cuenta     -> exige sesión/app; resultados vía búsqueda web, marcar "verificar manualmente"
+# confianza: alta | media | baja  (reputación, garantía y devoluciones en Colombia)
+# Para agregar una tienda: copia una línea y cambia nombre/dominio.
+
+siempre:  # se buscan para cualquier producto
+  - { nombre: Mercado Libre, dominio: mercadolibre.com.co, acceso: cuenta, confianza: alta, nota: "API con ML_ACCESS_TOKEN; filtrar 'Tienda oficial' y MercadoLíder" }
+  - { nombre: Falabella, dominio: falabella.com.co, acceso: navegador, confianza: alta }
+  - { nombre: Amazon, dominio: amazon.com, acceso: navegador, confianza: alta, nota: "Envío a Colombia; revisar 'Import fees deposit'" }
+  - { nombre: AliExpress, dominio: aliexpress.com, acceso: navegador, confianza: media, nota: "Preferir 'Choice', tiendas oficiales, >4.7★ y >1000 vendidos" }
+  - { nombre: Éxito, dominio: exito.com, acceso: web, confianza: alta }
+  - { nombre: Alkosto, dominio: alkosto.com, acceso: web, confianza: alta }
+
+tecnologia:
+  - { nombre: Ktronix, dominio: ktronix.com, acceso: web, confianza: alta }
+  - { nombre: Alkomprar, dominio: alkomprar.com, acceso: web, confianza: alta }
+  - { nombre: Olímpica, dominio: olimpica.com, acceso: api, confianza: alta }
+  - { nombre: Jumbo, dominio: jumbocolombia.com, acceso: api, confianza: alta }
+  - { nombre: Panamericana, dominio: panamericana.com.co, acceso: api, confianza: alta }
+  - { nombre: iShop, dominio: ishop.co, acceso: web, confianza: alta }
+  - { nombre: Mac Center, dominio: mac-center.com, acceso: web, confianza: alta }
+  - { nombre: Samsung Colombia, dominio: samsung.com/co, acceso: web, confianza: alta }
+  - { nombre: Xiaomi Colombia, dominio: mi.com/co, acceso: web, confianza: alta }
+  - { nombre: Tauret, dominio: tauretcomputadores.com, acceso: web, confianza: media }
+  - { nombre: eBay, dominio: ebay.com, acceso: web, confianza: media, nota: "Solo vendedores >98% positivos con envío a CO" }
+  - { nombre: Unilago / San Andresito (referencia), dominio: "", acceso: web, confianza: baja, nota: "Precios de referencia; exigir factura y garantía" }
+
+ropa_y_calzado:
+  - { nombre: Nike Colombia, dominio: nike.com.co, acceso: api, confianza: alta }
+  - { nombre: Adidas Colombia, dominio: adidas.co, acceso: web, confianza: alta }
+  - { nombre: Puma Colombia, dominio: co.puma.com, acceso: web, confianza: alta }
+  - { nombre: Arturo Calle, dominio: arturocalle.com, acceso: api, confianza: alta }
+  - { nombre: Studio F, dominio: studiof.com.co, acceso: api, confianza: alta }
+  - { nombre: Vélez, dominio: velez.com.co, acceso: api, confianza: alta }
+  - { nombre: Offcorss, dominio: offcorss.com, acceso: api, confianza: alta }
+  - { nombre: Koaj, dominio: koaj.co, acceso: web, confianza: alta }
+  - { nombre: Zara, dominio: zara.com/co, acceso: web, confianza: alta }
+  - { nombre: H&M, dominio: hm.com, acceso: web, confianza: alta }
+  - { nombre: Bershka, dominio: bershka.com/co, acceso: web, confianza: alta }
+  - { nombre: Pull&Bear, dominio: pullandbear.com/co, acceso: web, confianza: alta }
+  - { nombre: Stock Center (Colombia), dominio: stockcenter.com.co, acceso: web, confianza: alta, nota: "Outlet de marcas deportivas" }
+  - { nombre: Sportline América, dominio: sportlineamerica.com, acceso: web, confianza: alta }
+  - { nombre: Dafiti, dominio: dafiti.com.co, acceso: web, confianza: alta }
+  - { nombre: Shein, dominio: shein.com.co, acceso: cuenta, confianza: media, nota: "Bloquea bots; buscar cupones primer pedido" }
+  - { nombre: Temu, dominio: temu.com, acceso: cuenta, confianza: media }
+  - { nombre: Farfetch, dominio: farfetch.com, acceso: web, confianza: alta, nota: "Lujo; aranceles altos" }
+  - { nombre: ASOS, dominio: asos.com, acceso: web, confianza: alta }
+  - { nombre: StockX, dominio: stockx.com, acceso: web, confianza: alta, nota: "Sneakers verificados (autenticidad)" }
+  - { nombre: GOAT, dominio: goat.com, acceso: web, confianza: alta }
+  - { nombre: eBay, dominio: ebay.com, acceso: web, confianza: media }
+  - { nombre: Outlets Bogotá (Américas, Factory Nike Hayuelos/Plaza Central), dominio: "", acceso: web, confianza: alta }
+
+deportes:
+  - { nombre: Decathlon, dominio: decathlon.com.co, acceso: web, confianza: alta }
+  - { nombre: Nike Colombia, dominio: nike.com.co, acceso: api, confianza: alta }
+  - { nombre: Adidas Colombia, dominio: adidas.co, acceso: web, confianza: alta }
+  - { nombre: Sportline América, dominio: sportlineamerica.com, acceso: web, confianza: alta }
+  - { nombre: Pepe Ganga, dominio: pepeganga.com, acceso: api, confianza: alta }
+  - { nombre: Jumbo, dominio: jumbocolombia.com, acceso: api, confianza: alta }
+  - { nombre: Spinning Center / Bodytech shop, dominio: "", acceso: web, confianza: media }
+
+movilidad:  # bicicletas, patinetas eléctricas, motos eléctricas
+  - { nombre: Olímpica, dominio: olimpica.com, acceso: api, confianza: alta }
+  - { nombre: Jumbo, dominio: jumbocolombia.com, acceso: api, confianza: alta }
+  - { nombre: Pepe Ganga, dominio: pepeganga.com, acceso: api, confianza: alta }
+  - { nombre: Decathlon, dominio: decathlon.com.co, acceso: web, confianza: alta }
+  - { nombre: Bicicletas Milán, dominio: bicicletasmilan.com, acceso: web, confianza: alta }
+  - { nombre: GW Bicicletas, dominio: gwbicycles.com, acceso: web, confianza: alta }
+  - { nombre: Specialized Colombia, dominio: specialized.com/co, acceso: web, confianza: alta }
+  - { nombre: Trek Colombia, dominio: trekbikes.com/co, acceso: web, confianza: alta }
+  - { nombre: Xiaomi Colombia, dominio: mi.com/co, acceso: web, confianza: alta }
+  - { nombre: Segway Colombia, dominio: segway.com, acceso: web, confianza: alta }
+  - { nombre: Starker, dominio: starker.co, acceso: web, confianza: alta, nota: "Motos y bicis eléctricas" }
+  - { nombre: AUTECO / Minca eléctricas, dominio: auteco.com.co, acceso: web, confianza: alta }
+  - { nombre: Ecomobility / tiendas Bogotá, dominio: "", acceso: web, confianza: media }
+  - { nombre: AliExpress (bicis/patinetas), dominio: aliexpress.com, acceso: navegador, confianza: media, nota: "Ojo peso/volumen: envío y aranceles altos; baterías restringidas" }
+  - { nombre: Facebook Marketplace Bogotá, dominio: facebook.com/marketplace/bogota, acceso: cuenta, confianza: baja, nota: "Usado: ver en persona, pedir factura, revisar que no sea robada (RUNT no aplica a bicis; registro bici Bogotá)" }
+
+vehiculos:  # carros y motos
+  - { nombre: TuCarro, dominio: carros.tucarro.com.co, acceso: cuenta, confianza: alta, nota: "De Mercado Libre; usa el mismo token" }
+  - { nombre: TuMoto (Mercado Libre), dominio: motos.mercadolibre.com.co, acceso: cuenta, confianza: alta }
+  - { nombre: CarroYa, dominio: carroya.com, acceso: web, confianza: alta }
+  - { nombre: Autofact / Revisión historial, dominio: autofact.com.co, acceso: web, confianza: alta, nota: "Historial de un usado por placa" }
+  - { nombre: Kavak, dominio: kavak.com/co, acceso: web, confianza: alta, nota: "Usados certificados con garantía" }
+  - { nombre: Facebook Marketplace Bogotá, dominio: facebook.com/marketplace/bogota/vehicles, acceso: cuenta, confianza: baja }
+  - { nombre: Concesionarios oficiales (Renault, Chevrolet, Kia, Mazda, Toyota, BYD, Yamaha, Honda, AKT, Bajaj), dominio: "", acceso: web, confianza: alta }
+  - { nombre: Revista Motor (precios de referencia), dominio: revistamotor.com.co, acceso: web, confianza: alta, nota: "Tabla de precios de usados" }
+  # Verificación de usados: el agente puede consultar RUNT por placa, SOAT y multas SIMIT con las herramientas api_tm (runt_vehicle_by_plate, simit_account_status).
+
+hogar_y_electro:
+  - { nombre: Homecenter, dominio: homecenter.com.co, acceso: web, confianza: alta }
+  - { nombre: Alkosto, dominio: alkosto.com, acceso: web, confianza: alta }
+  - { nombre: Ikea Colombia, dominio: ikea.com/co, acceso: web, confianza: alta }
+  - { nombre: Tugó, dominio: tugo.co, acceso: web, confianza: alta }
+  - { nombre: Jamar, dominio: muebles-jamar.com, acceso: web, confianza: alta }
+  - { nombre: Easy, dominio: easy.com.co, acceso: web, confianza: alta }
+  - { nombre: Olímpica, dominio: olimpica.com, acceso: api, confianza: alta }
+  - { nombre: Jumbo, dominio: jumbocolombia.com, acceso: api, confianza: alta }
+
+belleza_y_salud:
+  - { nombre: Sephora, dominio: sephora.com.co, acceso: web, confianza: alta }
+  - { nombre: Bella Piel, dominio: bellapiel.com.co, acceso: web, confianza: alta }
+  - { nombre: Farmatodo, dominio: farmatodo.com.co, acceso: web, confianza: alta }
+  - { nombre: Cruz Verde, dominio: cruzverde.com.co, acceso: web, confianza: alta }
+  - { nombre: La Rebaja, dominio: larebajavirtual.com, acceso: web, confianza: alta }
+  - { nombre: Locatel, dominio: locatelcolombia.com, acceso: web, confianza: alta }
+
+mercado:
+  - { nombre: Rappi, dominio: rappi.com.co, acceso: cuenta, confianza: alta }
+  - { nombre: D1, dominio: domicilios.tiendasd1.com, acceso: web, confianza: alta }
+  - { nombre: Ara, dominio: aratiendas.com, acceso: web, confianza: alta }
+  - { nombre: Carulla, dominio: carulla.com, acceso: web, confianza: alta }
+  - { nombre: Makro, dominio: makro.com.co, acceso: web, confianza: alta }
+  - { nombre: Olímpica, dominio: olimpica.com, acceso: api, confianza: alta }
+  - { nombre: Jumbo, dominio: jumbocolombia.com, acceso: api, confianza: alta }
+
+mercados_chinos_confiables:  # buena calidad + compra segura
+  - { nombre: AliExpress Choice / tiendas oficiales de marca, dominio: aliexpress.com, acceso: navegador, confianza: media, nota: "Mejor opción china: protección al comprador, devoluciones Choice" }
+  - { nombre: Tiendas oficiales en AliExpress (Xiaomi, Baseus, Ugreen, Anker, Lenovo, Xiaomi Mijia, Dreame, Roborock), dominio: aliexpress.com, acceso: navegador, confianza: alta }
+  - { nombre: Temu, dominio: temu.com, acceso: cuenta, confianza: media, nota: "Barato, calidad variable; buena política de reembolso" }
+  - { nombre: Shein, dominio: shein.com.co, acceso: cuenta, confianza: media, nota: "Ropa; revisar tallas y reseñas con foto" }
+  - { nombre: Banggood, dominio: banggood.com, acceso: web, confianza: media, nota: "Electrónica/herramientas" }
+  - { nombre: Geekbuying, dominio: geekbuying.com, acceso: web, confianza: media }
+  - { nombre: Mercado Libre internacional (CBT), dominio: mercadolibre.com.co, acceso: cuenta, confianza: alta, nota: "Productos chinos con garantía y devolución de Mercado Libre — la forma más segura" }
+  # Evitar: DHgate (réplicas), Wish (calidad/entregas), tiendas sin historial.
+
+cupones_y_cashback:
+  - { nombre: Cuponation Colombia, dominio: cuponation.com.co, acceso: web }
+  - { nombre: Picodi Colombia, dominio: picodi.com/co, acceso: web }
+  - { nombre: Cupones Semana / El Tiempo, dominio: "", acceso: web }
+  - { nombre: Promodescuentos (comunidad, ofertas de usuarios), dominio: promodescuentos.com, acceso: web }
+  - { nombre: Grupos Telegram de ofertas Colombia (referencia), dominio: "", acceso: web }
+  - { nombre: Promociones bancarias, dominio: "", acceso: web, nota: "Bancolombia, Davivienda, BBVA, Nu, Lulo, RappiCard, Falabella CMR (precio CMR), Banco de Bogotá: buscar '<tienda> descuento <banco> noviembre'" }
+  - { nombre: Cupones AliExpress (códigos de tienda y de plataforma), dominio: aliexpress.com, acceso: web }
+  - { nombre: Eventos: Hiperofertas Alkosto, Black Friday, Cyber Lunes, Día sin IVA, 11.11, Hot Sale, dominio: "", acceso: web, nota: "Indicar si conviene esperar al próximo evento" }
+
+historial_precios:
+  - { nombre: camelcamelcamel (Amazon), dominio: camelcamelcamel.com, acceso: web }
+  - { nombre: Keepa (Amazon), dominio: keepa.com, acceso: web }
+  - { nombre: Historial propio, dominio: ofertas/historial.json, acceso: api }

@@ -1,0 +1,7 @@
+# Lista de deseos — la edita /deseos (o tú a mano).
+# nombre: lo que se busca. objetivo_cop: precio al que quieres que te avise. categoria: ver tiendas.yaml
+productos: []
+#  - nombre: "Patineta eléctrica Xiaomi Scooter 4 Lite"
+#    categoria: movilidad
+#    objetivo_cop: 1000000
+#    agregado: 2026-11-16
