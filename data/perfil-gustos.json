@@ -872,17 +872,19 @@
         },
         {
           "id": "mejorar-laptop",
-          "nombre": "Mejorar el portatil",
+          "nombre": "RAM del portatil (y mejoras)",
           "nivel": 4,
           "preferencias": {
             "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "detalle": [
-              "mas RAM",
+              "modulo RAM DDR4 SODIMM de 8 GB a 2666 MHz (para llegar a 16 GB)",
               "base refrigerante"
             ],
             "plazo": "2027",
-            "estado": "pendiente"
+            "estado": "pendiente",
+            "prioridad": "proxima",
+            "plazo_original": "diciembre 2026, con la prima"
           },
           "osm": [
             {
@@ -893,10 +895,13 @@
             "memoria ram",
             "ram ddr4",
             "base refrigerante",
-            "upgrade portatil"
+            "upgrade portatil",
+            "ram ddr4 sodimm 8gb",
+            "crucial",
+            "memoria ram portatil"
           ],
           "lugares_conocidos": [],
-          "notas": ""
+          "notas": "No olvidar la RAM: portatil HP Pavilion con 8 GB en 1 de 2 ranuras. Falta decidir su lugar en el orden de prioridades."
         },
         {
           "id": "tablet-diseno",
