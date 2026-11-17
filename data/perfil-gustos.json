@@ -1357,7 +1357,8 @@
             "plazo": "2027",
             "estado": "pendiente",
             "marca": "Bajaj Pulsar",
-            "prerrequisito": "pase de conduccion A2"
+            "prerrequisito": "pase de conduccion A2",
+            "accesorios": "todos los accesorios"
           },
           "osm": [
             {
@@ -1372,7 +1373,11 @@
             "moto ns 200",
             "bajaj",
             "concesionario de motos",
-            "escuela de conduccion"
+            "escuela de conduccion",
+            "accesorios para moto",
+            "casco",
+            "chaqueta de moto",
+            "guantes de moto"
           ],
           "lugares_conocidos": [],
           "notas": "Antes hablaba de la NS 125 FI; ahora la meta es la NS 200. Falta el pase A2."
@@ -1526,6 +1531,504 @@
           ],
           "lugares_conocidos": [],
           "notas": "Agrupa todo lo del area setup-y-hogar."
+        },
+        {
+          "id": "iphone-ultimo",
+          "nombre": "Ultimo iPhone",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "marca": "Apple",
+            "donde": "iShop, Mac Center"
+          },
+          "osm": [
+            {
+              "shop": "mobile_phone",
+              "brand": "Apple"
+            },
+            {
+              "shop": "electronics",
+              "brand": "Apple"
+            }
+          ],
+          "palabras_clave": [
+            "iphone",
+            "apple store",
+            "iShop",
+            "Mac Center"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "mac-ultimo",
+          "nombre": "Ultimo Mac",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "marca": "Apple",
+            "relacionado_con": [
+              "mejorar-laptop"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "computer",
+              "brand": "Apple"
+            },
+            {
+              "shop": "electronics",
+              "brand": "Apple"
+            }
+          ],
+          "palabras_clave": [
+            "macbook",
+            "mac",
+            "apple",
+            "iShop",
+            "Mac Center"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "apple-watch-ultimo",
+          "nombre": "Ultimo Apple Watch",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "marca": "Apple",
+            "nota": "antes queria el Huawei Watch GT 6 Pro; decidir cual"
+          },
+          "osm": [
+            {
+              "shop": "electronics",
+              "brand": "Apple"
+            },
+            {
+              "shop": "mobile_phone",
+              "brand": "Apple"
+            }
+          ],
+          "palabras_clave": [
+            "apple watch",
+            "reloj inteligente"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "ropa-original",
+          "nombre": "Toda la ropa original, de boxers a medias",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "detalle": "marcas originales: ropa interior, medias, camisetas",
+            "relacionado_con": [
+              "marcas-disenador",
+              "old-money",
+              "streetwear"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "clothes"
+            },
+            {
+              "shop": "boutique"
+            },
+            {
+              "shop": "underwear"
+            }
+          ],
+          "palabras_clave": [
+            "ropa original",
+            "calvin klein",
+            "tommy hilfiger",
+            "hanes",
+            "outlet",
+            "boxers originales"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "gorras",
+          "nombre": "Gorras que me gusten",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "relacionado_con": [
+              "streetwear",
+              "sneakers"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "clothes"
+            },
+            {
+              "shop": "hat"
+            }
+          ],
+          "palabras_clave": [
+            "gorras",
+            "gorras originales",
+            "new era",
+            "snapback"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "mejor-deportista",
+          "nombre": "Ser el mejor deportista posible",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "relacionado_con": [
+              "voley",
+              "futbol",
+              "padel",
+              "tenis",
+              "peso-75"
+            ]
+          },
+          "osm": [
+            {
+              "leisure": "sports_centre"
+            },
+            {
+              "leisure": "fitness_centre"
+            },
+            {
+              "leisure": "pitch"
+            }
+          ],
+          "palabras_clave": [
+            "entrenador",
+            "gimnasio",
+            "club deportivo",
+            "liga de voleibol"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "mejor-en-la-universidad",
+          "nombre": "Ser el mejor en la universidad",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "universidad": "UCompensar",
+            "carrera": "Finanzas y Negocios Internacionales"
+          },
+          "osm": [
+            {
+              "amenity": "university"
+            },
+            {
+              "amenity": "library"
+            }
+          ],
+          "palabras_clave": [
+            "biblioteca",
+            "universidad",
+            "estudio",
+            "tutorias"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "portafolio-solido",
+          "nombre": "Portafolio solido",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "relacionado_con": [
+              "negocio-estable"
+            ]
+          },
+          "osm": [
+            {
+              "office": "coworking"
+            }
+          ],
+          "palabras_clave": [
+            "portafolio",
+            "proyectos",
+            "github pages",
+            "linkedin"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "ingles-b2",
+          "nombre": "Certificarme en ingles B2",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "estudio": "Colombo Americano",
+            "examen": "B2 (por definir cual)"
+          },
+          "osm": [
+            {
+              "amenity": "language_school"
+            },
+            {
+              "amenity": "school",
+              "school:subject": "language"
+            }
+          ],
+          "palabras_clave": [
+            "ingles b2",
+            "examen de ingles",
+            "colombo americano",
+            "cambridge",
+            "toefl",
+            "ielts"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "inversiones-oro-cripto",
+          "nombre": "Inversiones en oro y criptomonedas",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "relacionado_con": [
+              "libertad-financiera",
+              "bolsa-y-cripto"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "jewelry"
+            },
+            {
+              "office": "financial"
+            }
+          ],
+          "palabras_clave": [
+            "oro",
+            "criptomonedas",
+            "casa de cambio",
+            "inversion en oro"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "bolsa-y-cripto",
+          "nombre": "Empezar lo antes posible en la bolsa y la cripto",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "relacionado_con": [
+              "inversiones-oro-cripto"
+            ]
+          },
+          "osm": [
+            {
+              "office": "financial"
+            },
+            {
+              "amenity": "events_venue"
+            }
+          ],
+          "palabras_clave": [
+            "bolsa de valores",
+            "comisionista de bolsa",
+            "curso de inversion",
+            "trading",
+            "meetup cripto"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "uber-con-la-moto",
+          "nombre": "Trabajar en Uber con la moto",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "requisito": "pase A2 y moto propia",
+            "alternativa": "domicilios (Rappi, Uber Eats)"
+          },
+          "osm": [
+            {
+              "shop": "motorcycle"
+            },
+            {
+              "shop": "motorcycle_repair"
+            }
+          ],
+          "palabras_clave": [
+            "uber moto",
+            "mensajero en moto",
+            "domicilios en moto",
+            "SOAT",
+            "tecnomecanica"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Ojo: el transporte de pasajeros en moto no esta autorizado en Colombia; verificar la regulacion antes."
+        }
+      ]
+    },
+    {
+      "area": "metas-3-a-5-anos",
+      "gustos": [
+        {
+          "id": "apartamentos-tipo-airbnb",
+          "nombre": "1 a 3 apartamentos tipo Airbnb",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2029-2031",
+            "estado": "pendiente",
+            "cantidad": "1 a 3",
+            "objetivo": "renta suficiente para libertad financiera",
+            "primer_paso": "comprar un apto y arrendarlo",
+            "relacionado_con": [
+              "libertad-financiera",
+              "bolsa-y-cripto"
+            ]
+          },
+          "osm": [
+            {
+              "office": "estate_agent"
+            },
+            {
+              "shop": "estate_agent"
+            }
+          ],
+          "palabras_clave": [
+            "apartamento",
+            "inmobiliaria",
+            "airbnb",
+            "arriendo",
+            "inversion inmobiliaria",
+            "feria inmobiliaria"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "carro-kia",
+          "nombre": "Carro Kia de la mejor calidad-precio",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2029-2031",
+            "estado": "pendiente",
+            "marca": "Kia",
+            "criterio": "mejor calidad-precio que encuentre"
+          },
+          "osm": [
+            {
+              "shop": "car"
+            },
+            {
+              "shop": "car_repair"
+            }
+          ],
+          "palabras_clave": [
+            "kia",
+            "concesionario kia",
+            "carro usado",
+            "carro nuevo"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "moto-bmw",
+          "nombre": "Moto BMW",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2029-2031",
+            "estado": "pendiente",
+            "marca": "BMW Motorrad",
+            "relacionado_con": [
+              "moto-ns-200"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "motorcycle",
+              "brand": "BMW"
+            },
+            {
+              "shop": "motorcycle"
+            }
+          ],
+          "palabras_clave": [
+            "bmw motorrad",
+            "moto bmw",
+            "concesionario bmw"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "reloj-coleccion",
+          "nombre": "Un buen reloj para empezar mi coleccion",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2029-2031",
+            "estado": "pendiente",
+            "relacionado_con": [
+              "old-money",
+              "marcas-disenador",
+              "apple-watch-ultimo"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "watches"
+            },
+            {
+              "shop": "jewelry"
+            }
+          ],
+          "palabras_clave": [
+            "reloj de lujo",
+            "relojeria",
+            "coleccion de relojes",
+            "seiko",
+            "tissot"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Su mensaje decia 'rejon'; interprete 'reloj'. Confirmar."
         }
       ]
     }
