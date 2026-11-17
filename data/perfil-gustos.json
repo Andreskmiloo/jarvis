@@ -809,6 +809,368 @@
           "notas": "Le gustan 'algunas' discotecas de la 85; faltan nombres, generos de musica y con quien va."
         }
       ]
+    },
+    {
+      "area": "setup-y-hogar",
+      "gustos": [
+        {
+          "id": "cargadores-y-baterias",
+          "nombre": "Cargadores y baterias para el celular",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "prioridad": "urgente"
+          },
+          "osm": [
+            {
+              "shop": "mobile_phone"
+            },
+            {
+              "shop": "electronics"
+            }
+          ],
+          "palabras_clave": [
+            "cargador",
+            "power bank",
+            "bateria portatil"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "luces-habitacion",
+          "nombre": "Luces para la habitacion",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "relacionado_con": [
+              "setup-gamer"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "lighting"
+            },
+            {
+              "shop": "electrical"
+            }
+          ],
+          "palabras_clave": [
+            "luces led",
+            "tira led",
+            "luces rgb",
+            "iluminacion cuarto"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "mejorar-laptop",
+          "nombre": "Mejorar el portatil",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "detalle": [
+              "mas RAM",
+              "base refrigerante"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "computer"
+            }
+          ],
+          "palabras_clave": [
+            "memoria ram",
+            "ram ddr4",
+            "base refrigerante",
+            "upgrade portatil"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "tablet-diseno",
+          "nombre": "Tablet para disenar",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027"
+          },
+          "osm": [
+            {
+              "shop": "electronics"
+            },
+            {
+              "shop": "mobile_phone"
+            }
+          ],
+          "palabras_clave": [
+            "tablet",
+            "ipad",
+            "tablet grafica",
+            "lapiz digital"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "hub-usb",
+          "nombre": "Buen hub",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "relacionado_con": [
+              "mejorar-laptop"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "computer"
+            },
+            {
+              "shop": "electronics"
+            }
+          ],
+          "palabras_clave": [
+            "hub usb-c",
+            "docking station",
+            "adaptador usb-c"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "puff",
+          "nombre": "Puff para sentarse",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027"
+          },
+          "osm": [
+            {
+              "shop": "furniture"
+            },
+            {
+              "shop": "houseware"
+            }
+          ],
+          "palabras_clave": [
+            "puff",
+            "pouf",
+            "sillon pequeno"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "organizador-ropa-y-zapatos",
+          "nombre": "Organizar ropa interior y zapatos",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "restriccion": "habitacion pequena"
+          },
+          "osm": [
+            {
+              "shop": "furniture"
+            },
+            {
+              "shop": "houseware"
+            },
+            {
+              "shop": "doityourself"
+            }
+          ],
+          "palabras_clave": [
+            "organizador",
+            "zapatero",
+            "cajonera",
+            "divisores cajon",
+            "closet pequeno"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "ropa-de-cama",
+          "nombre": "Sabanas, cobijas y almohada",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027"
+          },
+          "osm": [
+            {
+              "shop": "houseware"
+            },
+            {
+              "shop": "bed"
+            },
+            {
+              "shop": "interior_decoration"
+            }
+          ],
+          "palabras_clave": [
+            "sabanas",
+            "cobijas",
+            "almohada",
+            "tendido de cama",
+            "edredon"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "colchon",
+          "nombre": "Colchon",
+          "nivel": 3,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "orden": "despues de la ropa de cama"
+          },
+          "osm": [
+            {
+              "shop": "bed"
+            },
+            {
+              "shop": "furniture"
+            }
+          ],
+          "palabras_clave": [
+            "colchon",
+            "colchones"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "segundo-monitor",
+          "nombre": "Segundo monitor",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "relacionado_con": [
+              "mejorar-laptop",
+              "hub-usb"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "computer"
+            },
+            {
+              "shop": "electronics"
+            }
+          ],
+          "palabras_clave": [
+            "monitor",
+            "monitor 24 pulgadas",
+            "monitor portatil"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "tv-apple-tv-parlantes",
+          "nombre": "TV en la pared con Apple TV y parlantes Apple",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "marca": "Apple",
+            "relacionado_con": [
+              "audio-alta-definicion"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "electronics",
+              "brand": "Apple"
+            },
+            {
+              "shop": "electronics"
+            },
+            {
+              "shop": "hifi"
+            }
+          ],
+          "palabras_clave": [
+            "apple tv",
+            "tv",
+            "soporte tv pared",
+            "homepod",
+            "parlantes apple"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Apple oficial en Bogota: iShop, Mac Center."
+        },
+        {
+          "id": "huawei-watch-gt6-pro",
+          "nombre": "Huawei Watch GT 6 Pro",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "marca": "Huawei"
+          },
+          "osm": [
+            {
+              "shop": "mobile_phone",
+              "brand": "Huawei"
+            },
+            {
+              "shop": "electronics",
+              "brand": "Huawei"
+            }
+          ],
+          "palabras_clave": [
+            "huawei watch gt 6 pro",
+            "huawei",
+            "reloj inteligente"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "zapatos-voley",
+          "nombre": "Zapatos de voley",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "relacionado_con": [
+              "voley"
+            ],
+            "extra": "tambien rodilleras"
+          },
+          "osm": [
+            {
+              "shop": "sports"
+            },
+            {
+              "shop": "shoes"
+            }
+          ],
+          "palabras_clave": [
+            "zapatos de voleibol",
+            "tenis de voley",
+            "rodilleras voleibol",
+            "mizuno",
+            "asics"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        }
+      ]
     }
   ]
 }
