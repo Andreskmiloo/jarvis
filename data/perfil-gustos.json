@@ -818,9 +818,11 @@
           "nombre": "Cargadores y baterias para el celular",
           "nivel": 5,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
-            "prioridad": "urgente"
+            "prioridad": "urgente",
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -843,11 +845,13 @@
           "nombre": "Luces para la habitacion",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "relacionado_con": [
               "setup-gamer"
-            ]
+            ],
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -871,12 +875,14 @@
           "nombre": "Mejorar el portatil",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "detalle": [
               "mas RAM",
               "base refrigerante"
-            ]
+            ],
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -897,8 +903,10 @@
           "nombre": "Tablet para disenar",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
-            "presupuesto": "pago, desde feb 2027"
+            "tipo": "meta",
+            "presupuesto": "pago, desde feb 2027",
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -922,11 +930,13 @@
           "nombre": "Buen hub",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "relacionado_con": [
               "mejorar-laptop"
-            ]
+            ],
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -949,10 +959,12 @@
           "nombre": "Puff o baul-asiento con almacenamiento",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "uso": "sentarse y guardar ropa interior",
-            "division": "boxers de un lado, medias del otro"
+            "division": "boxers de un lado, medias del otro",
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -977,9 +989,11 @@
           "nombre": "Organizar ropa interior y zapatos",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
-            "restriccion": "habitacion pequena"
+            "restriccion": "habitacion pequena",
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -1007,8 +1021,10 @@
           "nombre": "Sabanas, cobijas y almohada",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
-            "presupuesto": "pago, desde feb 2027"
+            "tipo": "meta",
+            "presupuesto": "pago, desde feb 2027",
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -1036,10 +1052,12 @@
           "nombre": "Colchon",
           "nivel": 3,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "orden": "despues de la ropa de cama",
-            "decision_cama": "mantener cama sencilla, de mejor calidad (cuarto angosto)"
+            "decision_cama": "mantener cama sencilla, de mejor calidad (cuarto angosto)",
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -1061,12 +1079,14 @@
           "nombre": "Segundo monitor",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "relacionado_con": [
               "mejorar-laptop",
               "hub-usb"
-            ]
+            ],
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -1089,12 +1109,14 @@
           "nombre": "TV en la pared con Apple TV y parlantes Apple",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "marca": "Apple",
             "relacionado_con": [
               "audio-alta-definicion"
-            ]
+            ],
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -1123,9 +1145,11 @@
           "nombre": "Huawei Watch GT 6 Pro",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
-            "marca": "Huawei"
+            "marca": "Huawei",
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -1150,12 +1174,14 @@
           "nombre": "Zapatos de voley",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "relacionado_con": [
               "voley"
             ],
-            "extra": "tambien rodilleras"
+            "extra": "tambien rodilleras",
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -1180,7 +1206,7 @@
           "nombre": "Escritorio en L (delgado)",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde dic 2026 o ene 2027",
             "ubicacion": "en la esquina, contra las paredes",
             "forma": "en L, brazos angostos (poca profundidad)",
@@ -1188,7 +1214,9 @@
               "segundo-monitor",
               "mejorar-laptop",
               "hub-usb"
-            ]
+            ],
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -1216,13 +1244,15 @@
           "nombre": "Espejo grande de cuerpo entero",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "relacionado_con": [
               "old-money",
               "streetwear"
             ],
-            "ubicacion": "pared o detras de la puerta"
+            "ubicacion": "pared o detras de la puerta",
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
@@ -1249,13 +1279,15 @@
           "nombre": "Cajas transparentes para los tenis",
           "nivel": 4,
           "preferencias": {
-            "tipo": "deseo de compra",
+            "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "relacionado_con": [
               "sneakers",
               "organizador-ropa-y-zapatos"
             ],
-            "cantidad": "una por par"
+            "cantidad": "una por par",
+            "plazo": "2027",
+            "estado": "pendiente"
           },
           "osm": [
             {
