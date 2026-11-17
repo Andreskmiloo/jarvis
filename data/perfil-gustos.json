@@ -1310,6 +1310,224 @@
           "notas": "Por ahora seguira con el perchero abierto."
         }
       ]
+    },
+    {
+      "area": "metas-2027",
+      "gustos": [
+        {
+          "id": "patineta-electrica",
+          "nombre": "Patineta electrica",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "modelo": "Ninebot",
+            "relacionado_con": [
+              "movilidad"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "bicycle"
+            },
+            {
+              "shop": "electronics"
+            },
+            {
+              "shop": "scooter"
+            }
+          ],
+          "palabras_clave": [
+            "patineta electrica",
+            "ninebot",
+            "scooter electrico",
+            "ciclorruta",
+            "punto de carga"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Mapa: tiendas, ciclorrutas y parqueaderos seguros."
+        },
+        {
+          "id": "moto-ns-200",
+          "nombre": "Moto NS 200",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "marca": "Bajaj Pulsar",
+            "prerrequisito": "pase de conduccion A2"
+          },
+          "osm": [
+            {
+              "shop": "motorcycle"
+            },
+            {
+              "shop": "motorcycle_repair"
+            }
+          ],
+          "palabras_clave": [
+            "pulsar ns 200",
+            "moto ns 200",
+            "bajaj",
+            "concesionario de motos",
+            "escuela de conduccion"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Antes hablaba de la NS 125 FI; ahora la meta es la NS 200. Falta el pase A2."
+        },
+        {
+          "id": "peso-75",
+          "nombre": "Pesar unos 75 (kg)",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "meta_kg": "75",
+            "relacionado_con": [
+              "voley",
+              "ufc-mma",
+              "boxeo"
+            ]
+          },
+          "osm": [
+            {
+              "leisure": "fitness_centre"
+            },
+            {
+              "leisure": "sports_centre"
+            },
+            {
+              "amenity": "gym"
+            }
+          ],
+          "palabras_clave": [
+            "gimnasio",
+            "nutricionista",
+            "entrenamiento",
+            "perder peso"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Falta el peso actual."
+        },
+        {
+          "id": "libertad-financiera",
+          "nombre": "Buena libertad financiera",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "detalle": "sin depender ni preocupar a la familia",
+            "relacionado_con": [
+              "negocio-estable"
+            ]
+          },
+          "osm": [
+            {
+              "office": "financial"
+            },
+            {
+              "office": "coworking"
+            }
+          ],
+          "palabras_clave": [
+            "inversion",
+            "ahorro",
+            "educacion financiera",
+            "finanzas personales"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Sin cifras por ahora."
+        },
+        {
+          "id": "negocio-estable",
+          "nombre": "Negocio estable",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "negocio": "Presencia Parfums",
+            "relacionado_con": [
+              "perfumeria",
+              "ecommerce"
+            ]
+          },
+          "osm": [
+            {
+              "office": "coworking"
+            },
+            {
+              "amenity": "conference_centre"
+            }
+          ],
+          "palabras_clave": [
+            "emprendimiento",
+            "negocio",
+            "networking de negocios",
+            "ferias de emprendimiento"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "necesidades-personales-maxima-calidad",
+          "nombre": "Necesidades personales con la maxima calidad",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "detalle": "ropa, comida, salud y bienestar de alta calidad"
+          },
+          "osm": [],
+          "palabras_clave": [
+            "calidad de vida",
+            "bienestar",
+            "salud",
+            "alta calidad"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "casa-personalizada",
+          "nombre": "Casa personalizada al milimetro para maximo rendimiento",
+          "nivel": 5,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "relacionado_con": [
+              "escritorio-en-l",
+              "luces-habitacion",
+              "segundo-monitor"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "furniture"
+            },
+            {
+              "shop": "interior_decoration"
+            },
+            {
+              "shop": "electronics"
+            }
+          ],
+          "palabras_clave": [
+            "decoracion",
+            "personalizar habitacion",
+            "setup",
+            "diseno de interiores"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Agrupa todo lo del area setup-y-hogar."
+        }
+      ]
     }
   ]
 }
