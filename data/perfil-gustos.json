@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "actualizado": "2026-11-16",
+  "actualizado": "2026-11-17",
   "areas": [
     {
       "area": "deporte",
@@ -1169,6 +1169,42 @@
           ],
           "lugares_conocidos": [],
           "notas": ""
+        },
+        {
+          "id": "escritorio-delgado",
+          "nombre": "Escritorio mas delgado",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde dic 2026 o ene 2027",
+            "ubicacion": "contra la pared, como el actual",
+            "forma": "angosto (poca profundidad)",
+            "relacionado_con": [
+              "segundo-monitor",
+              "mejorar-laptop",
+              "hub-usb"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "furniture"
+            },
+            {
+              "shop": "houseware"
+            },
+            {
+              "shop": "doityourself"
+            }
+          ],
+          "palabras_clave": [
+            "escritorio",
+            "escritorio angosto",
+            "escritorio pequeno",
+            "escritorio para pared",
+            "mueble para computador"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Reemplaza o complementa el escritorio actual de madera bajo la ventana. Faltan medidas del espacio."
         }
       ]
     }
