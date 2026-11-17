@@ -26,6 +26,16 @@ npm run dev
 ```
 Tests: `npm test` · Build: `npm run build`.
 
+## Hoy y tu zona
+- **Mapa en calma**: al entrar solo ves tu casa y tus lugares; las capas que enciendas se recuerdan. Los puntos se agrupan en burbujas con el número y se abren al acercarte.
+- **Dock**: J (Jarvis), 🌍 (Tierra), ⌂ (casa) y ☰ (satélite, 2D/3D, tema, giro, salir).
+- **Hoy** (pestaña Vivo): pico y placa de hoy (regla oficial de la Alcaldía para noviembre de 2026), TRM oficial (datos.gov.co), amanecer y atardecer, fase lunar, lluvia de los últimos 30 días frente a los 5 años anteriores y nivel del río más cercano a tu casa (Open-Meteo GloFAS), y **viento animado** con partículas.
+- **Luz real**: el cielo y la niebla del mapa siguen al Sol sobre Bogotá (amanecer dorado, noche azul).
+- **Ficha de zona**: puntaje "cómo está tu zona hoy" (aire, lluvia, río, incendios, eventos), **cómo llegar** desde tu casa en carro, bici o a pie con la ruta dibujada (OSRM/OpenStreetMap), y tarjetas plegables con **fotos** del lugar (Wikimedia Commons), **historia cercana** (Wikipedia) y noticias.
+- **Alertas cerca de ti**: al abrir, aviso discreto si hay un incendio, evento natural o río alto cerca de tu casa o tus lugares; tócalo y la cámara cae ahí.
+- **Aviones por tipo**: comercial, carga, estatal o privado por indicativo, cada uno con su color.
+- Jarvis suma dos herramientas: `ruta` y `hoy`.
+
 ## Planeta (pestaña Vivo)
 - **Satélites en órbita**: ~600 satélites con posición real (SGP4 con `satellite.js`, TLE de CelesTrak). Toca uno para ver su órbita y cuándo pasa sobre tu casa; la tarjeta dice cuántos hay encima ahora y el próximo paso de la Estación Espacial.
 - **Día y noche**: la sombra de la noche y la línea del amanecer/atardecer sobre el globo (cálculo astronómico en el navegador).

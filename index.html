@@ -30,7 +30,7 @@
       <section id="tab-zona" class="tab" role="tabpanel">
         <p class="vacio">Toca cualquier punto del mapa para leer la zona: localidad, UPZ, barrio, estrato, valor del suelo, clima, aire y qué hay cerca.</p>
       </section>
-      <section id="tab-vivo" class="tab" role="tabpanel" hidden><div id="vivo-planeta"></div><div id="vivo-datos"></div><div id="vivo-camaras"></div></section>
+      <section id="tab-vivo" class="tab" role="tabpanel" hidden><div id="vivo-hoy"></div><div id="vivo-planeta"></div><div id="vivo-datos"></div><div id="vivo-camaras"></div></section>
       <section id="tab-intereses" class="tab" role="tabpanel" hidden></section>
       <section id="tab-lugares" class="tab" role="tabpanel" hidden></section>
       <section id="tab-capas" class="tab" role="tabpanel" hidden></section>
@@ -40,11 +40,14 @@
       <button id="boton-jarvis" class="boton-mapa" title="Jarvis: pídele cosas al mapa (J)">J</button>
       <button id="boton-tierra" class="boton-mapa" aria-pressed="true" title="Ver la Tierra completa / volver a Bogotá">🌍</button>
       <button id="boton-casa" class="boton-mapa" title="Mi casa">⌂</button>
-      <button id="boton-sat" class="boton-mapa" title="Vista desde el satélite">🛰</button>
-      <button id="boton-3d" class="boton-mapa" aria-pressed="true" title="Cambiar entre relieve 3D y plano">2D</button>
-      <button id="boton-tema" class="boton-mapa" title="Cambiar tema: blanco y negro o Matrix">◐</button>
-      <button id="boton-orbita" class="boton-mapa" title="Girar la vista 90°">⟳</button>
-      <button id="boton-salir" class="boton-mapa" title="Cerrar sesión">⏻</button>
+      <button id="boton-mas" class="boton-mapa" aria-expanded="false" title="Más: satélite, 2D/3D, tema, giro, salir">☰</button>
+      <div class="vista__extra" id="vista-extra">
+        <button id="boton-sat" class="boton-mapa" title="Vista desde el satélite">🛰</button>
+        <button id="boton-3d" class="boton-mapa" aria-pressed="true" title="Cambiar entre relieve 3D y plano">2D</button>
+        <button id="boton-tema" class="boton-mapa" title="Cambiar tema: blanco y negro o Matrix">◐</button>
+        <button id="boton-orbita" class="boton-mapa" title="Girar la vista 90°">⟳</button>
+        <button id="boton-salir" class="boton-mapa" title="Cerrar sesión">⏻</button>
+      </div>
     </div>
     <div id="menu-sat" class="menu" hidden role="menu"></div>
     <div id="menu-casa" class="menu" hidden role="menu"></div>

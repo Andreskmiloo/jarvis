@@ -23,3 +23,26 @@ export function descargar(nombre: string, contenido: string, tipo = "application
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+/**
+ * Convierte cada <h3> y lo que le sigue (hasta el siguiente <h3>/<h2>) en una tarjeta
+ * plegable <details>. Solo quedan abiertas las que coinciden con `abiertas`.
+ */
+export function plegar(cont: HTMLElement, abiertas: RegExp = /^$/) {
+  for (const h of [...cont.querySelectorAll<HTMLHeadingElement>(":scope > h3")]) {
+    const d = document.createElement("details");
+    d.className = "pliegue";
+    const titulo = h.textContent?.trim() ?? "";
+    d.open = abiertas.test(titulo);
+    const s = document.createElement("summary");
+    s.innerHTML = h.innerHTML;
+    d.appendChild(s);
+    let sig = h.nextElementSibling;
+    while (sig && !/^H[23]$/.test(sig.tagName) && !sig.classList.contains("pliegue")) {
+      const siguiente = sig.nextElementSibling;
+      d.appendChild(sig);
+      sig = siguiente;
+    }
+    h.replaceWith(d);
+  }
+}

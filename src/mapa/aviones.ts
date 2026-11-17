@@ -2,7 +2,7 @@
 // con una línea vertical hasta el suelo, y se mueve suave entre lecturas.
 import { puedeAnimar } from "./ritmo";
 import type { GeoJSONSource, Map as Mapa } from "maplibre-gl";
-import { avanzar, type Avion } from "../fuentes/aviones";
+import { COLOR_TIPO, tipoAvion, avanzar, type Avion } from "../fuentes/aviones";
 import { metrosPorPixel, poligono } from "./pines";
 
 /** Altura del suelo de la sabana: las altitudes ADS-B son sobre el nivel del mar. */
@@ -28,7 +28,8 @@ export function geojsonAviones(lista: Avion[], seg: number, zoom: number): GeoJS
     const p = avanzar(a, seg);
     const m = metrosPorPixel(p.lat, zoom);
     const alto = a.enTierra ? 0 : Math.max(60, (p.altitud - SUELO_M) * ESCALA_ALTURA);
-    const props = { nombre: `✈ ${a.vuelo}`, sub: `${Math.round(a.altitud)} m · ${Math.round(a.velocidad * 3.6)} km/h${a.enTierra ? " · en tierra" : ""} · ${a.pais}`, avion: a.icao };
+    const tipo = tipoAvion(a.vuelo);
+    const props = { nombre: `✈ ${a.vuelo}`, sub: `${tipo === "desconocido" ? "" : `${tipo} · `}${Math.round(a.altitud)} m · ${Math.round(a.velocidad * 3.6)} km/h${a.enTierra ? " · en tierra" : ""} · ${a.pais}`, avion: a.icao, color: COLOR_TIPO[tipo] };
     features.push({
       type: "Feature",
       geometry: { type: "Polygon", coordinates: [flecha(p.lng, p.lat, a.rumbo, 18 * m)] },
@@ -58,7 +59,7 @@ export class CapaAviones {
         type: "fill-extrusion",
         source: "aviones",
         paint: {
-          "fill-extrusion-color": ["case", ["==", ["get", "linea"], true], "#bfc3c7", ["==", ["get", "tierra"], true], "#9aa0a6", "#ffffff"],
+          "fill-extrusion-color": ["case", ["==", ["get", "linea"], true], "#bfc3c7", ["==", ["get", "tierra"], true], "#9aa0a6", ["coalesce", ["get", "color"], "#ffffff"]],
           "fill-extrusion-base": ["get", "base"],
           "fill-extrusion-height": ["get", "alto"],
           "fill-extrusion-opacity": 0.95,

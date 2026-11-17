@@ -8,7 +8,7 @@ import { animar } from "./ui/anim";
 import { aviso, esc } from "./ui/html";
 import { distancia } from "./zona/resumen";
 import { elegirIcono, pines } from "./mapa/pines";
-import { puedeAnimar } from "./mapa/ritmo";
+import { guardarPref, leerPref } from "./ui/preferencias";
 import { CapaAviones } from "./mapa/aviones";
 import { aviones, URL_PUENTE, type Avion } from "./fuentes/aviones";
 
@@ -37,7 +37,8 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
   let capaAv: CapaAviones | null = null;
   let actualizado = 0;
   let errorSem = "";
-  const visibles = { fallas: true, camaras: true, sismos: false, aviones: true };
+  // En calma por defecto: solo se ve lo que tú enciendas (y se recuerda).
+  const visibles = leerPref("vivo", { fallas: false, camaras: false, sismos: false, aviones: true });
   // Clases de cámara visibles: los videodetectores (1.784) arrancan apagados para no saturar.
   const clasesVisibles = new Set<ClaseCamara>(["webcam", "transito", "foto", "osm"]);
   let modo: Modo | null = null;
@@ -65,7 +66,7 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
         source: "vivo-camaras",
         layout: { visibility: "none" },
         paint: {
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 4.5, 9, 4.5, 10.5, 2.5], // con pin encima basta un punto
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 4.5, 8.6, 4.5, 9.2, 0], // con pin encima basta un punto
           "circle-color": ["get", "color"],
           "circle-stroke-width": 1,
           "circle-stroke-color": "#001a0a",
@@ -93,7 +94,7 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
         id: "vivo-fallas-pulso",
         type: "circle",
         source: "vivo-fallas",
-        paint: { "circle-radius": 8, "circle-color": "#ff2a4f", "circle-opacity": 0.4 },
+        paint: { "circle-radius": 0, "circle-color": "#ff2a4f", "circle-opacity": 0 },
       },
       antes,
     );
@@ -102,40 +103,14 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
         id: "vivo-fallas",
         type: "circle",
         source: "vivo-fallas",
-        paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 5, 9, 5, 10.5, 2.5], "circle-color": "#ff2a4f", "circle-stroke-width": 1.5, "circle-stroke-color": "#fff" },
+        paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 5, 8.6, 5, 9.2, 0], "circle-color": "#ff2a4f", "circle-stroke-width": 1.5, "circle-stroke-color": "#fff" },
       },
       antes,
     );
     capaAv = new CapaAviones(mapa);
     if (avs.length) capaAv.poner(avs, horaOpenSky); // la primera lectura pudo llegar antes que la capa
     ["vivo-camaras", "vivo-sismos", "vivo-fallas", "aviones"].forEach(registrarCapa);
-    pulsar();
     volcar();
-  }
-
-  // Pulso de los semáforos en falla: llama la atención sin ocultar el punto.
-  function pulsar() {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let ultimo = 0;
-    const paso = (t: number) => {
-      requestAnimationFrame(paso);
-      if (t - ultimo < 110 || !puedeAnimar() || !visibles.fallas || !fallasEnVista() || !mapa.getLayer("vivo-fallas-pulso")) return;
-      ultimo = t;
-      const k = (t % 1400) / 1400;
-      mapa.setPaintProperty("vivo-fallas-pulso", "circle-radius", 6 + 12 * k);
-      mapa.setPaintProperty("vivo-fallas-pulso", "circle-opacity", 0.55 * (1 - k));
-    };
-    requestAnimationFrame(paso);
-  }
-
-  // Solo se anima si alguna falla está dentro de la vista (si no, el mapa descansa).
-  let enVista = { t: 0, v: false };
-  function fallasEnVista(): boolean {
-    const ahora = performance.now();
-    if (ahora - enVista.t < 1000) return enVista.v;
-    const b = mapa.getBounds();
-    enVista = { t: ahora, v: !!sem?.fallas.some((f) => b.contains([f.lng, f.lat])) };
-    return enVista.v;
   }
 
   function camsVisibles(): Camara[] {
@@ -348,6 +323,7 @@ export function iniciarVivo(mapa: Mapa, cont: HTMLElement, registrarCapa: (id: s
     cont.querySelectorAll<HTMLInputElement>("[data-ver]").forEach((i) =>
       i.addEventListener("change", () => {
         visibles[i.dataset.ver as keyof typeof visibles] = i.checked;
+        guardarPref("vivo", visibles);
         pintar();
         volcar();
       }),

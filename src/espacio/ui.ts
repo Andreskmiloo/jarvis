@@ -21,6 +21,10 @@ export interface Planeta {
   /** Para el asistente y la ficha de zona. */
   resumen(lat: number, lng: number): Promise<string[]>;
   noticiasDe(tema: string): Promise<Noticia[]>;
+  /** Incendio y evento natural más cercanos a un punto (km), para alertas y puntaje. */
+  cercanos(lat: number, lng: number): { incendio?: { lat: number; lng: number; km: number; texto: string }; evento?: { lat: number; lng: number; km: number; texto: string } };
+  /** Se resuelve cuando la primera carga de datos terminó. */
+  listo: Promise<void>;
 }
 
 export function iniciarPlaneta(mapa: Mapa, cont: HTMLElement, registrar: (id: string) => void, caerEn: (lat: number, lng: number, zoom?: number) => void): Planeta {
@@ -197,7 +201,7 @@ export function iniciarPlaneta(mapa: Mapa, cont: HTMLElement, registrar: (id: st
     pintarTodo();
     panel();
   }
-  void cargar();
+  const primera = cargar();
   // Satélites se mueven ~7 km/s: cada 2 s, solo si se ven (zoom bajo) y el mapa está quieto.
   setInterval(() => on.satelites && tles.length && mapa.getZoom() < 9 && puedeAnimar() && pintarSatelites(), 2000);
   setInterval(() => pintarNoche(), 60_000);
@@ -301,6 +305,15 @@ export function iniciarPlaneta(mapa: Mapa, cont: HTMLElement, registrar: (id: st
       return out;
     },
     noticiasDe: (tema) => noticias(tema, 48, 6),
+    cercanos(lat, lng) {
+      const f = focos.map((x) => ({ x, d: distancia(lat, lng, x.lat, x.lng) })).sort((a, b) => a.d - b.d)[0];
+      const e = eventos.map((x) => ({ x, d: distancia(lat, lng, x.lat, x.lng) })).sort((a, b) => a.d - b.d)[0];
+      return {
+        incendio: f && { lat: f.x.lat, lng: f.x.lng, km: f.d / 1000, texto: `🔥 Foco de incendio (${f.x.frp.toFixed(1)} MW, ${hace(Date.parse(f.x.cuando))})` },
+        evento: e && { lat: e.x.lat, lng: e.x.lng, km: e.d / 1000, texto: `${e.x.icono} ${e.x.titulo}` },
+      };
+    },
+    listo: primera,
   };
   return api;
 }

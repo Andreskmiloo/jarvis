@@ -16,6 +16,8 @@ export interface Acciones {
   vista(tipo: string): Promise<string>;
   misDatos(): Promise<string>;
   planeta(lat?: number, lng?: number): Promise<string>;
+  ruta(destino: string, modo: string): Promise<string>;
+  hoy(): Promise<string>;
   /** Catálogo para el prompt: ids de gustos y de capas. */
   catalogo(): { gustos: string[]; capas: string[] };
 }
@@ -49,6 +51,13 @@ function herramientas(c: { gustos: string[]; capas: string[] }): Anthropic.Beta.
       ["tipo"],
     ),
     t("mis_datos", "Devuelve la casa del usuario, sus lugares guardados (ya fue / quiere ir) y sus gustos. Úsala antes de recomendar.", {}),
+    t(
+      "ruta",
+      "Calcula y dibuja cómo llegar desde la casa del usuario a un lugar (dirección, barrio o sitio), con tiempo y distancia.",
+      { destino: { type: "string" }, modo: { type: "string", enum: ["carro", "bici", "pie"] } },
+      ["destino", "modo"],
+    ),
+    t("hoy", "Datos del día en Bogotá: pico y placa (qué placas no circulan), TRM, lluvia de los últimos 30 días frente a lo normal, nivel del río cerca de la casa y fase lunar.", {}),
     t("planeta", "Qué pasa encima y alrededor de un punto ahora: satélites visibles, paso de la Estación Espacial, incendio y evento natural más cercanos, clima espacial. Sin coordenadas usa la casa.", { lat: { type: "number" }, lng: { type: "number" } }),
   ];
 }
@@ -142,6 +151,10 @@ export function ejecutar(a: Acciones, nombre: string, x: Record<string, unknown>
       return a.vista(String(x.tipo));
     case "mis_datos":
       return a.misDatos();
+    case "ruta":
+      return a.ruta(String(x.destino ?? ""), String(x.modo ?? "carro"));
+    case "hoy":
+      return a.hoy();
     case "planeta":
       return a.planeta(num(x.lat), num(x.lng));
     default:

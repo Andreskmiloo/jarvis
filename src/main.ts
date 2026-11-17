@@ -15,6 +15,13 @@ import { ANCLA_DATOS, CAPA_EDIFICIOS, estiloMapa, EXAGERACION, type Tema, VISTA_
 import { conectarRitmo, nitidezAdaptativa } from "./mapa/ritmo";
 import { iniciarPlaneta } from "./espacio/ui";
 import { iniciarJarvis } from "./jarvis/ui";
+import { ruta, textoDuracion, type Modo, type Ruta } from "./fuentes/rutas";
+import { articulosCerca, fotosCerca } from "./fuentes/wiki";
+import { rio } from "./fuentes/agua";
+import { puntajeZona } from "./zona/puntaje";
+import { iniciarLuz } from "./mapa/luz";
+import { iniciarHoy } from "./hoy";
+import { decidirAlertas, mostrarAlertas } from "./alertas";
 import { animar } from "./ui/anim";
 import { iniciarVivo } from "./vivo";
 import { iniciarCamaras } from "./camaras/ui";
@@ -24,7 +31,8 @@ import { elegirIcono, iniciarPines } from "./mapa/pines";
 import { iniciarCapas3D } from "./capas3d/ui";
 import { CLAVE_WINDY, enlacesEnVivo, webcamsCerca } from "./fuentes/webcams";
 import { Lugares, type MiLugar } from "./lugares/store";
-import { aviso, descargar, esc, metros } from "./ui/html";
+import { aviso, descargar, esc, metros, plegar } from "./ui/html";
+import { guardarPref, leerPref } from "./ui/preferencias";
 import { distancia, resumir, type Resumen } from "./zona/resumen";
 import { cerrarSesion, iniciarAcceso } from "./acceso";
 
@@ -175,7 +183,7 @@ mapa.on("load", () => {
     type: "circle",
     source: "mis-lugares",
     paint: {
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 7, 9, 7, 10.5, 2.5],
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 7, 8.6, 7, 9.2, 0],
       "circle-color": ["case", ["get", "visitado"], "#1e8449", "#f39c12"],
       "circle-stroke-width": 2,
       "circle-stroke-color": "#fff",
@@ -188,7 +196,7 @@ mapa.on("load", () => {
       type: "circle",
       source: "intereses",
       paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 6, 9, 6, 10.5, 2.5],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 6, 8.6, 6, 9.2, 0],
         "circle-color": ["match", ["get", "estado"], "visitado", "#1e8449", "pendiente", "#f39c12", "#8e44ad"],
         "circle-stroke-width": 1.5,
         "circle-stroke-color": "#fff",
@@ -202,14 +210,16 @@ mapa.on("load", () => {
     mapa.on("mouseenter", id, () => (mapa.getCanvas().style.cursor = "pointer"));
     mapa.on("mouseleave", id, () => (mapa.getCanvas().style.cursor = ""));
   }
-  // Centros comerciales encendidos desde el inicio (salen del archivo guardado, sin servidor).
-  alternarPOI("centros-comerciales", true);
+  // Capas que dejaste encendidas la última vez (por defecto, ninguna: mapa en calma).
+  for (const id of leerPref<string[]>("poi", [])) if (CAPAS_POI.some((c) => c.id === id)) alternarPOI(id, true);
   pintarCapas();
   pintarIntereses();
   pintarLugares();
 });
 
 mapa.on("click", (e: MapMouseEvent) => {
+  // Las burbujas de pines agrupados tienen su propio clic (acercar); no leer la zona debajo.
+  if (mapa.getLayer("pines-grupo") && mapa.queryRenderedFeatures(e.point, { layers: ["pines-grupo"] }).length) return;
   const f = mapa.queryRenderedFeatures(e.point, { layers: capasInteractivas.filter((l) => mapa.getLayer(l)) })[0];
   if (f?.properties?.camara && !modoAgregar && !modoCasa) return camarasUI.abrir(String(f.properties.camara));
   if (f?.properties?.video && !modoAgregar && !modoCasa) return camarasUI.abrirExterna(String(f.properties.titulo ?? "Webcam en vivo"), String(f.properties.video));
@@ -295,6 +305,8 @@ const camarasUI = iniciarCamaras(mapa, document.getElementById("vivo-camaras")!,
 function abrirWaze(lat: number, lng: number) {
   camarasUI.abrirExterna("Tráfico en vivo · Waze", `https://embed.waze.com/iframe?zoom=15&lat=${lat.toFixed(5)}&lon=${lng.toFixed(5)}&ct=livemap&pin=1`);
 }
+iniciarLuz(mapa);
+const hoy = iniciarHoy(mapa, document.getElementById("vivo-hoy")!);
 const planeta = iniciarPlaneta(mapa, document.getElementById("vivo-planeta")!, registrar, (lat, lng, zoom) => caerEn(lat, lng, zoom));
 const vivo = iniciarVivo(mapa, document.getElementById("vivo-datos")!, (id) => {
   capasInteractivas.push(id);
@@ -454,6 +466,7 @@ async function leerZona(lat: number, lng: number) {
     const r = await resumir(lat, lng, 500, controlZona.signal);
     if (controlZona.signal.aborted) return;
     tabs.zona.innerHTML = htmlZona(r);
+    plegar(tabs.zona, /^Ahora/);
     animar(tabs.zona);
     if (CLAVE_WINDY) pintarWebcams(lat, lng, controlZona.signal);
     void ahoraAqui(r, controlZona.signal);
@@ -469,26 +482,105 @@ async function leerZona(lat: number, lng: number) {
 async function ahoraAqui(r: Resumen, signal: AbortSignal) {
   const caja = document.createElement("section");
   caja.className = "ahora-aqui";
-  caja.innerHTML = `<h3>Ahora aquí</h3><p class="cargando">Mirando el cielo y las noticias</p>`;
+  caja.innerHTML = `<p class="cargando">Calculando cómo está esta zona hoy</p>`;
   tabs.zona.appendChild(caja);
-  const lineas = await planeta.resumen(r.lat, r.lng);
+  const [lineas, agua] = await Promise.all([planeta.resumen(r.lat, r.lng), rio(r.lat, r.lng, signal).catch(() => null)]);
   if (signal.aborted) return;
+  const cerca = planeta.cercanos(r.lat, r.lng);
+  const pz = puntajeZona({
+    aqi: r.aire?.indiceUS,
+    uv: r.aire?.uv,
+    probLluvia: r.clima?.probLluviaProx3h,
+    temperatura: r.clima?.temperatura,
+    rio: agua?.nivel,
+    incendioKm: cerca.incendio?.km,
+    eventoKm: cerca.evento?.km,
+  });
   const tema = r.zona.find((d) => d.etiqueta === "Barrio")?.valor ?? r.zona.find((d) => d.etiqueta === "Localidad")?.valor;
-  let h = `<h3>Ahora aquí</h3>${lineas.length ? `<ul class="lista">${lineas.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>` : `<p class="nota">Cielo y alrededores tranquilos.</p>`}`;
-  caja.innerHTML = h + (tema ? `<p class="cargando">Noticias de ${esc(tema)}</p>` : "");
-  if (!tema) return;
-  try {
-    const ns = await planeta.noticiasDe(tema);
-    if (signal.aborted) return;
-    h += `<h3>Noticias de ${esc(tema)} (48 h)</h3>${
-      ns.length
-        ? `<ul class="lista">${ns.map((n) => `<li><a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.titulo)}</a><div class="sub">${esc(n.medio)}</div></li>`).join("")}</ul>`
-        : `<p class="nota">Sin noticias recientes con ese nombre.</p>`
-    }`;
-  } catch (e) {
-    h += `<p class="nota">Noticias: ${esc(e instanceof Error ? e.message : e)}</p>`;
+  caja.innerHTML = `<div class="puntaje" style="--p:${pz.valor};--c:${pz.color}"><div class="puntaje__aro"><b>${pz.valor}</b></div>
+      <div><b>${pz.etiqueta}</b><span>${pz.motivos.length ? esc(pz.motivos.join(" · ")) : "nada preocupante ahora"}</span></div></div>
+    <div class="acciones ruta-botones">${(["carro", "bici", "pie"] as Modo[]).map((m) => `<button class="boton sec peq" data-ruta="${m}">${m === "carro" ? "🚗" : m === "bici" ? "🚲" : "🚶"} Cómo llegar</button>`).join("")}</div>
+    <details class="pliegue" open><summary>Ahora aquí</summary><ul class="lista">${[
+      ...lineas,
+      agua ? `🌊 Río o quebrada más cercano: caudal ${agua.nivel} (${agua.hoy.toFixed(2)} m³/s, normal ${agua.mediana.toFixed(2)})` : "",
+    ]
+      .filter(Boolean)
+      .map((l) => `<li>${esc(l)}</li>`)
+      .join("") || "<li>Cielo y alrededores tranquilos.</li>"}</ul></details>
+    <details class="pliegue" data-perezoso="fotos"><summary>📸 Fotos de aquí</summary><p class="cargando">Buscando fotos</p></details>
+    <details class="pliegue" data-perezoso="historia"><summary>📖 Historia cercana</summary><p class="cargando">Buscando en Wikipedia</p></details>
+    ${tema ? `<details class="pliegue" data-perezoso="noticias"><summary>📰 Noticias de ${esc(tema)}</summary><p class="cargando">Buscando noticias</p></details>` : ""}`;
+  caja.querySelectorAll<HTMLButtonElement>("[data-ruta]").forEach((b) => b.addEventListener("click", () => void trazarRuta({ lat: r.lat, lng: r.lng }, b.dataset.ruta as Modo)));
+  // Lo pesado solo se pide al abrir la tarjeta.
+  caja.querySelectorAll<HTMLDetailsElement>("[data-perezoso]").forEach((d) =>
+    d.addEventListener(
+      "toggle",
+      async () => {
+        if (!d.open || d.dataset.cargado) return;
+        d.dataset.cargado = "1";
+        const cuerpo = d.querySelector("p.cargando")!;
+        try {
+          if (d.dataset.perezoso === "fotos") {
+            const fs = await fotosCerca(r.lat, r.lng);
+            cuerpo.outerHTML = fs.length
+              ? `<div class="fotos">${fs.map((f) => `<a href="${esc(f.pagina)}" target="_blank" rel="noopener" title="${esc(f.titulo)} · ${f.metros} m"><img src="${esc(f.miniatura)}" alt="${esc(f.titulo)}" loading="lazy" /></a>`).join("")}</div><p class="nota">Wikimedia Commons</p>`
+              : `<p class="nota">No hay fotos con ubicación a menos de 400 m.</p>`;
+          } else if (d.dataset.perezoso === "historia") {
+            const as = await articulosCerca(r.lat, r.lng);
+            cuerpo.outerHTML = as.length
+              ? `<ul class="lista">${as.map((a) => `<li><a href="${esc(a.url)}" target="_blank" rel="noopener"><b>${esc(a.titulo)}</b></a> <span class="sub">${a.metros} m</span><div class="sub">${esc(a.resumen)}</div></li>`).join("")}</ul>`
+              : `<p class="nota">No hay artículos de Wikipedia a menos de 1,2 km.</p>`;
+          } else {
+            const ns = await planeta.noticiasDe(tema!);
+            cuerpo.outerHTML = ns.length
+              ? `<ul class="lista">${ns.map((n) => `<li><a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.titulo)}</a><div class="sub">${esc(n.medio)}</div></li>`).join("")}</ul>`
+              : `<p class="nota">Sin noticias recientes con ese nombre (48 h).</p>`;
+          }
+        } catch (e) {
+          cuerpo.outerHTML = `<p class="nota">${esc(e instanceof Error ? e.message : e)}</p>`;
+          delete d.dataset.cargado;
+        }
+      },
+    ),
+  );
+}
+
+// ---------- Cómo llegar ----------
+async function trazarRuta(destino: { lat: number; lng: number }, modo: Modo, desde?: { lat: number; lng: number }): Promise<Ruta | null> {
+  const origen = desde ?? casa;
+  if (!origen) {
+    aviso("Marca tu casa con ⌂ para calcular cómo llegar");
+    return null;
   }
-  if (!signal.aborted) caja.innerHTML = h;
+  aviso("Calculando la ruta…");
+  const r = await ruta(modo, origen, destino);
+  if (!r) {
+    aviso("No encontré una ruta");
+    return null;
+  }
+  const fc: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [{ type: "Feature", geometry: { type: "LineString", coordinates: r.linea }, properties: {} }] };
+  const fuente = mapa.getSource("ruta") as GeoJSONSource | undefined;
+  if (fuente) fuente.setData(fc);
+  else {
+    mapa.addSource("ruta", { type: "geojson", data: fc, lineMetrics: true });
+    const antes = mapa.getLayer("pines-sombra") ? "pines-sombra" : undefined;
+    mapa.addLayer({ id: "ruta-brillo", type: "line", source: "ruta", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#4fc3f7", "line-width": 12, "line-opacity": 0.22, "line-blur": 4 } }, antes);
+    mapa.addLayer(
+      {
+        id: "ruta",
+        type: "line",
+        source: "ruta",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-width": 4.5, "line-gradient": ["interpolate", ["linear"], ["line-progress"], 0, "#2ecc71", 1, "#4fc3f7"] },
+      },
+      antes,
+    );
+  }
+  const b = r.linea.reduce((acc, [x, y]) => [Math.min(acc[0], x), Math.min(acc[1], y), Math.max(acc[2], x), Math.max(acc[3], y)], [180, 90, -180, -90]);
+  mapa.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 90, pitch: 50, duration: 1600 });
+  const icono = modo === "carro" ? "🚗" : modo === "bici" ? "🚲" : "🚶";
+  aviso(`${icono} ${textoDuracion(r.segundos)} · ${(r.metros / 1000).toFixed(1)} km${desde ? "" : " desde tu casa"}`, 9000);
+  return r;
 }
 
 function htmlZona(r: Resumen): string {
@@ -602,7 +694,7 @@ function pintarCapas() {
     h += `<h3>${esc(g)}</h3>`;
     for (const c of cs) {
       h += `<label class="capa"><input type="checkbox" data-poi="${c.id}" ${activasPOI.has(c.id) ? "checked" : ""}/><i style="background:${c.color}"></i>${esc(c.nombre)}${
-        activasPOI.has(c.id) && z < c.zoomMin ? `<small>acerca el zoom</small>` : ""
+        activasPOI.has(c.id) && z < c.zoomMin ? `<small>acerca el zoom</small>` : activasPOI.has(c.id) && conteos.has(c.id) ? `<small class="conteo">${conteos.get(c.id)}${c.archivo ? "" : " en vista"}</small>` : ""
       }</label>`;
     }
   }
@@ -633,12 +725,13 @@ function alternarPOI(id: string, on: boolean) {
   const c = CAPAS_POI.find((x) => x.id === id)!;
   if (on) {
     activasPOI.add(id);
+    guardarPref("poi", [...activasPOI]);
     if (!mapa.getSource(id)) {
       mapa.addSource(id, { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       const antes = "intereses";
       mapa.addLayer({ id: `${id}-area`, type: "fill", source: id, filter: ["==", ["geometry-type"], "Polygon"], paint: { "fill-color": c.color, "fill-opacity": 0.35, "fill-outline-color": c.color } }, antes);
       mapa.addLayer({ id: `${id}-linea`, type: "line", source: id, filter: ["==", ["geometry-type"], "LineString"], paint: { "line-color": c.color, "line-width": 3 } }, antes);
-      mapa.addLayer({ id: `${id}-punto`, type: "circle", source: id, filter: ["==", ["geometry-type"], "Point"], paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 5, 9, 5, 10.5, 2.5], "circle-color": c.color, "circle-stroke-width": 1, "circle-stroke-color": "#fff" } }, antes);
+      mapa.addLayer({ id: `${id}-punto`, type: "circle", source: id, filter: ["==", ["geometry-type"], "Point"], paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 0, 7, 5, 8.6, 5, 9.2, 0], "circle-color": c.color, "circle-stroke-width": 1, "circle-stroke-color": "#fff" } }, antes);
       for (const l of [`${id}-area`, `${id}-punto`]) {
         capasInteractivas.push(l);
         mapa.on("mouseenter", l, () => (mapa.getCanvas().style.cursor = "pointer"));
@@ -649,6 +742,7 @@ function alternarPOI(id: string, on: boolean) {
     cargarPOI(c);
   } else {
     activasPOI.delete(id);
+    guardarPref("poi", [...activasPOI]);
     archivosPuestos.delete(id);
     pinesMapa.quitar(id);
     for (const s of ["area", "linea", "punto"]) if (mapa.getLayer(`${id}-${s}`)) mapa.setLayoutProperty(`${id}-${s}`, "visibility", "none");
@@ -657,6 +751,8 @@ function alternarPOI(id: string, on: boolean) {
 }
 
 const controlesPOI = new Map<string, AbortController>();
+/** Cuántos elementos tiene cada capa (en la vista o en toda la ciudad si es archivo). */
+const conteos = new Map<string, number>();
 const archivosPuestos = new Set<string>();
 async function cargarPOI(c: CapaPOI) {
   if (c.archivo) {
@@ -672,6 +768,8 @@ async function cargarPOI(c: CapaPOI) {
     fc.features.forEach((f) => (f.properties = { ...f.properties, __capa: c.id }));
     (mapa.getSource(c.id) as GeoJSONSource | undefined)?.setData(fc);
     if (activasPOI.has(c.id)) pinesMapa.poner(c.id, fc, { color: c.color });
+    conteos.set(c.id, fc.features.length);
+    if (!tabs.capas.hidden) pintarCapas();
     return;
   }
   if (mapa.getZoom() < c.zoomMin) return;
@@ -684,6 +782,7 @@ async function cargarPOI(c: CapaPOI) {
     fc.features.forEach((f) => (f.properties = { ...f.properties, __capa: c.id }));
     (mapa.getSource(c.id) as GeoJSONSource | undefined)?.setData(fc);
     pinesMapa.poner(c.id, fc, { color: c.color });
+    conteos.set(c.id, fc.features.length);
   } catch (e) {
     if (!ctl.signal.aborted) aviso(`${c.nombre}: sin respuesta del servidor`);
   }
@@ -777,7 +876,7 @@ function pintarIntereses() {
       h += `<li><div class="fila"><button class="enlace" data-ir="${esc(l.id)}">${esc(l.nombre)}</button><span class="sub">${metros(d)}</span></div>
         <div class="sub">${[l.horario && `🕑 ${esc(l.horario)}`, l.direccion && esc(l.direccion), l.telefono && esc(l.telefono)].filter(Boolean).join(" · ")}</div>
         <div>${badges}</div>
-        <div class="acciones"><button class="boton peq" data-fui="${esc(l.id)}">Ya fui</button><button class="boton sec peq" data-quiero="${esc(l.id)}">Quiero ir</button>${
+        <div class="acciones"><button class="boton peq" data-fui="${esc(l.id)}">Ya fui</button><button class="boton sec peq" data-quiero="${esc(l.id)}">Quiero ir</button><button class="boton sec peq" data-ruta-a="${esc(l.id)}" title="Cómo llegar en bici desde tu casa">🧭</button>${
           l.web ? `<a class="boton sec peq" target="_blank" rel="noopener" href="${esc(l.web.startsWith("http") ? l.web : "https://" + l.web)}">Web</a>` : ""
         }</div></li>`;
     }
@@ -800,6 +899,12 @@ function pintarIntereses() {
     b.addEventListener("click", () => {
       const l = porId(b.dataset.ir!);
       mapa.flyTo({ center: [l.lng, l.lat], zoom: 17 });
+    }),
+  );
+  tabs.intereses.querySelectorAll<HTMLButtonElement>("[data-ruta-a]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const l = porId(b.dataset.rutaA!);
+      void trazarRuta({ lat: l.lat, lng: l.lng }, "bici");
     }),
   );
   for (const [attr, visitado] of [["fui", true], ["quiero", false]] as const) {
@@ -1107,6 +1212,16 @@ const jarvisUI = iniciarJarvis({
     const l = await planeta.resumen(p.lat, p.lng);
     return l.length ? l.join("\n") : "Nada destacado encima ni alrededor.";
   },
+  async ruta(destino, modo) {
+    const p = await resolverLugar(destino);
+    const r = await trazarRuta({ lat: p.lat, lng: p.lng }, (["carro", "bici", "pie"].includes(modo) ? modo : "carro") as Modo);
+    if (!r) return casa ? "No encontré una ruta." : "El usuario no ha marcado su casa (botón ⌂); no puedo calcular la ruta.";
+    return `Ruta en ${modo} desde la casa a ${p.nombre}: ${textoDuracion(r.segundos)}, ${(r.metros / 1000).toFixed(1)} km (OSRM/OpenStreetMap, sin tráfico en tiempo real). Dibujada en el mapa.`;
+  },
+  async hoy() {
+    await hoy.listo;
+    return hoy.texto();
+  },
   catalogo: () => ({
     gustos: perfil.areas.flatMap((a) => a.gustos.map((g) => g.id)),
     capas: [...CAPAS_POI.map((c) => c.id), ...CAPAS_RASTER.map((c) => c.id), "satelites", "noche", "incendios", "eventos", "pines-3d"],
@@ -1137,4 +1252,21 @@ addEventListener("keydown", (e) => {
     e.preventDefault();
     a[1]();
   }
+});
+
+// ---------- Dock: lo secundario se guarda en ☰ ----------
+const botonMas = document.getElementById("boton-mas")!;
+const extra = document.getElementById("vista-extra")!;
+botonMas.addEventListener("click", () => {
+  const abierto = !extra.classList.contains("abierta");
+  extra.classList.toggle("abierta", abierto);
+  botonMas.setAttribute("aria-expanded", String(abierto));
+});
+
+// ---------- Alertas cerca de tu casa y tus lugares ----------
+void Promise.all([planeta.listo, hoy.listo]).then(async () => {
+  const refs = [...(casa ? [{ nombre: "tu casa", lat: casa.lat, lng: casa.lng }] : []), ...lugares.todos().slice(0, 12).map((l) => ({ nombre: l.nombre, lat: l.lat, lng: l.lng }))];
+  if (!refs.length) return;
+  const r = casa ? await hoy.rioCasa() : null;
+  mostrarAlertas(decidirAlertas(refs, planeta.cercanos, r && casa ? { nivel: r.nivel, lat: casa.lat, lng: casa.lng } : undefined), (lat, lng) => caerEn(lat, lng, 12));
 });

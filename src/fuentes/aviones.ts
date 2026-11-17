@@ -67,3 +67,27 @@ export function avanzar(a: Avion, seg: number): { lat: number; lng: number; alti
   const lng = a.lng + (d * Math.sin(r)) / (111_320 * Math.cos((a.lat * Math.PI) / 180));
   return { lat, lng, altitud: a.altitud + a.vertical * Math.max(0, Math.min(seg, 60)) };
 }
+
+// ---------- Tipo de aeronave por indicativo (idea de OSIRIS, MIT; reglas para Colombia) ----------
+export type TipoAvion = "comercial" | "carga" | "estatal" | "privado" | "desconocido";
+
+/** Prefijos OACI de aerolíneas que operan en Bogotá (pasajeros y carga). */
+const AEROLINEAS = new Set(["AVA", "LAN", "LPE", "LXP", "ARE", "RPB", "JAT", "VVC", "SKU", "CMP", "AAL", "UAL", "DAL", "JBU", "NKS", "IBE", "AFR", "KLM", "DLH", "TPU", "TAI", "AMX", "AEA", "CUB", "VOI", "AZU", "GLO", "BOV", "AMV", "SRU", "EZA", "SAE", "TPA", "LCO", "AVB", "NSE", "CKS", "ABX", "FDX", "UPS", "GTI", "DAE", "KRE", "SWL", "LTG"]);
+const CARGA = new Set(["TPA", "LCO", "CKS", "ABX", "FDX", "UPS", "GTI", "DAE", "AVB", "KRE", "SWL", "LTG"]);
+/** Fuerza Aérea, Ejército, Armada, Policía y aviación de Estado de Colombia. */
+const ESTATAL = ["FAC", "EJC", "ARC", "PNC"];
+
+export function tipoAvion(indicativo: string): TipoAvion {
+  const v = indicativo.trim().toUpperCase();
+  if (!v) return "desconocido";
+  const pre = v.slice(0, 3);
+  if (ESTATAL.includes(pre) && /\d/.test(v.slice(3))) return "estatal";
+  if (CARGA.has(pre) && /^\d/.test(v.slice(3))) return "carga";
+  if (AEROLINEAS.has(pre) && /^\d/.test(v.slice(3))) return "comercial";
+  // Matrícula como indicativo (aviación general): HK-1234, N123AB, etc.
+  if (/^HK\d{3,4}[A-Z]?$/.test(v) || /^N\d{1,5}[A-Z]{0,2}$/.test(v) || /^[A-Z]{2}[A-Z0-9]{3,4}$/.test(v)) return "privado";
+  if (/^[A-Z]{3}\d/.test(v)) return "comercial";
+  return "desconocido";
+}
+
+export const COLOR_TIPO: Record<TipoAvion, string> = { comercial: "#ffffff", carga: "#ffb300", estatal: "#ff5252", privado: "#40c4ff", desconocido: "#b0bec5" };

@@ -143,13 +143,15 @@ export class Pines {
       if (img) mapa.addImage(e.id, img, { pixelRatio: 2 });
     });
     const crear = () => {
-      mapa.addSource("pines-3d", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      // Agrupados: de lejos, una burbuja con el número; al acercarse se abren en pines con figura.
+      mapa.addSource("pines-3d", { type: "geojson", data: { type: "FeatureCollection", features: [] }, cluster: true, clusterRadius: 42, clusterMaxZoom: 14 });
       const antes = mapa.getLayer("nombres-vias") ? "nombres-vias" : undefined;
       mapa.addLayer(
         {
           id: "pines-sombra",
           type: "circle",
           source: "pines-3d",
+          filter: ["!", ["has", "point_count"]],
           minzoom: ZOOM_MIN - 3, // teselas lejanas (vista inclinada) son de zoom menor; se ocultan por opacidad
           paint: {
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 1.5, 16, 4],
@@ -165,6 +167,7 @@ export class Pines {
         id: "pines-3d",
         type: "symbol",
         source: "pines-3d",
+        filter: ["!", ["has", "point_count"]],
         minzoom: ZOOM_MIN - 3, // teselas lejanas (vista inclinada) son de zoom menor; se ocultan por opacidad
         layout: {
           "icon-image": ["get", "__img"],
@@ -179,6 +182,47 @@ export class Pines {
         },
         paint: { "icon-opacity": ["interpolate", ["linear"], ["zoom"], ZOOM_MIN, 0, ZOOM_MIN + 0.4, 1] },
       });
+      mapa.addLayer({
+        id: "pines-grupo",
+        type: "circle",
+        source: "pines-3d",
+        minzoom: ZOOM_MIN - 3,
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-color": "rgba(20, 22, 26, 0.82)",
+          "circle-radius": ["interpolate", ["linear"], ["get", "point_count"], 2, 13, 50, 19, 500, 27],
+          "circle-stroke-color": "rgba(255, 255, 255, 0.85)",
+          "circle-stroke-width": 1.5,
+          "circle-opacity": ["interpolate", ["linear"], ["zoom"], ZOOM_MIN, 0, ZOOM_MIN + 0.4, 1],
+          "circle-stroke-opacity": ["interpolate", ["linear"], ["zoom"], ZOOM_MIN, 0, ZOOM_MIN + 0.4, 1],
+          "circle-pitch-alignment": "viewport",
+        },
+      });
+      mapa.addLayer({
+        id: "pines-grupo-n",
+        type: "symbol",
+        source: "pines-3d",
+        minzoom: ZOOM_MIN - 3,
+        filter: ["has", "point_count"],
+        layout: {
+          "text-field": ["get", "point_count_abbreviated"],
+          "text-font": ["Noto Sans Bold"],
+          "text-size": 12,
+          "text-allow-overlap": true,
+          "text-ignore-placement": true,
+          "text-pitch-alignment": "viewport",
+        },
+        paint: { "text-color": "#fff", "text-opacity": ["interpolate", ["linear"], ["zoom"], ZOOM_MIN, 0, ZOOM_MIN + 0.4, 1] },
+      });
+      // Tocar una burbuja acerca hasta que se abre.
+      mapa.on("click", "pines-grupo", async (e) => {
+        const f = e.features?.[0];
+        if (!f) return;
+        const z = await (mapa.getSource("pines-3d") as GeoJSONSource).getClusterExpansionZoom(f.properties!.cluster_id as number);
+        mapa.easeTo({ center: (f.geometry as GeoJSON.Point).coordinates as [number, number], zoom: z + 0.3, duration: 700 });
+      });
+      mapa.on("mouseenter", "pines-grupo", () => (mapa.getCanvas().style.cursor = "pointer"));
+      mapa.on("mouseleave", "pines-grupo", () => (mapa.getCanvas().style.cursor = ""));
       this.listo = true;
       this.alternar(this.activo);
       this.dibujar();
@@ -210,7 +254,7 @@ export class Pines {
   alternar(activo: boolean) {
     this.activo = activo;
     if (!this.listo) return;
-    for (const l of ["pines-3d", "pines-sombra"]) this.mapa.setLayoutProperty(l, "visibility", activo ? "visible" : "none");
+    for (const l of ["pines-3d", "pines-sombra", "pines-grupo", "pines-grupo-n"]) this.mapa.setLayoutProperty(l, "visibility", activo ? "visible" : "none");
   }
 
   private programar() {
