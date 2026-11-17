@@ -1024,7 +1024,9 @@
             "tipo": "meta",
             "presupuesto": "pago, desde feb 2027",
             "plazo": "2027",
-            "estado": "pendiente"
+            "estado": "pendiente",
+            "prioridad_orden": 2,
+            "prioridad": "proxima"
           },
           "osm": [
             {
@@ -1045,7 +1047,7 @@
             "edredon"
           ],
           "lugares_conocidos": [],
-          "notas": ""
+          "notas": "Segunda prioridad: cobijas (y sabanas/almohada). El colchon queda para despues."
         },
         {
           "id": "colchon",
@@ -1181,7 +1183,9 @@
             ],
             "extra": "tambien rodilleras",
             "plazo": "2027",
-            "estado": "pendiente"
+            "estado": "pendiente",
+            "prioridad_orden": 3,
+            "prioridad": "proxima"
           },
           "osm": [
             {
@@ -1199,7 +1203,7 @@
             "asics"
           ],
           "lugares_conocidos": [],
-          "notas": ""
+          "notas": "Tercera prioridad junto con los zapatos para diario."
         },
         {
           "id": "escritorio-en-l",
@@ -1308,6 +1312,74 @@
           ],
           "lugares_conocidos": [],
           "notas": "Por ahora seguira con el perchero abierto."
+        },
+        {
+          "id": "zapatos-diario",
+          "nombre": "Zapatos para diario",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "prioridad": "proxima",
+            "prioridad_orden": 3,
+            "presupuesto": "pago, desde feb 2027",
+            "relacionado_con": [
+              "sneakers",
+              "zapatos-voley"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "shoes"
+            }
+          ],
+          "palabras_clave": [
+            "zapatos",
+            "tenis para diario",
+            "sneakers",
+            "outlet de zapatos"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Tercera prioridad, junto a los zapatos de voley."
+        },
+        {
+          "id": "audifonos-inear-portatil",
+          "nombre": "Audifonos in-ear para el portatil",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "meta",
+            "plazo": "2027",
+            "estado": "pendiente",
+            "prioridad": "proxima",
+            "prioridad_orden": 4,
+            "presupuesto": "pago, desde feb 2027",
+            "tipo_audifono": "in-ear",
+            "relacionado_con": [
+              "audio-alta-definicion",
+              "mejorar-laptop"
+            ],
+            "marcas_vistas": [
+              "KZ"
+            ]
+          },
+          "osm": [
+            {
+              "shop": "electronics"
+            },
+            {
+              "shop": "hifi"
+            }
+          ],
+          "palabras_clave": [
+            "audifonos in-ear",
+            "iem",
+            "KZ",
+            "audifonos para portatil",
+            "audifonos con cable"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Cuarta prioridad. Ya tenia KZ en su lista de compras."
         }
       ]
     },
@@ -1325,7 +1397,9 @@
             "modelo": "Ninebot",
             "relacionado_con": [
               "movilidad"
-            ]
+            ],
+            "prioridad_orden": 1,
+            "prioridad": "indiscutible"
           },
           "osm": [
             {
@@ -1346,7 +1420,7 @@
             "punto de carga"
           ],
           "lugares_conocidos": [],
-          "notas": "Mapa: tiendas, ciclorrutas y parqueaderos seguros."
+          "notas": "Prioridad indiscutible. Aporte previsto el 30 de nov para que la compre la tia (Ninebot)."
         },
         {
           "id": "moto-ns-200",
