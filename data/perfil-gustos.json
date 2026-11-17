@@ -945,12 +945,14 @@
           "notas": ""
         },
         {
-          "id": "puff",
-          "nombre": "Puff para sentarse",
+          "id": "puff-baul",
+          "nombre": "Puff o baul-asiento con almacenamiento",
           "nivel": 4,
           "preferencias": {
             "tipo": "deseo de compra",
-            "presupuesto": "pago, desde feb 2027"
+            "presupuesto": "pago, desde feb 2027",
+            "uso": "sentarse y guardar ropa interior",
+            "division": "boxers de un lado, medias del otro"
           },
           "osm": [
             {
@@ -961,12 +963,14 @@
             }
           ],
           "palabras_clave": [
-            "puff",
-            "pouf",
-            "sillon pequeno"
+            "puff baul",
+            "puff con almacenamiento",
+            "baul asiento",
+            "banco con almacenamiento",
+            "organizador divisores"
           ],
           "lugares_conocidos": [],
-          "notas": ""
+          "notas": "Quiere un puff o caja-silla donde guardar ropa interior, con divisiones: boxers y medias. Ojo: su mensaje decia 'una el i'; confirmar si es en L, con divisor o tipo cajonera."
         },
         {
           "id": "organizador-ropa-y-zapatos",
@@ -1034,7 +1038,8 @@
           "preferencias": {
             "tipo": "deseo de compra",
             "presupuesto": "pago, desde feb 2027",
-            "orden": "despues de la ropa de cama"
+            "orden": "despues de la ropa de cama",
+            "decision_cama": "mantener cama sencilla, de mejor calidad (cuarto angosto)"
           },
           "osm": [
             {
@@ -1049,7 +1054,7 @@
             "colchones"
           ],
           "lugares_conocidos": [],
-          "notas": ""
+          "notas": "Duda entre cama mas grande o mantener la sencilla; se inclina por sencilla de mejor calidad."
         },
         {
           "id": "segundo-monitor",
@@ -1205,6 +1210,72 @@
           ],
           "lugares_conocidos": [],
           "notas": "Quiere un escritorio en L, delgado, contra la pared. Reemplaza o complementa el actual. Faltan medidas de la esquina y de cada pared."
+        },
+        {
+          "id": "espejo-cuerpo-entero",
+          "nombre": "Espejo grande de cuerpo entero",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "relacionado_con": [
+              "old-money",
+              "streetwear"
+            ],
+            "ubicacion": "pared o detras de la puerta"
+          },
+          "osm": [
+            {
+              "shop": "interior_decoration"
+            },
+            {
+              "shop": "houseware"
+            },
+            {
+              "shop": "glaziery"
+            }
+          ],
+          "palabras_clave": [
+            "espejo de cuerpo entero",
+            "espejo de piso",
+            "espejo grande",
+            "espejo de pared"
+          ],
+          "lugares_conocidos": [],
+          "notas": ""
+        },
+        {
+          "id": "cajas-transparentes-tenis",
+          "nombre": "Cajas transparentes para los tenis",
+          "nivel": 4,
+          "preferencias": {
+            "tipo": "deseo de compra",
+            "presupuesto": "pago, desde feb 2027",
+            "relacionado_con": [
+              "sneakers",
+              "organizador-ropa-y-zapatos"
+            ],
+            "cantidad": "una por par"
+          },
+          "osm": [
+            {
+              "shop": "houseware"
+            },
+            {
+              "shop": "doityourself"
+            },
+            {
+              "shop": "variety_store"
+            }
+          ],
+          "palabras_clave": [
+            "cajas transparentes para tenis",
+            "sneaker box",
+            "caja apilable zapatos",
+            "cajas acrilicas"
+          ],
+          "lugares_conocidos": [],
+          "notas": "Por ahora seguira con el perchero abierto."
         }
       ]
     }
