@@ -1171,14 +1171,14 @@
           "notas": ""
         },
         {
-          "id": "escritorio-delgado",
-          "nombre": "Escritorio mas delgado",
+          "id": "escritorio-en-l",
+          "nombre": "Escritorio en L (delgado)",
           "nivel": 4,
           "preferencias": {
             "tipo": "deseo de compra",
             "presupuesto": "pago, desde dic 2026 o ene 2027",
-            "ubicacion": "contra la pared, como el actual",
-            "forma": "angosto (poca profundidad)",
+            "ubicacion": "en la esquina, contra las paredes",
+            "forma": "en L, brazos angostos (poca profundidad)",
             "relacionado_con": [
               "segundo-monitor",
               "mejorar-laptop",
@@ -1197,14 +1197,14 @@
             }
           ],
           "palabras_clave": [
-            "escritorio",
-            "escritorio angosto",
-            "escritorio pequeno",
-            "escritorio para pared",
-            "mueble para computador"
+            "escritorio en L",
+            "escritorio esquinero",
+            "escritorio de esquina",
+            "escritorio gamer en L",
+            "escritorio angosto"
           ],
           "lugares_conocidos": [],
-          "notas": "Reemplaza o complementa el escritorio actual de madera bajo la ventana. Faltan medidas del espacio."
+          "notas": "Quiere un escritorio en L, delgado, contra la pared. Reemplaza o complementa el actual. Faltan medidas de la esquina y de cada pared."
         }
       ]
     }
