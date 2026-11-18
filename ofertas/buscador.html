@@ -170,7 +170,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .card.is-best{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
 .card-img{aspect-ratio:4/3;border-radius:0}
 .card-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:12px}
-.badge{position:absolute;left:8px;top:8px;background:var(--accent);color:var(--accent-fg);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:999px}
+.badges{position:absolute;left:8px;top:8px;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.badge.cheap{background:var(--tag);color:var(--tag-fg)}
+.badge{background:var(--accent);color:var(--accent-fg);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:999px}
 .card-body{padding:12px 14px 14px;display:grid;gap:6px;align-content:start}
 .card h3{font-family:var(--body);font-weight:600;font-size:.92rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card h3 a{color:var(--fg);text-decoration:none} .card h3 a:hover{text-decoration:underline}
@@ -287,11 +289,11 @@ window.Vitrina = (() => {
     return c.join('');
   }
 
-  function card(r, best) {
+  function card(r, best, cheap) {
     const img = safeImg(r.imagen);
     const off = r.precio_antes_cop && r.precio_antes_cop > r.precio_final_estimado_cop ? Math.round((1 - r.precio_final_estimado_cop / r.precio_antes_cop) * 100) : r.descuento_pct;
     return `<article class="card${best ? ' is-best' : ''}">
-<a class="card-img" href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${img ? `<img src="${img}" alt="" loading="lazy">` : `<span class="ph">${initials(r.producto)}</span>`}${best ? '<span class="badge">Mejor calidad-precio</span>' : ''}</a>
+<a class="card-img" href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${img ? `<img src="${img}" alt="" loading="lazy">` : `<span class="ph">${initials(r.producto)}</span>`}<span class="badges">${best ? '<span class="badge">Mejor calidad-precio</span>' : ''}${cheap ? '<span class="badge cheap">La más barata</span>' : ''}</span></a>
 <div class="card-body">
   ${r.puntaje_cp != null ? `<div class="cp" title="Puntaje calidad-precio de 0 a 100"><b>${esc(r.puntaje_cp)}</b><span class="cp-bar"><i style="width:${Math.max(0, Math.min(100, +r.puntaje_cp || 0))}%"></i></span><span class="cp-l">calidad-precio</span></div>` : ''}
   ${r.marca ? `<span class="brand-tag">${esc(r.marca)}</span>` : ''}
@@ -342,8 +344,9 @@ ${rec.spec_clave ? `<span class="spec">${esc(rec.spec_clave)}</span>` : ''}<p>${
     } else {
       body = GAMAS.map(([k, l, n]) => {
         const g = nuevos.filter((r) => r.gama === k); if (!g.length) return '';
+        const minP = Math.min(...g.map((r) => r.precio_final_estimado_cop));
         return `<section class="lane lane-${k}" id="gama-${k}"><div class="lane-head">${tier(n)}<h2>${l}</h2><span class="note">${esc((d.gamas || {})[k] || `${cop(Math.min(...g.map((r) => r.precio_final_estimado_cop)))} – ${cop(Math.max(...g.map((r) => r.precio_final_estimado_cop)))}`)}</span><span class="count">${g.length}</span></div>
-<div class="cards">${g.map((r, i) => card(r, i === 0)).join('')}</div></section>`;
+<div class="cards">${g.map((r, i) => card(r, i === 0, r.precio_final_estimado_cop === minP)).join('')}</div></section>`;
       }).join('') + (st.usados && usados.length ? `<section class="lane lane-usados"><div class="lane-head"><h2>Usados y Marketplace</h2><span class="note">Revisa en persona y pide factura.</span><span class="count">${usados.length}</span></div><div class="cards">${usados.map((r) => card(r, false)).join('')}</div></section>` : '');
     }
     return `<header class="res-head"><span class="eyebrow">${esc(CATS[d.categoria] || 'Resultados')}</span><h2 class="res-title">${esc(d.consulta)}</h2>

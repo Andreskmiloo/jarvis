@@ -16,13 +16,15 @@ decir con claridad dónde comprar. Responde siempre en español.
    `siempre` y, si aplica, `mercados_chinos_confiables`. Si el producto es ambiguo (talla, color,
    capacidad, año/modelo), asume la versión más común y dilo.
 
-2. **Búsqueda directa** (rápida y exacta). Ejecuta:
+2. **Barrido directo (rápido y profundo)** — una sola orden con 3 a 8 consultas en paralelo
+   (nombre genérico + marcas/modelos principales), con caché de 6 horas y fichas técnicas:
    ```bash
-   node ofertas/buscar.js "<producto>" --categoria <ropa|tecnologia|deportes|hogar|mercado|movilidad|vehiculos|todas> --max 6
+   node ofertas/barrido.js "<producto genérico>" "<marca A + producto>" "<marca B + producto>" … \
+     --categoria <cat> --max 10 --incluir "<palabras del producto>" --excluir "<accesorios|repuestos|niños>" \
+     --min <precio mínimo razonable> --fichas 10 --specs "<unidades clave: Wh|W|GB|MHz…>"
    ```
-   Devuelve JSON con resultados de tiendas VTEX (Nike CO, Arturo Calle, Vélez, Olímpica, Jumbo...),
-   Falabella, Amazon, AliExpress, Mercado Libre (si hay `ML_ACCESS_TOKEN`) y la TRM del día.
-   Descarta resultados que no sean el producto pedido (accesorios, repuestos, otros modelos).
+   Devuelve resultados deduplicados y ordenados por precio, más las especificaciones leídas de las fichas de
+   los candidatos nacionales más baratos. (Para una sola consulta puedes seguir usando `ofertas/buscar.js`.)
 
 3. **Búsqueda web** (sigue la sección `como_buscar` de `ofertas/tiendas.yaml` para saber qué vía usar en cada fuente) para cada tienda `acceso: web` o `cuenta` de las categorías elegidas. Lanza las
    búsquedas en paralelo (varias llamadas en el mismo turno). Patrones:
@@ -92,6 +94,22 @@ decir con claridad dónde comprar. Responde siempre en español.
 
 8. **Responde** con: la mejor opción (tienda, precio final, enlace), las 3 siguientes, los cupones
    aplicables, si conviene esperar, y la ruta del `.html` generado. Breve y directo.
+
+## Eficiencia (profundo pero rápido)
+- Haz el barrido directo y las búsquedas web **en paralelo en el mismo turno** (todas las WebSearch a la vez,
+  máximo ~8), no una por una.
+- No abras páginas que ya sabes bloqueadas (Mercado Libre listado, Shein, Temu, AliExpress producto, Alkosto
+  buscador): usa la vía indicada en `como_buscar` de `ofertas/tiendas.yaml`.
+- Abre fichas solo de los mejores candidatos (las que dan `--fichas` ya están leídas).
+- Para de buscar cuando tengas ≥ 8 tiendas o ≥ 5 marcas cubiertas y la más barata de cada gama confirmada.
+
+## La más barata (siempre)
+- Además de calidad-precio y premium, **esfuérzate por encontrar la opción más barata** de cada gama y del total:
+  busca variantes genéricas, Mercado Libre (por búsqueda web), Amazon y marcas alternativas.
+- Solo cuenta un precio como "más barato" si es del producto pedido y está verificado (los precios "desde" de
+  AliExpress suelen ser de la variante más pequeña: confírmalos o déjalos fuera).
+- En `top3`, si el usuario pide lo más barato, usa etiquetas "Más barata · …"; la página marca sola con
+  "La más barata" la oferta de menor precio de cada gama.
 
 ## Reglas
 - Nunca inventes precios, cupones ni enlaces. Todo precio debe venir del script o de una página que viste.
