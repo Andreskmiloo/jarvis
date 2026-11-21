@@ -14,8 +14,8 @@ const cambios = {};      // cambio en [data-cambio="x"]
 const FORMULARIOS = {};  // formularios: { col, titulo(item, ctx), campos(item, ctx), guardar(d, previo) }
 
 const COLECCIONES_BASE = ['pagos', 'diarios', 'pedidos', 'tareas', 'metas']; // las que trae todo respaldo
-const COLECCIONES = [...COLECCIONES_BASE, 'cuentas', 'movimientos', 'habitos', 'bienes', 'historial'];
-const CAMPOS_FECHA = ['fecha', 'fechaPago', 'fechaCobro', 'actualizado'];
+const COLECCIONES = [...COLECCIONES_BASE, 'cuentas', 'movimientos', 'habitos', 'bienes', 'historial', 'deseos'];
+const CAMPOS_FECHA = ['fecha', 'fechaPago', 'fechaCobro', 'actualizado', 'fechaCompra', 'consultaFecha'];
 const FECHA_OK = /^\d{4}-\d{2}-\d{2}$/;
 const fechaValida = f => typeof f === 'string' && FECHA_OK.test(f) && deFecha(aFecha(f)) === f;
 const registro = x => x && typeof x === 'object' && !Array.isArray(x);
@@ -26,6 +26,7 @@ function datosVacios() {
     ingresos: { q15: 0, q30: 0 }, config: { gananciaEstimada: 100000 },
     cuentas: [], movimientos: [], pagos: [], diarios: [], pedidos: [], tareas: [], metas: [], habitos: [],
     bienes: [], historial: [], // inventario y foto mensual del patrimonio
+    deseos: [], // lo que quieres comprar (con ofertas importadas del buscador)
   };
 }
 
@@ -207,7 +208,7 @@ function leerForm(f) {
 }
 
 // ---------- Formularios (se abren en una ventana emergente) ----------
-const FORMULARIO_DE = { pagos: 'pago', diarios: 'diario', pedidos: 'pedido', tareas: 'tarea', metas: 'meta', cuentas: 'cuenta', habitos: 'habito', bienes: 'bien' };
+const FORMULARIO_DE = { pagos: 'pago', diarios: 'diario', pedidos: 'pedido', tareas: 'tarea', metas: 'meta', cuentas: 'cuenta', habitos: 'habito', bienes: 'bien', deseos: 'deseo' };
 
 function abrirFormulario(nombre, item, ctx = {}, enSitio = false) {
   const F = FORMULARIOS[nombre];

@@ -5,9 +5,13 @@ const SECCIONES = [
   { id: 'cuentas', texto: 'Cuentas', icono: 'cuentas', vista: vistaCuentas },
   { id: 'finanzas', texto: 'Finanzas', icono: 'finanzas', vista: vistaFinanzas },
   { id: 'patrimonio', texto: 'Patrimonio', icono: 'patrimonio', vista: vistaPatrimonio },
+  { id: 'compras', texto: 'Compras', icono: 'bolsa', vista: vistaCompras },
   { id: 'pendientes', texto: 'Pendientes', icono: 'pendientes', vista: vistaPendientes },
   { id: 'negocio', texto: 'Negocio', icono: 'negocio', vista: vistaNegocio },
 ];
+acciones.menuMas = () => abrirHoja('Más secciones', `<nav class="menu-mas">${SECCIONES.slice(MENU_CEL).map(s =>
+  `<a href="#${s.id}" data-accion="cerrarHoja"${s.id === vistaActual() ? ' aria-current="page"' : ''}>${ic(s.icono)}<span>${s.texto}</span>${ic('chevron')}</a>`).join('')}</nav>`, { chica: true });
+
 const ALIAS = { tablero: 'inicio', parfums: 'negocio' }; // direcciones de la versión anterior
 
 let vistaPintada = '';
@@ -19,11 +23,17 @@ function vistaActual() {
   return SECCIONES.some(s => s.id === id) ? id : 'inicio';
 }
 
+// En el celular el menú de abajo muestra las primeras secciones y un botón "Más" con el resto;
+// en PC la barra lateral las muestra todas.
+const MENU_CEL = 4;
+
 function construirMenu() {
   const menu = document.getElementById('menu');
-  menu.style.setProperty('--n', SECCIONES.length);
-  menu.innerHTML = SECCIONES.map(s =>
-    `<a href="#${s.id}" data-vista="${s.id}">${ic(s.icono)}<span>${s.texto}</span></a>`).join('') + '<i class="ind" aria-hidden="true"></i>';
+  menu.style.setProperty('--n', MENU_CEL + 1);
+  menu.innerHTML = SECCIONES.map((s, i) =>
+    `<a href="#${s.id}" data-vista="${s.id}"${i >= MENU_CEL ? ' class="extra"' : ''}>${ic(s.icono)}<span>${s.texto}</span></a>`).join('')
+    + `<button type="button" class="mas-menu" data-accion="menuMas" aria-haspopup="dialog">${ic('puntos')}<span>Más</span></button>`
+    + '<i class="ind" aria-hidden="true"></i>';
   document.getElementById('fab').innerHTML = ic('mas');
   document.getElementById('registrar-lat').innerHTML = ic('mas') + '<span>Registrar movimiento</span>';
   document.getElementById('pie-exportar').innerHTML = ic('descargar') + '<span>Descargar respaldo</span>';
@@ -49,9 +59,10 @@ function render() {
 
   const menu = document.getElementById('menu');
   menu.querySelectorAll('a').forEach((a, i) => {
-    if (a.dataset.vista === id) { a.setAttribute('aria-current', 'page'); menu.style.setProperty('--i', i); }
+    if (a.dataset.vista === id) { a.setAttribute('aria-current', 'page'); menu.style.setProperty('--i', i); menu.style.setProperty('--ic', Math.min(i, MENU_CEL)); }
     else a.removeAttribute('aria-current');
   });
+  menu.querySelector('.mas-menu').classList.toggle('activo', SECCIONES.findIndex(s => s.id === id) >= MENU_CEL);
   document.title = seccion.texto + ' · Jarvis';
   document.getElementById('estado-guardado').textContent = almacenOk ? 'Almacenamiento local' : 'Cambios sin guardar';
   document.body.dataset.vista = id;

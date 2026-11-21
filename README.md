@@ -26,6 +26,12 @@ pide reducir el movimiento, muestra una composición fija.
   estado de resultados por mes (ingresos, costo de lo vendido, gastos del día a día, pagos de deudas y
   resultado), el inventario de tus cosas (lo que costaron, lo que valen hoy y cuánto las valoras) y una
   línea de tiempo con todos tus movimientos y compras.
+- **Compras**: lo que quieres comprar con un semáforo que mira tu momento económico (lo libre de la
+  quincena, los pagos de los próximos 7 días, las deudas atrasadas y tu colchón) y te dice si comprarlo
+  ya, con cuidado o esperar, con un plan de ahorro por quincena. Importa los resultados del buscador de
+  ofertas (sus archivos JSON) y los liga al deseo; al marcarlo comprado pasa a tu inventario. Además,
+  en qué se va tu dinero (este mes frente al anterior), los gastos hormiga y lo que pagas cada mes y al año.
+  Son reglas simples sobre tus datos para ayudarte a decidir, no asesoría financiera.
 - **Pendientes**: matriz de Eisenhower (urgente / importante), metas con anillo de progreso y
   una rutina de hábitos con rachas.
 - **Negocio**: ventas, pedidos y ganancia hacia tu meta, y el ritmo que necesitas para llegar.
@@ -107,6 +113,7 @@ js/finanzas.js    quincenas, alertas, deudas, fijos, gastos diarios, por cobrar
 js/pendientes.js  matriz de Eisenhower, metas y rutina
 js/negocio.js     pedidos, ventas y ganancia
 js/patrimonio.js  balance, estado de resultados, inventario y línea de tiempo
+js/compras.js     deseos, semáforo de compras, ofertas importadas y en qué se va el dinero
 js/analisis.js    proyección de caja, gráfico y lecturas de Jarvis
 js/tablero.js     pantalla de Inicio
 js/app.js         navegación y eventos
