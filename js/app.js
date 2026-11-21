@@ -4,6 +4,7 @@ const SECCIONES = [
   { id: 'inicio', texto: 'Inicio', icono: 'inicio', vista: vistaInicio },
   { id: 'cuentas', texto: 'Cuentas', icono: 'cuentas', vista: vistaCuentas },
   { id: 'finanzas', texto: 'Finanzas', icono: 'finanzas', vista: vistaFinanzas },
+  { id: 'patrimonio', texto: 'Patrimonio', icono: 'patrimonio', vista: vistaPatrimonio },
   { id: 'pendientes', texto: 'Pendientes', icono: 'pendientes', vista: vistaPendientes },
   { id: 'negocio', texto: 'Negocio', icono: 'negocio', vista: vistaNegocio },
 ];

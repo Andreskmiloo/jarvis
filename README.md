@@ -21,6 +21,11 @@ pide reducir el movimiento, muestra una composición fija.
 - **Cuentas**: tu billetera y tus bancos. Escribes cuánto tienes en cada una (dinero en físico y
   digital) y registras gastos, ingresos y transferencias (por ejemplo, un retiro de cajero).
 - **Finanzas**: quincenas, deudas, fijos, gastos diarios y lo que te deben.
+- **Patrimonio**: tu economía como una empresa. Lo que tienes (cuentas, inventario, lo que te deben) y lo
+  que debes (cada deuda con su saldo, cuota y fecha), tu patrimonio neto y cómo cambia mes a mes. Un
+  estado de resultados por mes (ingresos, costo de lo vendido, gastos del día a día, pagos de deudas y
+  resultado), el inventario de tus cosas (lo que costaron, lo que valen hoy y cuánto las valoras) y una
+  línea de tiempo con todos tus movimientos y compras.
 - **Pendientes**: matriz de Eisenhower (urgente / importante), metas con anillo de progreso y
   una rutina de hábitos con rachas.
 - **Negocio**: ventas, pedidos y ganancia hacia tu meta, y el ritmo que necesitas para llegar.
@@ -101,6 +106,7 @@ js/cuentas.js     cuentas, movimientos y transferencias
 js/finanzas.js    quincenas, alertas, deudas, fijos, gastos diarios, por cobrar
 js/pendientes.js  matriz de Eisenhower, metas y rutina
 js/negocio.js     pedidos, ventas y ganancia
+js/patrimonio.js  balance, estado de resultados, inventario y línea de tiempo
 js/analisis.js    proyección de caja, gráfico y lecturas de Jarvis
 js/tablero.js     pantalla de Inicio
 js/app.js         navegación y eventos

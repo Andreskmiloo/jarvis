@@ -14,7 +14,7 @@ const cambios = {};      // cambio en [data-cambio="x"]
 const FORMULARIOS = {};  // formularios: { col, titulo(item, ctx), campos(item, ctx), guardar(d, previo) }
 
 const COLECCIONES_BASE = ['pagos', 'diarios', 'pedidos', 'tareas', 'metas']; // las que trae todo respaldo
-const COLECCIONES = [...COLECCIONES_BASE, 'cuentas', 'movimientos', 'habitos'];
+const COLECCIONES = [...COLECCIONES_BASE, 'cuentas', 'movimientos', 'habitos', 'bienes', 'historial'];
 const CAMPOS_FECHA = ['fecha', 'fechaPago', 'fechaCobro', 'actualizado'];
 const FECHA_OK = /^\d{4}-\d{2}-\d{2}$/;
 const fechaValida = f => typeof f === 'string' && FECHA_OK.test(f) && deFecha(aFecha(f)) === f;
@@ -25,6 +25,7 @@ function datosVacios() {
     version: VERSION, ultimoRespaldo: '',
     ingresos: { q15: 0, q30: 0 }, config: { gananciaEstimada: 100000 },
     cuentas: [], movimientos: [], pagos: [], diarios: [], pedidos: [], tareas: [], metas: [], habitos: [],
+    bienes: [], historial: [], // inventario y foto mensual del patrimonio
   };
 }
 
@@ -75,6 +76,8 @@ function completar(d) {
       });
   }
   r.cuentas = r.cuentas.map(c => ({ ...c, tipo: c.tipo === 'efectivo' ? 'efectivo' : 'digital' }));
+  r.historial = r.historial.filter(h => typeof h.mes === 'string' && /^\d{4}-\d{2}$/.test(h.mes))
+    .map(h => ({ ...h, activos: Number(h.activos) || 0, pasivos: Number(h.pasivos) || 0, neto: Number(h.neto) || 0 }));
   r.habitos = r.habitos.map(h => ({ ...h, hechos: Array.isArray(h.hechos) ? h.hechos.filter(fechaValida) : [] }));
   for (const x of [...r.pagos, ...r.pedidos, ...r.movimientos]) {
     for (const k of ['cuenta', 'destino', 'movId', 'siguienteId']) {
@@ -155,6 +158,7 @@ function cambiarDatos(cambiar) {
   let nuevo;
   try {
     if (cambiar() === false) return;
+    if (JSON.stringify(datos) !== previo) anotarPatrimonio(); // la foto del mes sigue al día
     nuevo = JSON.stringify(datos);
   } catch (e) {
     console.error(e);
@@ -203,7 +207,7 @@ function leerForm(f) {
 }
 
 // ---------- Formularios (se abren en una ventana emergente) ----------
-const FORMULARIO_DE = { pagos: 'pago', diarios: 'diario', pedidos: 'pedido', tareas: 'tarea', metas: 'meta', cuentas: 'cuenta', habitos: 'habito' };
+const FORMULARIO_DE = { pagos: 'pago', diarios: 'diario', pedidos: 'pedido', tareas: 'tarea', metas: 'meta', cuentas: 'cuenta', habitos: 'habito', bienes: 'bien' };
 
 function abrirFormulario(nombre, item, ctx = {}, enSitio = false) {
   const F = FORMULARIOS[nombre];

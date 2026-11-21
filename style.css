@@ -827,3 +827,51 @@ input, select { min-height: 42px; background: #0e121a; }
     grid-template-areas: "hero caja caja" "kpis kpis kpis" "lecturas semana debe" "metas metas rutina" "respaldo respaldo respaldo";
   }
 }
+
+/* ---------- Patrimonio ---------- */
+.patrimonio .a-neto .gigante { display: block; font-size: clamp(2rem, 4.4vw, 3.2rem); letter-spacing: -.05em; margin: 2px 0 4px; }
+.mini-grafico { display: block; width: 100%; height: 70px; margin-top: 12px; overflow: visible; }
+.mini-grafico .cero { stroke: var(--linea); stroke-dasharray: 3 4; }
+.mini-grafico .linea-neto { fill: none; stroke: var(--acc); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.mini-grafico circle { fill: var(--acc); }
+.nav-mes { display: flex; align-items: center; gap: 4px; font-size: .82rem; font-weight: 650; text-transform: capitalize; }
+.nav-mes .icono-btn:first-child .ic { transform: rotate(90deg); }
+.nav-mes .icono-btn.siguiente .ic { transform: rotate(-90deg); }
+.nav-mes .icono-btn:disabled { opacity: .35; cursor: default; }
+.resultados { list-style: none; margin: 10px 0 0; padding: 0; }
+.resultados li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--linea); font-size: .88rem; }
+.resultados li.sub { padding: 3px 0 3px 14px; border-bottom: 0; color: var(--txt-3); font-size: .8rem; }
+.resultados li.sub b { font-weight: 500; }
+.resultados li.total { font-weight: 700; }
+.resultados li.final { margin-top: 4px; border: 0; border-top: 2px solid var(--acc-2); padding-top: 9px; font-weight: 800; font-size: 1rem; }
+.grupo { display: flex; justify-content: space-between; margin: 14px 0 4px; color: var(--acc); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; }
+.grupo:first-of-type { margin-top: 4px; }
+.grupo span { color: var(--txt-2); letter-spacing: 0; }
+.aprecio { display: inline-flex; gap: 3px; }
+.aprecio i { width: 7px; height: 7px; border-radius: 50%; background: var(--linea-2, #434b59); }
+.aprecio i.on { background: var(--acc); }
+.linea-tiempo { display: grid; gap: 8px; }
+.mes-linea { border: 1px solid var(--linea); border-radius: 14px; background: #ffffff04; }
+.mes-linea summary { display: flex; align-items: center; gap: 10px; padding: 11px 13px; cursor: pointer; list-style: none; }
+.mes-linea summary::-webkit-details-marker { display: none; }
+.mes-linea summary .ic { width: 16px; height: 16px; margin-left: auto; transition: transform .2s; color: var(--txt-3); }
+.mes-linea[open] summary .ic { transform: rotate(180deg); }
+.mes-nombre { font-weight: 700; text-transform: capitalize; }
+.mes-cifras { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: .78rem; font-variant-numeric: tabular-nums; }
+.mes-linea ol { list-style: none; margin: 0; padding: 2px 13px 12px 13px; position: relative; }
+.mes-linea ol::before { content: ''; position: absolute; left: 79px; top: 4px; bottom: 16px; width: 1px; background: var(--linea); }
+.evento { display: grid; grid-template-columns: 52px 24px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 5px 0; font-size: .84rem; }
+.evento .dia { color: var(--txt-3); font-size: .74rem; white-space: nowrap; }
+.punto-ev { position: relative; z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--panel); border: 1px solid var(--linea); }
+.punto-ev .ic { width: 12px; height: 12px; }
+.evento.pos .punto-ev { color: var(--pos); } .evento.neg .punto-ev { color: var(--neg); } .evento.acc .punto-ev { color: var(--acc); }
+.texto-ev { overflow-wrap: anywhere; }
+@media (min-width: 760px) {
+  .patrimonio { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "neto neto" "tienes debes" "resultados inventario" "linea linea"; }
+  .patrimonio .a-neto { grid-area: neto; } .patrimonio .a-tienes { grid-area: tienes; } .patrimonio .a-debes { grid-area: debes; }
+  .patrimonio .a-resultados { grid-area: resultados; } .patrimonio .a-inventario { grid-area: inventario; } .patrimonio .a-linea { grid-area: linea; }
+}
+@media (min-width: 1360px) {
+  .patrimonio { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "neto tienes debes" "resultados inventario inventario" "linea linea linea"; }
+}
+.patrimonio .a-neto .stats b { font-size: clamp(.9rem, 1.6vw, 1.05rem); overflow-wrap: normal; white-space: nowrap; }
