@@ -34,7 +34,7 @@ function migrar(d) {
   if (!('cuentas' in d)) {
     d.cuentas = [
       { nombre: 'Billetera', tipo: 'efectivo', saldo: 0, actualizado: '' },
-      { nombre: 'BBVA', tipo: 'digital', saldo: 0, actualizado: '' },
+      { nombre: 'Banco', tipo: 'digital', saldo: 0, actualizado: '' },
     ];
   }
   if (!('habitos' in d)) d.habitos = [{ nombre: 'Estudiar Matemática', hechos: [] }];
@@ -104,7 +104,19 @@ function completar(d) {
 function cargar() {
   try { lecturaGuardada = localStorage.getItem(CLAVE); }
   catch (e) { usarMemoria = true; almacenOk = false; }
-  return leerEstado(lecturaGuardada);
+  // Algunos navegadores (modo privado) dejan leer pero no escribir: se avisa desde el principio, no al primer cambio.
+  if (!usarMemoria) {
+    try { localStorage.setItem(CLAVE + '_prueba', '1'); localStorage.removeItem(CLAVE + '_prueba'); }
+    catch (e) { almacenOk = false; }
+  }
+  const d = leerEstado(lecturaGuardada);
+  // Datos de una versión anterior: quedan guardados ya actualizados (los dañados no se tocan; su copia está en _corrupto).
+  let version = VERSION;
+  try { version = Number(JSON.parse(lecturaGuardada).version) || 1; } catch (e) { /* vacío o dañado */ }
+  if (lecturaGuardada && version < VERSION && !usarMemoria) {
+    try { lecturaGuardada = JSON.stringify(d); localStorage.setItem(CLAVE, lecturaGuardada); } catch (e) { almacenOk = false; }
+  }
+  return d;
 }
 
 function leerEstado(crudo) {
@@ -134,39 +146,34 @@ function sincronizarPestana() {
   return true;
 }
 
-async function cambiarDatos(cambiar) {
-  const ejecutar = () => {
-    if (sincronizarPestana()) return;
-    const previo = JSON.stringify(datos);
-    let nuevo;
-    try {
-      if (cambiar() === false) return;
-      nuevo = JSON.stringify(datos);
-    } catch (e) {
-      datos = JSON.parse(previo);
-      render();
-      throw e;
-    }
-    if (nuevo !== previo && !usarMemoria) {
-      if (sincronizarPestana()) return;
-      try {
-        localStorage.setItem(CLAVE, nuevo);
-        lecturaGuardada = nuevo;
-        almacenOk = true;
-      } catch (e) {
-        almacenOk = false;
-      }
-    }
-    if (nuevo !== previo) render();
-  };
-  // Con Web Locks, leer y escribir es una sola operación entre pestañas del mismo origen.
+// Toda acción que cambia datos pasa por aquí: primero mira si otra pestaña guardó algo (y en ese caso carga eso),
+// luego aplica el cambio, guarda y vuelve a pintar. Es síncrono: localStorage también lo es, así que leer, comparar
+// y escribir ocurre en el mismo paso y nada de lo que escribes en la pantalla se pierde por un repintado tardío.
+function cambiarDatos(cambiar) {
+  if (sincronizarPestana()) return;
+  const previo = JSON.stringify(datos);
+  let nuevo;
   try {
-    if (navigator.locks) await navigator.locks.request(CLAVE, ejecutar);
-    else ejecutar();
+    if (cambiar() === false) return;
+    nuevo = JSON.stringify(datos);
   } catch (e) {
     console.error(e);
+    datos = JSON.parse(previo);
+    render();
     avisar('No se pudo completar la acción.', 'error');
+    return;
   }
+  if (nuevo === previo) return;
+  if (!usarMemoria) {
+    try {
+      localStorage.setItem(CLAVE, nuevo);
+      lecturaGuardada = nuevo;
+      almacenOk = true;
+    } catch (e) {
+      almacenOk = false;
+    }
+  }
+  render();
 }
 
 // ---------- Listas ----------

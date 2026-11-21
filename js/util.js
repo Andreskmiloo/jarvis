@@ -18,7 +18,7 @@ function peso(n) {
   return (n < 0 ? '-' : '') + '$' + miles(Math.abs(n));
 }
 
-// "793.900" o "$793.900" → 793900 (quita todo lo que no sea dígito)
+// "1.234.567" o "$1.234.567" → 1234567 (quita todo lo que no sea dígito)
 function dinero(texto) {
   const valor = Number(String(texto ?? '').replace(/\D/g, ''));
   return Number.isSafeInteger(valor) ? valor : 0;

@@ -74,6 +74,11 @@ Una instalación nueva empieza vacía. Los datos guardados en el mismo navegador
 al actualizar. Si cambias de dirección o dispositivo, exporta un respaldo desde la instalación
 anterior e impórtalo en la nueva. Guarda el JSON en un lugar privado porque contiene tus datos.
 
+Cada cambio se guarda al instante. Si tienes Jarvis abierto en dos pestañas, la que estaba atrás carga
+los cambios de la otra antes de guardar, para que ninguna pise a la otra. Los datos de versiones
+anteriores se actualizan y quedan guardados solos; si el navegador no deja guardar (modo privado),
+Jarvis lo avisa desde que abres la página.
+
 ## Compatibilidad
 
 Funciona sin conexión, sin librerías externas y con scripts normales (no módulos), así que abre

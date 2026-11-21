@@ -14,7 +14,8 @@ function fijarEstadoPedido(o, estado, cambioContable = false) {
   o.estado = estado;
   if (estado === 'pagado' && (antes !== 'pagado' || o.movId || cambioContable)) {
     sincronizarMovimiento(o, 'ingreso', o.precio, 'Negocio', 'Cobro ' + o.cliente);
-    if (antes !== 'pagado') avisar('Marcado como cobrado');
+    const cuenta = o.movId && buscar('cuentas', o.cuenta);
+    if (antes !== 'pagado') avisar(cuenta ? 'Cobrado. Entró a ' + cuenta.nombre : 'Marcado como cobrado');
   } else if (antes === 'pagado' && o.movId) {
     quitarMov(o.movId);
     o.movId = '';
