@@ -1,0 +1,24 @@
+{
+  "name": "ojo-de-dios",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Lector de zonas de Bogotá con datos públicos, mis lugares e intereses",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.9.0",
+    "maplibre-gl": "^6.18.0",
+    "satellite.js": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946.0.16",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}
