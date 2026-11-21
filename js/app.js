@@ -44,6 +44,7 @@ function render() {
   const sinAlmacen = almacenOk ? ''
     : `<p class="aviso">${ic('alerta')}<span>Este navegador no me deja guardar datos (¿modo privado?). Exporta un respaldo antes de cerrar.</span></p>`;
   document.getElementById('vista').innerHTML = sinAlmacen + html;
+  montarNucleo(document.querySelector('.hero-esfera'));
 
   const menu = document.getElementById('menu');
   menu.querySelectorAll('a').forEach((a, i) => {
@@ -52,7 +53,7 @@ function render() {
   });
   document.title = seccion.texto + ' · Jarvis';
   document.getElementById('estado-guardado').textContent = almacenOk ? 'Almacenamiento local' : 'Cambios sin guardar';
-  document.body.dataset.vista = id; // el CSS usa esto (por ejemplo, el holograma brilla más en Inicio)
+  document.body.dataset.vista = id;
   document.getElementById('pie-respaldo').textContent = datos.ultimoRespaldo ? 'Último respaldo: ' + hace(datos.ultimoRespaldo) : 'Aún sin respaldo';
 
   if (cambio) previos.clear();

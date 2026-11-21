@@ -39,6 +39,7 @@ function vistaInicio() {
     </header>
     <section class="rejilla inicio">
       <article class="tarjeta hero a-hero">
+        <div class="hero-esfera" aria-hidden="true"></div>
         <div class="hero-cab">
           <span class="etiqueta">Disponible ahora</span>
           <a class="enlace" href="#cuentas">Ver cuentas${ic('flecha')}</a>

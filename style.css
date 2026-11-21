@@ -1,7 +1,6 @@
 /* ==========================================================================
    Jarvis — sistema visual
-   Aspecto holográfico: luz dorada sobre azul acero oscuro, líneas finas y una esfera
-   que gira detrás de todo (js/holograma.js). Compacto: poco espacio vacío.
+   Superficies oscuras y un núcleo animado dentro de la tarjeta de saldo.
    Se diseña primero para celular y se ensancha en PC.
    Todo el movimiento se apaga con "reducir movimiento".
    ========================================================================== */
@@ -30,8 +29,6 @@
   --fuente: Inter, "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   --ease: cubic-bezier(.2, .8, .2, 1);
-  --holo: min(139vw, 920px);                   /* ancho del lienzo de la esfera (incluye órbitas y anillos) */
-  --aura: min(118vw, 780px);                   /* ancho del resplandor de CSS detrás de la esfera */
   --inset-sup: env(safe-area-inset-top, 0px);  /* zonas seguras del celular (muesca y barra de inicio) */
   --inset-inf: env(safe-area-inset-bottom, 0px);
   color-scheme: dark;
@@ -83,28 +80,6 @@ b { font-weight: 650; }
   -webkit-mask-image: radial-gradient(ellipse at 50% 18%, #000 15%, transparent 72%);
   mask-image: radial-gradient(ellipse at 50% 18%, #000 15%, transparent 72%);
 }
-.orbe { position: absolute; border-radius: 50%; will-change: transform; }
-.orbe.a { width: 52vmax; height: 52vmax; top: -22vmax; right: -16vmax; background: radial-gradient(circle, rgba(255, 160, 40, .2), transparent 64%); animation: deriva-a 26s ease-in-out infinite alternate; }
-.orbe.b { width: 44vmax; height: 44vmax; bottom: -22vmax; right: -10vmax; background: radial-gradient(circle, rgba(255, 90, 30, .14), transparent 64%); animation: deriva-b 32s ease-in-out infinite alternate; }
-.orbe.c { width: 40vmax; height: 40vmax; top: 30%; left: -16vmax; background: radial-gradient(circle, rgba(60, 120, 210, .2), transparent 64%); animation: deriva-c 38s ease-in-out infinite alternate; }
-
-/* La esfera holográfica (se dibuja en js/holograma.js). Queda detrás de la tarjeta principal
-   de Inicio, que es transparente; en las demás pantallas es solo un resplandor lejano. */
-.holo, .holo-aura {
-  position: absolute; left: 50%; top: 215px;
-  transform: translate(-50%, -50%); opacity: .5; transition: opacity 1s ease;
-}
-.holo { width: var(--holo); height: var(--holo); }
-body[data-vista="inicio"] .holo, body[data-vista="inicio"] .holo-aura { opacity: 1; }
-/* Resplandor de la esfera: degradados que respiran (los mueve el navegador, no cuestan casi nada) */
-.holo-aura {
-  width: var(--aura); height: var(--aura); border-radius: 50%;
-  background:
-    radial-gradient(closest-side, rgba(255, 176, 60, .4), rgba(255, 140, 30, .16) 42%, rgba(255, 110, 20, .07) 66%, transparent 100%),
-    radial-gradient(closest-side, transparent 56%, rgba(255, 150, 30, .22) 62%, transparent 70%);
-  animation: aura 9s ease-in-out infinite alternate;
-}
-
 /* ---------- Estructura ---------- */
 .app { position: relative; z-index: 1; min-height: 100vh; }
 .lateral { display: contents; }
@@ -410,22 +385,6 @@ main > .aviso { margin: 0 0 10px; }
 .stats b { font-size: 1.02rem; font-weight: 700; }
 
 /* ---------- Inicio ---------- */
-.hero {
-  --vidrio: rgba(6, 9, 16, .6);
-  padding: 14px; border-color: rgba(255, 176, 46, .34);
-  background:
-    linear-gradient(90deg, transparent, rgba(255, 200, 100, .8) 50%, transparent) 50% 0 / 70% 1px no-repeat,
-    linear-gradient(90deg, rgba(4, 7, 13, .72), rgba(4, 7, 13, .4) 70%, transparent),   /* velo: el texto se lee sobre la esfera */
-    linear-gradient(160deg, rgba(255, 176, 46, .08), rgba(255, 122, 26, .02) 55%, transparent),
-    var(--vidrio);
-  box-shadow: var(--sombra), 0 0 38px -16px rgba(255, 150, 30, .55);
-}
-.hero .chip { background: rgba(5, 8, 14, .55); }
-.hero::after { /* resplandor que respira */
-  content: ''; position: absolute; top: -45%; right: -22%; width: 72%; height: 150%; pointer-events: none;
-  background: radial-gradient(closest-side, rgba(255, 160, 40, .2), transparent); animation: respirar 7s ease-in-out infinite alternate;
-}
-.hero > * { position: relative; z-index: 1; }
 .hero-cab { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
 .gigante { display: block; font-size: clamp(1.9rem, 7.4vw, 2.7rem); font-weight: 760; line-height: 1.05; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
 .gigante.degradado { color: #fff; filter: drop-shadow(0 0 16px rgba(255, 150, 30, .4)); }
@@ -582,13 +541,8 @@ select.estado.pagado { color: var(--pos); border-color: rgba(61, 220, 151, .45);
 @keyframes girar { to { transform: rotate(360deg); } }
 @keyframes latir { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.78); opacity: .75; } }
 @keyframes pulso { 0% { box-shadow: 0 0 0 0 rgba(61, 220, 151, .55); } 70%, 100% { box-shadow: 0 0 0 8px rgba(61, 220, 151, 0); } }
-@keyframes aura { from { transform: translate(-50%, -50%) scale(.94); } to { transform: translate(-50%, -50%) scale(1.07); } }
-@keyframes respirar { from { opacity: .55; transform: scale(.94); } to { opacity: 1; transform: scale(1.08); } }
 @keyframes brillo { 55%, 100% { transform: translateX(100%); } }
 @keyframes trazo { from { stroke-dasharray: 0 100; } }
-@keyframes deriva-a { to { transform: translate3d(-14vmax, 10vmax, 0) scale(1.15); } }
-@keyframes deriva-b { to { transform: translate3d(-12vmax, -8vmax, 0) scale(1.1); } }
-@keyframes deriva-c { to { transform: translate3d(10vmax, 6vmax, 0) scale(1.25); } }
 @keyframes subir-hoja { from { opacity: .4; transform: translateY(60px) scale(.98); } }
 @keyframes bajar-hoja { to { opacity: 0; transform: translateY(40px) scale(.98); } }
 @keyframes entra-toast { from { opacity: 0; transform: translateY(14px) scale(.96); } }
@@ -616,10 +570,6 @@ select.estado.pagado { color: var(--pos); border-color: rgba(61, 220, 151, .45);
 
 /* ---------- Tablet y PC ---------- */
 @media (min-width: 640px) {
-  :root { --holo: min(73vw, 660px); --aura: min(62vw, 560px); }
-  .holo, .holo-aura { left: 74%; }
-  .hero { --vidrio: rgba(6, 9, 16, .22); }
-  .hero > * { max-width: 62%; }
   .matriz { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hoja { align-items: center; }
   .hoja-panel { max-height: 88vh; border-radius: 22px; border-bottom: 1px solid rgba(255, 176, 46, .3); padding-bottom: 16px; }
@@ -659,8 +609,6 @@ select.estado.pagado { color: var(--pos); border-color: rgba(61, 220, 151, .45);
 }
 
 @media (min-width: 1024px) {
-  :root { --holo: min(61vh, 47vw, 614px); --aura: min(52vh, 40vw, 520px); }
-  .holo, .holo-aura { left: calc(236px + (100vw - 236px) / 2 + min(1360px, 100vw - 236px) * .3); top: 200px; }
   .app { display: grid; grid-template-columns: 236px minmax(0, 1fr); align-items: start; }
   .lateral {
     position: sticky; top: 0; display: flex; flex-direction: column; gap: 16px; height: 100vh; padding: 20px 12px 16px;
@@ -685,7 +633,6 @@ select.estado.pagado { color: var(--pos); border-color: rgba(61, 220, 151, .45);
   .avisos { bottom: 20px; }
   .encabezado { margin-top: 0; }
   .tarjeta { padding: 16px; --vidrio: rgba(9, 14, 24, .84); }
-  .hero { padding: 18px; --vidrio: rgba(6, 9, 16, .22); }
   input, select { min-height: 36px; font-size: 14px; }
   .monto-en-linea { min-height: 32px; }
   select.estado { font-size: .78rem; }
@@ -727,13 +674,6 @@ select.estado.pagado { color: var(--pos); border-color: rgba(61, 220, 151, .45);
   background: radial-gradient(ellipse at 85% 0%, #1b2233, transparent 48%),
               radial-gradient(ellipse at 14% 0%, #20190f, transparent 35%), var(--bg);
 }
-.orbe { display: none; }
-.holo, .holo-aura { left: 74%; top: 228px; }
-body:not([data-vista="inicio"]) .holo,
-body:not([data-vista="inicio"]) .holo-aura { opacity: 0; }
-.holo-aura { opacity: .56; }
-body[data-vista="inicio"] .holo-aura { opacity: .58; }
-
 .marca { padding: calc(16px + var(--inset-sup)) 18px 14px; }
 .marca-logo { gap: 12px; }
 .marca-texto b { font-size: 1.25rem; letter-spacing: -.03em; }
@@ -791,21 +731,37 @@ input, select { min-height: 42px; background: #0e121a; }
 .stats b, .hero-pie b, .gigante, .kpi b { overflow-wrap: anywhere; }
 
 .hero {
-  min-height: 260px;
+  isolation: isolate;
+  min-height: 270px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   gap: 12px;
-  background: linear-gradient(104deg, #151b26 4%, #151a24ee 41%, #151a24a8 75%, #151a24aa);
-  border-color: #59503c;
+  background:
+    radial-gradient(ellipse at 89% 40%, #162432 0%, transparent 55%),
+    linear-gradient(120deg, #121923, #10151e 59%, #0c121b);
+  border-color: #61503b;
 }
 .hero::after { display: none; }
-.hero > * { max-width: initial; }
-.hero .gigante { font-size: clamp(2.1rem, 4.4vw, 4.3rem); letter-spacing: -.065em; }
+.hero > :not(.hero-esfera) { position: relative; z-index: 1; }
+.hero .hero-esfera {
+  position: absolute;
+  inset: 16px 0 49px auto;
+  width: min(63%, 410px);
+  pointer-events: none;
+  background-image:
+    linear-gradient(#f3d0a20b 1px, transparent 1px),
+    linear-gradient(90deg, #f3d0a20b 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 72% 69% at 54% 47%, #000 50%, transparent 100%);
+}
+.nucleo-canvas { display: block; width: 100%; height: 100%; }
+.hero .chip { background: #10151ee8; }
+.hero .enlace { position: relative; padding: 5px 8px; border-radius: 7px; background: #10151ed9; }
+.hero .gigante { font-size: clamp(2.1rem, 4vw, 3.8rem); letter-spacing: -.065em; }
 .hero .gigante.degradado { filter: none; }
 .hero .etiqueta { color: #ffcf83; font-size: .74rem; }
-.hero .reparto { margin: 0; height: 6px; }
-.hero .chips-tipos { margin: 0; }
+.hero .reparto { width: min(48%, 240px); margin: 0; height: 5px; }
+.hero .chips-tipos { max-width: min(61%, 270px); margin: 0; }
 .hero-pie { margin-top: auto; padding-top: 15px; gap: 7px; }
 .hero-pie > div > span { font-size: .74rem; }
 .kpi { padding: 13px; }
@@ -824,7 +780,8 @@ input, select { min-height: 42px; background: #0e121a; }
 @media (max-width: 479px) {
   .encabezado .acciones-enc { width: 100%; }
   .hero-pie > div > span { font-size: .7rem; }
-  .hero { min-height: 245px; }
+  .hero { min-height: 264px; }
+  .hero .hero-esfera { inset: 29px -3px 56px auto; width: 62%; }
   .hero .chip { font-size: .72rem; }
   .icono-btn, .ok-rapido { min-width: 34px; }
   .item { gap: 6px; }
@@ -862,8 +819,6 @@ input, select { min-height: 42px; background: #0e121a; }
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     grid-template-areas: "hero caja" "kpis kpis" "lecturas semana" "debe rutina" "metas metas" "respaldo respaldo";
   }
-  :root { --holo: 420px; --aura: 370px; }
-  .holo, .holo-aura { left: calc(216px + (100vw - 216px) * .31); top: 245px; }
 }
 
 @media (min-width: 1450px) {

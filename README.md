@@ -9,8 +9,9 @@ Jarvis tiene un tablero oscuro con acentos dorados, tarjetas de resumen y un gr�
 que se puede recorrer con el teclado, el puntero o el dedo. En escritorio se navega desde
 la barra lateral. En teléfonos, el menú inferior deja las secciones al alcance del pulgar.
 
-La esfera de Inicio se dibuja en un canvas y se pausa al ocultar la pestaña o abrir un diálogo.
-El diseño respeta la preferencia del sistema de reducir el movimiento.
+El núcleo de la tarjeta de saldo combina filamentos dorados y órbitas cálidas y frías. Sigue
+sutilmente al puntero y se pausa al quedar fuera de la vista o al abrir un diálogo. Si el sistema
+pide reducir el movimiento, muestra una composición fija.
 
 ## Qué tiene
 
