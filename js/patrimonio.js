@@ -5,10 +5,10 @@
 
 const CATEGORIAS_BIEN = [
   ['tecnologia', 'Tecnología'], ['movilidad', 'Movilidad'], ['ropa', 'Ropa y calzado'],
-  ['hogar', 'Hogar'], ['estudio', 'Estudio y trabajo'], ['otro', 'Otro'],
+  ['musica', 'Instrumentos y música'], ['hogar', 'Hogar'], ['estudio', 'Estudio y trabajo'], ['otro', 'Otro'],
 ];
-const VIDA_UTIL = { tecnologia: 4, movilidad: 6, ropa: 3, hogar: 8, estudio: 5, otro: 0 }; // años; 0 = no se desvaloriza
-const nombreCategoriaBien = k => (CATEGORIAS_BIEN.find(c => c[0] === k) || CATEGORIAS_BIEN[5])[1];
+// Años en que pierde su valor; 0 = no se desvaloriza (un instrumento bien cuidado casi no pierde valor).
+const VIDA_UTIL = { tecnologia: 4, movilidad: 6, ropa: 3, musica: 0, hogar: 8, estudio: 5, otro: 0 };
 
 // Valor de hoy: el que escribiste tú o, si no, el de compra bajando parejo durante su vida útil
 // (nunca por debajo del 10% de lo que costó).
