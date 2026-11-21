@@ -168,36 +168,55 @@ FORMULARIOS.pago = {
       + campo('Nota', 'nota', p.nota);
   },
   guardar: (d, previo) => {
-    guardarItem('pagos', {
+    const pago = {
       ...previo, id: previo.id || uid(),
       nombre: d.nombre, tipo: d.tipo, monto: d.monto || 0, saldo: d.saldo || 0, fecha: d.fecha,
       cuenta: d.cuenta || '', mensual: d.mensual, conCobros: d.conCobros, nota: d.nota,
-    });
+    };
+    if (pago.fecha !== previo.fecha) pago.diaMensual = Number(pago.fecha.slice(-2));
+    if (pago.origenMensual) pago.cuotaEditada = true;
+    if (pago.pagado && (pago.movId || pago.monto !== previo.monto || pago.cuenta !== (previo.cuenta || ''))) {
+      sincronizarMovimiento(pago, 'gasto', pago.monto, 'Pagos', pago.nombre, pago.fechaPago);
+    }
+    guardarItem('pagos', pago);
   },
 };
 
-// Pagar = marcar pagado (y descontar de la cuenta asignada). Si se repite cada mes, nace el del mes siguiente.
-// Deshacer = lo contrario (y borra el del mes siguiente si nadie lo ha tocado).
+function siguientePagoMensual(p) {
+  const fecha = sumarMes(p.fecha, p.diaMensual);
+  const serie = p.serieMensual || p.id;
+  const existente = buscar('pagos', p.siguienteId) ||
+    datos.pagos.find(x => x.serieMensual === serie && (x.periodoMensual || (x.fecha || '').slice(0, 7)) === fecha.slice(0, 7));
+  if (existente) return existente.id;
+
+  const cuota = {
+    ...p, id: uid(), fecha, pagado: false, fechaPago: '', siguienteId: '', movId: '',
+    origenMensual: p.id, serieMensual: serie, diaMensual: p.diaMensual || Number(p.fecha.slice(-2)),
+    periodoMensual: fecha.slice(0, 7), cuotaEditada: false,
+  };
+  datos.pagos.push(cuota);
+  return cuota.id;
+}
+
 acciones.pagar = id => {
   const p = buscar('pagos', id);
   if (!p) return;
   if (p.pagado) {
-    const sig = p.siguienteId && buscar('pagos', p.siguienteId);
-    if (sig && !sig.pagado) borrarItem('pagos', sig.id);
+    const sig = buscar('pagos', p.siguienteId);
+    if (sig && !sig.pagado && sig.cuotaEditada === false && !sig.siguienteId) {
+      borrarItem('pagos', sig.id);
+      p.siguienteId = '';
+    }
     if (p.movId) quitarMov(p.movId);
-    p.pagado = false; p.fechaPago = ''; p.siguienteId = ''; p.movId = '';
+    p.pagado = false; p.fechaPago = ''; p.movId = '';
     avisar('Pago revertido');
     return;
   }
   p.pagado = true; p.fechaPago = hoy();
-  const cuenta = p.cuenta && buscar('cuentas', p.cuenta);
-  if (cuenta && p.monto) p.movId = registrarMov({ tipo: 'gasto', monto: p.monto, cuenta: cuenta.id, categoria: 'Pagos', nota: p.nombre }).id;
-  if (p.mensual && p.fecha) {
-    const sig = { ...p, id: uid(), fecha: sumarMes(p.fecha), pagado: false, fechaPago: '', siguienteId: '', movId: '' };
-    datos.pagos.push(sig);
-    p.siguienteId = sig.id;
-  }
-  avisar(cuenta && p.monto ? 'Pagado. Se descontó de ' + cuenta.nombre : 'Marcado como pagado');
+  sincronizarMovimiento(p, 'gasto', p.monto, 'Pagos', p.nombre, p.fechaPago);
+  if (p.mensual && p.fecha) p.siguienteId = siguientePagoMensual(p);
+  const cuenta = p.movId && buscar('cuentas', p.cuenta);
+  avisar(cuenta ? 'Pagado. Se descontó de ' + cuenta.nombre : 'Marcado como pagado');
 };
 
 cambios.ingreso = (clave, valor) => { datos.ingresos[clave] = dinero(valor); };

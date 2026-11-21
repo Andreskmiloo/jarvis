@@ -8,6 +8,7 @@
   const lienzo = document.getElementById('holo');
   if (!lienzo || !lienzo.getContext) return;
   const ctx = lienzo.getContext('2d');
+  if (!ctx) return;
   const quieto = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const TAU = Math.PI * 2;
 

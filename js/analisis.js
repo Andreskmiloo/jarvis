@@ -29,8 +29,9 @@ function proyeccion(dias = 30) {
     const d = del(f);
     if (i > 0) {
       const [y, m, dd] = f.split('-').map(Number);
-      if (dd === 15) d.ingresos.push({ texto: 'Quincena', monto: Number(datos.ingresos.q15) || 0 });
-      if (dd === dia30(y, m)) d.ingresos.push({ texto: 'Quincena', monto: Number(datos.ingresos.q30) || 0 });
+      const quincena = dd === 15 ? 'q15' : dd === dia30(y, m) ? 'q30' : '';
+      const monto = quincena ? Number(datos.ingresos[quincena]) : 0;
+      if (monto > 0) d.ingresos.push({ texto: 'Quincena', monto });
       const semana = aFecha(f).getDay();
       d.diarios = suma(datos.diarios.filter(g => !g.soloHabiles || (semana >= 1 && semana <= 5)), g => g.monto);
     }
@@ -63,7 +64,7 @@ window.addEventListener('resize', () => { clearTimeout(temporizadorGrafico); tem
 function dibujarCaja(cont) {
   const serie = proyeccion(30);
   const n = serie.length;
-  const w = Math.max(280, Math.floor(cont.clientWidth) || 320);
+  const w = Math.max(220, Math.floor(cont.clientWidth) || 320);
   const h = w < 520 ? 170 : 210;
   const m = { t: 14, r: 8, b: 24, l: 8 };
   const valores = serie.flatMap(p => [p.saldo, p.conCobros]);
@@ -94,7 +95,7 @@ function dibujarCaja(cont) {
     return '';
   }).join('');
 
-  cont.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="Flujo de caja proyectado a 30 días">
+  cont.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" tabindex="0" aria-label="Flujo de caja proyectado a 30 días. Usa las flechas izquierda y derecha para explorar.">
       <defs>
         <linearGradient id="${id}a" gradientUnits="userSpaceOnUse" x1="0" y1="${m.t}" x2="0" y2="${h - m.b}">
           <stop offset="0" stop-color="#ffb02e" stop-opacity=".38"/><stop offset="${fz}" stop-color="#ffb02e" stop-opacity="0"/>
@@ -126,10 +127,10 @@ function dibujarCaja(cont) {
   const tip = cont.querySelector('.tip');
 
   const ocultar = () => { guia.style.opacity = 0; punto.style.opacity = 0; tip.classList.remove('on'); };
-  const mover = e => {
-    const r = svg.getBoundingClientRect();
-    const px = (e.clientX - r.left) * (w / (r.width || w));
-    const i = Math.max(0, Math.min(n - 1, Math.round((px - m.l) / (w - m.l - m.r) * (n - 1))));
+  let indice = 0;
+  const mostrar = dia => {
+    indice = Math.max(0, Math.min(n - 1, dia));
+    const i = indice;
     const p = serie[i];
     guia.setAttribute('x1', x(i)); guia.setAttribute('x2', x(i)); guia.style.opacity = 1;
     punto.setAttribute('cx', x(i)); punto.setAttribute('cy', y(p.saldo)); punto.style.opacity = 1;
@@ -149,6 +150,19 @@ function dibujarCaja(cont) {
     const izquierda = x(i) + 14 + ancho > w ? x(i) - ancho - 14 : x(i) + 14;
     tip.style.left = Math.max(0, izquierda) + 'px';
   };
+  const mover = e => {
+    const r = svg.getBoundingClientRect();
+    const px = (e.clientX - r.left) * (w / (r.width || w));
+    mostrar(Math.round((px - m.l) / (w - m.l - m.r) * (n - 1)));
+  };
+  svg.addEventListener('focus', () => mostrar(indice));
+  svg.addEventListener('blur', ocultar);
+  svg.addEventListener('keydown', e => {
+    const navegar = { ArrowRight: indice + 1, ArrowLeft: indice - 1, Home: 0, End: n - 1 };
+    if (!Object.hasOwn(navegar, e.key)) return;
+    e.preventDefault();
+    mostrar(navegar[e.key]);
+  });
   svg.addEventListener('pointermove', mover);
   svg.addEventListener('pointerdown', mover);
   svg.addEventListener('pointerleave', ocultar);
@@ -168,11 +182,11 @@ function dibujarCaja(cont) {
 function tarjetaCaja(area) {
   const serie = proyeccion(30);
   const c = resumenCaja(serie);
-  const sinSaldos = datos.cuentas.every(x => !x.saldo);
+  const sinSaldos = datos.cuentas.every(x => !x.actualizado && !x.saldo);
   const color = v => (v < 0 ? 'rojo' : '');
   return `<article class="tarjeta ${area}">
     ${cab('Flujo de caja', 'próximos 30 días', 'tendencia')}
-    <div class="leyenda-caja"><span class="l-saldo">Saldo proyectado</span><span class="l-cobros">Si cobras lo pendiente</span></div>
+    <div class="leyenda-caja"><span class="l-saldo">Saldo proyectado</span>${serie.some(p => p.cobros.length) ? '<span class="l-cobros">Si cobras lo pendiente</span>' : ''}</div>
     <div class="grafico" data-grafico="caja"></div>
     <div class="stats tres">
       <div><span>Disponible ahora</span><b class="num ${color(totalCuentas())}" data-k="caja-ahora">${contador(totalCuentas())}</b></div>
@@ -196,7 +210,7 @@ function lecturas() {
   const qa = resumenQuincena(actual);
   const qs = resumenQuincena(siguiente);
   const disponible = totalCuentas();
-  const sinSaldos = datos.cuentas.every(c => !c.saldo);
+  const sinSaldos = datos.cuentas.every(c => !c.actualizado && !c.saldo);
   const caja = resumenCaja(proyeccion(30));
 
   // Pagos vencidos
@@ -241,7 +255,7 @@ function lecturas() {
   if (sinMinimo.length) add('medio', 'tarjeta', `Confirma el mínimo de ${sinMinimo.map(esc).join(', ')}`, 'Mientras no lo escribas, no se descuenta de tu libre.', enlace('#finanzas', 'Ir a deudas'));
 
   // Día de pago
-  if (inicioQuincena(h) === h && !datos.movimientos.some(mv => mv.categoria === 'Quincena' && mv.fecha === h)) {
+  if (inicioQuincena(h) === h && !datos.movimientos.some(mv => mv.categoria === 'Quincena' && mv.tipo === 'ingreso' && mv.fecha === h)) {
     const monto = Number(datos.ingresos[esQuincena15(h) ? 'q15' : 'q30']) || 0;
     add('hoy', 'ingreso', 'Hoy es día de pago', `Registra tu ingreso de ${peso(monto)} para actualizar tus saldos.`,
       `<button type="button" class="btn mini" data-accion="registrarQuincena">${ic('mas')}<span>Registrar ingreso</span></button>`);

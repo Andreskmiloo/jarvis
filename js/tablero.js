@@ -8,6 +8,7 @@ function vistaInicio() {
   const qa = resumenQuincena(actual);
   const qs = resumenQuincena(siguiente);
   const alertas = vencenPronto(true);
+  const pagosSemana = alertas.filter(a => a.porPagar !== undefined).length;
   const efectivo = totalCuentas('efectivo');
   const digital = totalCuentas('digital');
   const disponible = efectivo + digital;
@@ -18,12 +19,12 @@ function vistaInicio() {
   const totalCobrar = suma(cobrar, o => o.precio);
   const deudas = totalDeudas();
   const neta = disponible + totalCobrar - deudas;
-  const sinSaldos = datos.cuentas.every(c => !c.saldo);
+  const sinSaldos = datos.cuentas.every(c => !c.actualizado && !c.saldo);
   const debe = [...cobrar].sort((a, b) => (a.fechaCobro || '9999').localeCompare(b.fechaCobro || '9999'));
   const metas = datos.metas.filter(m => !m.hecha).sort(porFecha).slice(0, 6);
 
-  const kpi = (etiqueta, valor, detalle, clase, k) => `<article class="tarjeta kpi">
-      <span class="etiqueta">${etiqueta}</span>
+  const kpi = (etiqueta, valor, detalle, clase, k, icono) => `<article class="tarjeta kpi">
+      <div class="kpi-cab"><span class="etiqueta">${etiqueta}</span>${ico(icono)}</div>
       <b class="num ${clase}" data-k="${k}">${contador(valor)}</b>
       <span class="detalle">${detalle}</span>
     </article>`;
@@ -32,7 +33,7 @@ function vistaInicio() {
   return `<header class="encabezado">
       <div>
         <span class="etiqueta" id="saludo">${saludo()}</span>
-        <h2 class="titulo">Inicio</h2>
+        <h1 class="titulo">Inicio</h1>
         <p class="sub" id="fecha-hoy">${fechaLarga()}</p>
       </div>
     </header>
@@ -59,19 +60,19 @@ function vistaInicio() {
         ${sinSaldos ? `<p class="aviso">${ic('info')}<span>Escribe cuánto tienes en tu billetera y en tus bancos. <a href="#cuentas">Ir a cuentas</a></span></p>` : ''}
       </article>
 
+      ${tarjetaCaja('a-caja')}
+
       <div class="kpis a-kpis">
-        ${kpi('Libre · actual', qa.libre, qa.etiqueta, qa.libre < 0 ? 'rojo' : 'verde', 'libre-actual')}
-        ${kpi('Libre · siguiente', qs.libre, qs.etiqueta, qs.libre < 0 ? 'rojo' : 'verde', 'libre-siguiente')}
-        ${kpi('Pagos · 7 días', totalPorPagar(alertas), `${alertas.filter(a => a.porPagar !== undefined).length} pagos`, '', 'por-pagar')}
-        ${kpi('Por cobrar', totalCobrar, `${cobrar.length} ${cobrar.length === 1 ? 'cliente' : 'clientes'}`, 'ambar', 'por-cobrar')}
+        ${kpi('Libre · actual', qa.libre, qa.etiqueta, qa.libre < 0 ? 'rojo' : 'verde', 'libre-actual', 'calendario')}
+        ${kpi('Libre · siguiente', qs.libre, qs.etiqueta, qs.libre < 0 ? 'rojo' : 'verde', 'libre-siguiente', 'tendencia')}
+        ${kpi('Pagos · 7 días', totalPorPagar(alertas), `${pagosSemana} ${pagosSemana === 1 ? 'pago' : 'pagos'}`, '', 'por-pagar', 'reloj')}
+        ${kpi('Por cobrar', totalCobrar, `${cobrar.length} ${cobrar.length === 1 ? 'cliente' : 'clientes'}`, 'ambar', 'por-cobrar', 'cobro')}
       </div>
 
       <article class="tarjeta a-lecturas">
         ${cab('Lectura de Jarvis', 'según tus datos', 'chispa')}
         ${listaLecturas(5)}
       </article>
-
-      ${tarjetaCaja('a-caja')}
 
       <article class="tarjeta a-semana${alertas.length ? ' alerta' : ''}">
         ${cab('Vence esta semana', alertas.length ? peso(totalPorPagar(alertas)) + ' por pagar' : 'próximos 7 días', 'reloj')}

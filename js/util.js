@@ -20,7 +20,12 @@ function peso(n) {
 
 // "793.900" o "$793.900" → 793900 (quita todo lo que no sea dígito)
 function dinero(texto) {
-  return Number(String(texto ?? '').replace(/\D/g, '')) || 0;
+  const valor = Number(String(texto ?? '').replace(/\D/g, ''));
+  return Number.isSafeInteger(valor) ? valor : 0;
+}
+
+function dineroConSigno(texto) {
+  return (String(texto ?? '').trim().startsWith('-') ? -1 : 1) * dinero(texto) || 0;
 }
 
 // Texto del usuario → HTML seguro (el JSON importado podría traer etiquetas).
@@ -57,11 +62,11 @@ function sumarDias(s, n) {
 const ultimoDia = (y, m) => new Date(y, m, 0).getDate(); // m = 1..12
 
 // Mismo día del mes siguiente (recorta: 31 ene → 28 feb).
-function sumarMes(s) {
+function sumarMes(s, diaOriginal) {
   let [y, m, d] = s.split('-').map(Number);
   m++;
   if (m > 12) { m = 1; y++; }
-  return iso(y, m, Math.min(d, ultimoDia(y, m)));
+  return iso(y, m, Math.min(diaOriginal || d, ultimoDia(y, m)));
 }
 
 const diasHasta = s => Math.round((aFecha(s) - aFecha(hoy())) / 86400000);
@@ -136,8 +141,8 @@ function diasEnPeriodo(inicio, fin, soloHabiles) {
 const campo = (etiqueta, nombre, valor = '', extra = '') =>
   `<label>${etiqueta}<input name="${nombre}" value="${esc(valor)}" ${extra}></label>`;
 
-const campoDinero = (etiqueta, nombre, valor, extra = '') =>
-  campo(etiqueta, nombre, valor ? miles(valor) : '', `inputmode="numeric" data-dinero ${extra}`);
+const campoDinero = (etiqueta, nombre, valor, extra = '', modo = 'numeric') =>
+  campo(etiqueta, nombre, valor ? miles(valor) : '', `inputmode="${modo}" data-dinero ${extra}`);
 
 const campoFecha = (etiqueta, nombre, valor, extra = '') =>
   campo(etiqueta, nombre, valor, `type="date" ${extra}`);
@@ -159,7 +164,7 @@ const btnNuevo = (form, texto, ctx = {}, clase = 'btn mini') =>
 // Encabezado de página
 function encabezado(etiqueta, titulo, sub = '', acciones = '') {
   return `<header class="encabezado">
-    <div><span class="etiqueta">${etiqueta}</span><h2 class="titulo">${titulo}</h2>${sub ? `<p class="sub">${sub}</p>` : ''}</div>
+    <div><span class="etiqueta">${etiqueta}</span><h1 class="titulo">${titulo}</h1>${sub ? `<p class="sub">${sub}</p>` : ''}</div>
     ${acciones ? `<div class="acciones-enc">${acciones}</div>` : ''}
   </header>`;
 }

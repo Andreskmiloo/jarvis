@@ -9,18 +9,13 @@ const gananciaPedido = o => costoConocido(o)
   : Number(datos.config.gananciaEstimada) || 0;
 
 // Cambia el estado de un pedido. Si pasa a "pagado" y tiene cuenta, el cobro suma al saldo (y se revierte al deshacer).
-function fijarEstadoPedido(o, estado) {
+function fijarEstadoPedido(o, estado, cambioContable = false) {
   const antes = o.estado;
   o.estado = estado;
-  if (estado === 'pagado' && antes !== 'pagado') {
-    const cuenta = o.cuenta && buscar('cuentas', o.cuenta);
-    if (cuenta && o.precio) {
-      o.movId = registrarMov({ tipo: 'ingreso', monto: o.precio, cuenta: cuenta.id, categoria: 'Negocio', nota: 'Cobro ' + o.cliente }).id;
-      avisar('Cobrado. Entró a ' + cuenta.nombre);
-    } else {
-      avisar('Marcado como cobrado');
-    }
-  } else if (antes === 'pagado' && estado !== 'pagado' && o.movId) {
+  if (estado === 'pagado' && (antes !== 'pagado' || o.movId || cambioContable)) {
+    sincronizarMovimiento(o, 'ingreso', o.precio, 'Negocio', 'Cobro ' + o.cliente);
+    if (antes !== 'pagado') avisar('Marcado como cobrado');
+  } else if (antes === 'pagado' && o.movId) {
     quitarMov(o.movId);
     o.movId = '';
   }
@@ -140,6 +135,7 @@ FORMULARIOS.pedido = {
       costo: d.costo, // vacío = null = se usa la ganancia estimada
       estado: previo.estado || 'pedido', fechaCobro: d.fechaCobro, cuenta: d.cuenta || '',
     });
-    fijarEstadoPedido(buscar('pedidos', id), d.estado); // aplica el efecto en las cuentas si cambió
+    const cambioContable = (d.precio || 0) !== previo.precio || (d.cuenta || '') !== (previo.cuenta || '');
+    fijarEstadoPedido(buscar('pedidos', id), d.estado, cambioContable);
   },
 };

@@ -34,11 +34,37 @@ function registrarMov(m) {
   return mov;
 }
 
+// Sustituye el efecto contable y conserva la fecha y el ID del movimiento original.
+function actualizarMov(id, cambiosMov) {
+  const mov = buscar('movimientos', id);
+  aplicarMov(mov, -1);
+  Object.assign(mov, cambiosMov);
+  aplicarMov(mov, 1);
+}
+
 function quitarMov(id) {
   const m = buscar('movimientos', id);
   if (!m) return;
   aplicarMov(m, -1);
   borrarItem('movimientos', id);
+}
+
+function sincronizarMovimiento(item, tipo, monto, categoria, nota, fecha = '') {
+  const mov = item.movId && buscar('movimientos', item.movId);
+  const cuenta = item.cuenta && buscar('cuentas', item.cuenta);
+  if (!cuenta || !monto) {
+    if (mov) quitarMov(mov.id);
+    item.movId = '';
+    return;
+  }
+  const detalle = { tipo, monto, cuenta: cuenta.id, categoria, nota };
+  if (!mov) {
+    item.movId = registrarMov({ ...detalle, fecha: fecha || hoy() }).id;
+  } else if (mov.monto !== monto || mov.cuenta !== cuenta.id) {
+    actualizarMov(mov.id, detalle);
+  } else {
+    mov.nota = nota;
+  }
 }
 
 // ---------- Pantalla ----------
@@ -118,7 +144,7 @@ function tarjetaCuenta(c) {
     <div class="cuenta-saldo num ${c.saldo < 0 ? 'rojo' : ''}" data-k="saldo">${contador(c.saldo)}</div>
     <div class="detalle ${viejo ? 'ambar' : ''}">Actualizado ${hace(c.actualizado)}</div>
     <label class="ajuste"><span>Ajustar saldo</span>
-      <input class="monto-en-linea" inputmode="numeric" value="${miles(c.saldo)}" data-cambio="saldoCuenta" data-id="${id}" aria-label="Saldo de ${esc(c.nombre)}"></label>
+      <input class="monto-en-linea" inputmode="text" value="${miles(c.saldo)}" data-cambio="saldoCuenta" data-id="${id}" aria-label="Saldo de ${esc(c.nombre)}"></label>
     <div class="cuenta-acc">
       ${btnNuevo('movimiento', 'Gasto', { tipo: 'gasto', cuenta: c.id }, 'btn mini suave')}
       ${btnNuevo('movimiento', 'Ingreso', { tipo: 'ingreso', cuenta: c.id }, 'btn mini suave')}
@@ -145,7 +171,7 @@ function filaMov(m) {
 function categoriasMes() {
   const mes = hoy().slice(0, 7);
   const delMes = datos.movimientos.filter(m => (m.fecha || '').startsWith(mes));
-  const gastos = {};
+  const gastos = Object.create(null);
   for (const m of delMes) if (m.tipo === 'gasto') { const k = m.categoria || 'Otros'; gastos[k] = (gastos[k] || 0) + (Number(m.monto) || 0); }
   const filas = Object.entries(gastos).sort((a, b) => b[1] - a[1]);
   const totalGastos = suma(filas, f => f[1]);
@@ -169,7 +195,7 @@ FORMULARIOS.cuenta = {
     c = c || {};
     return campo('Nombre', 'nombre', c.nombre, 'required placeholder="Ej.: Billetera, Nequi, Bancolombia"')
       + selector('Tipo de dinero', 'tipo', [['efectivo', 'Efectivo (físico)'], ['digital', 'Digital (banco o app)']], c.tipo || 'digital')
-      + campoDinero(c.id ? 'Saldo actual' : 'Saldo inicial', 'saldo', c.saldo);
+      + campoDinero(c.id ? 'Saldo actual' : 'Saldo inicial', 'saldo', c.saldo, '', 'text');
   },
   guardar: (d, previo) => {
     const cambioSaldo = !previo.id || (Number(previo.saldo) || 0) !== (d.saldo || 0);
@@ -234,6 +260,10 @@ acciones.registrarQuincena = () => {
 acciones.borrarMov = id => {
   const m = buscar('movimientos', id);
   if (!m) return;
+  if ([...datos.pagos, ...datos.pedidos].some(item => item.movId === id)) {
+    avisar('Deshaz el pago o cobro desde su registro para revertir este movimiento.', 'error');
+    return;
+  }
   confirmar({
     titulo: 'Borrar movimiento', boton: 'Borrar', peligro: true,
     texto: `Se borrará <b>${esc(m.nota || m.categoria || 'el movimiento')}</b> y se revertirá su efecto en los saldos.`,
@@ -244,6 +274,6 @@ acciones.borrarMov = id => {
 cambios.saldoCuenta = (id, valor) => {
   const c = buscar('cuentas', id);
   if (!c) return;
-  c.saldo = dinero(valor);
+  c.saldo = dineroConSigno(valor);
   c.actualizado = hoy();
 };

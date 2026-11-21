@@ -51,6 +51,7 @@ function render() {
     else a.removeAttribute('aria-current');
   });
   document.title = seccion.texto + ' · Jarvis';
+  document.getElementById('estado-guardado').textContent = almacenOk ? 'Almacenamiento local' : 'Cambios sin guardar';
   document.body.dataset.vista = id; // el CSS usa esto (por ejemplo, el holograma brilla más en Inicio)
   document.getElementById('pie-respaldo').textContent = datos.ultimoRespaldo ? 'Último respaldo: ' + hace(datos.ultimoRespaldo) : 'Aún sin respaldo';
 
@@ -62,13 +63,15 @@ function render() {
   pintarGraficos();
 }
 
-// Después de cada acción: guardar y volver a pintar.
+// Los diálogos se abren en el mismo evento para que el foco responda de inmediato.
+const accionesConGuardado = new Set(['confirmarSi', 'exportar', 'pagar', 'cobrado', 'tareaHecha', 'metaHecha', 'habitoHoy']);
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-accion]');
-  if (!el || !acciones[el.dataset.accion]) return;
-  acciones[el.dataset.accion](el.dataset.id, el);
-  guardar();
-  render();
+  const accion = el?.dataset.accion;
+  if (!Object.hasOwn(acciones, accion)) return;
+  const ejecutar = () => acciones[accion](el.dataset.id, el);
+  if (accionesConGuardado.has(accion)) cambiarDatos(ejecutar);
+  else if (accion === 'cerrarHoja' || !sincronizarPestana()) ejecutar();
 });
 
 document.addEventListener('submit', e => {
@@ -76,20 +79,28 @@ document.addEventListener('submit', e => {
   if (!f) return;
   e.preventDefault();
   const F = FORMULARIOS[f.dataset.form];
-  const previo = (F.col && enEdicion(F.col)) || null;
-  if (F.guardar(leerForm(f), previo || {}) === false) return; // false = faltan datos, la ventana sigue abierta
-  cerrarHoja();
-  guardar();
-  render();
-  avisar(F.aviso || (previo ? 'Cambios guardados' : 'Agregado'));
+  cambiarDatos(() => {
+    if (!f.isConnected || !f.closest('.hoja.abierta')) return false;
+    const previo = (F.col && enEdicion(F.col)) || null;
+    if (F.guardar(leerForm(f), previo || {}) === false) return false;
+    cerrarHoja();
+    avisar(F.aviso || (previo ? 'Cambios guardados' : 'Agregado'));
+  });
 });
 
 document.addEventListener('change', e => {
   const el = e.target.closest('[data-cambio]');
-  if (!el) return;
-  cambios[el.dataset.cambio](el.dataset.id, el.value, el);
-  guardar();
-  render();
+  if (!el || !Object.hasOwn(cambios, el.dataset.cambio)) return;
+  const aplicar = () => cambios[el.dataset.cambio](el.dataset.id, el.value, el);
+  if (el.dataset.cambio === 'importar') {
+    if (!sincronizarPestana()) aplicar();
+  } else {
+    cambiarDatos(aplicar);
+  }
+});
+
+window.addEventListener('storage', e => {
+  if (e.key === CLAVE || e.key === null) sincronizarPestana();
 });
 
 // Escape cierra la ventana emergente; Tab se queda dentro de ella (accesibilidad con teclado)
@@ -106,15 +117,22 @@ document.addEventListener('keydown', e => {
   else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus(); }
 });
 
-window.addEventListener('hashchange', () => { cerrarHoja(); render(); window.scrollTo(0, 0); });
+window.addEventListener('hashchange', () => {
+  cerrarHoja();
+  render();
+  document.getElementById('vista').focus({ preventScroll: true });
+  window.scrollTo(0, 0);
+});
 
 // Si dejas la pestaña abierta de un día para otro, al volver se actualiza "hoy"
 // (solo si cambió el día, para no borrar lo que estés escribiendo).
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) { actualizarReloj(); if (hoy() !== fechaPintada) render(); }
+  if (!document.hidden && !sincronizarPestana()) {
+    actualizarReloj();
+    if (hoy() !== fechaPintada) render();
+  }
 });
 
 datos = cargar();
-guardar();
 construirMenu();
 render();

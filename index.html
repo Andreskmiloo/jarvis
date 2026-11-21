@@ -39,13 +39,13 @@
       </header>
       <nav id="menu" class="menu" aria-label="Secciones"></nav>
       <div class="pie-lateral">
-        <div class="pie-estado"><span class="punto"></span><span>Guardado en este navegador</span></div>
+        <div class="pie-estado"><span class="punto"></span><span id="estado-guardado">Almacenamiento local</span></div>
         <button type="button" class="btn suave mini" id="pie-exportar" data-accion="exportar"></button>
         <span class="pie-respaldo" id="pie-respaldo"></span>
       </div>
     </aside>
 
-    <main id="vista"></main>
+    <main id="vista" tabindex="-1"></main>
   </div>
 
   <button type="button" class="fab" id="fab" data-accion="registrar" aria-label="Registrar movimiento" title="Registrar movimiento"></button>

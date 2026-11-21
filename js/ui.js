@@ -7,9 +7,11 @@ const reducirMovimiento = () =>
 // ---------- Ventana emergente (formularios y confirmaciones) ----------
 let alAceptar = null;
 let temporizadorHoja = 0;
+let focoAnterior = null;
 
 function abrirHoja(titulo, html, opciones = {}) {
   const h = document.getElementById('hoja');
+  if (!h.classList.contains('abierta')) focoAnterior = document.activeElement;
   clearTimeout(temporizadorHoja);
   h.innerHTML = `<div class="hoja-fondo" data-accion="cerrarHoja"></div>
     <div class="hoja-panel${opciones.chica ? ' chica' : ''}${opciones.enSitio ? ' quieta' : ''}" role="dialog" aria-modal="true" aria-labelledby="hoja-titulo">
@@ -22,10 +24,11 @@ function abrirHoja(titulo, html, opciones = {}) {
   h.classList.add('abierta');
   h.setAttribute('aria-hidden', 'false');
   document.body.classList.add('con-hoja');
-  if (!opciones.enSitio) {
-    const primero = h.querySelector('input:not([type="hidden"]):not([type="checkbox"]):not([type="date"]), select');
-    if (primero) primero.focus({ preventScroll: true });
-  }
+  document.querySelector('.app').inert = true;
+  const primero = opciones.enSitio ? h.querySelector('.seg.on') :
+    (opciones.chica ? h.querySelector('.hoja-cuerpo [data-accion="cerrarHoja"]') :
+      h.querySelector('input:not([type="hidden"]):not([type="checkbox"]):not([type="date"]), select'));
+  (primero || h.querySelector('.hoja-cab button')).focus({ preventScroll: true });
 }
 
 function cerrarHoja() {
@@ -34,6 +37,10 @@ function cerrarHoja() {
   alAceptar = null;
   if (!h.classList.contains('abierta')) return;
   h.classList.remove('abierta');
+  document.querySelector('.app').inert = false;
+  if (focoAnterior?.isConnected) focoAnterior.focus({ preventScroll: true });
+  else document.getElementById('vista').focus({ preventScroll: true });
+  focoAnterior = null;
   h.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('con-hoja');
   temporizadorHoja = setTimeout(() => { if (!h.classList.contains('abierta')) h.innerHTML = ''; }, 350);

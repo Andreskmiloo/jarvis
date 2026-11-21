@@ -5,20 +5,12 @@ en el navegador (`localStorage`) y se respalda con un archivo JSON. Para celular
 
 ## Aspecto
 
-Holográfico, como el Jarvis de las películas: luz dorada sobre azul acero oscuro, líneas finas y una
-esfera de fragmentos dorados que gira detrás de la tarjeta principal de Inicio (en las demás pantallas
-queda como un resplandor lejano; sigue un poco al puntero y al desplazamiento). Todo se mueve con
-suavidad: cifras que cuentan hasta su valor, barras y anillos que se llenan, tarjetas que entran una
-tras otra. Sin emojis: solo iconos vectoriales.
+Jarvis tiene un tablero oscuro con acentos dorados, tarjetas de resumen y un gráfico de caja
+que se puede recorrer con el teclado, el puntero o el dedo. En escritorio se navega desde
+la barra lateral. En teléfonos, el menú inferior deja las secciones al alcance del pulgar.
 
-La esfera (`js/holograma.js`) es el "núcleo" de Jarvis: un ovillo de fragmentos dorados; una red de
-nodos por la que saltan señales (un anillo la escanea de polo a polo y enciende los nodos que cruza);
-nueve órbitas que van naciendo, girando alrededor y desvaneciéndose; anillos de medición que giran
-cada uno a su ritmo; y un núcleo que late y lanza una onda cada pocos segundos.
-
-Es solo adorno y está pensada para no pesar: se pausa con la pestaña oculta o con una ventana abierta,
-va a menos cuadros en celular y baja sola su ritmo si el aparato es lento. Con "reducir movimiento"
-activado se dibuja una vez (con la red, las señales y las órbitas) y queda quieta.
+La esfera de Inicio se dibuja en un canvas y se pausa al ocultar la pestaña o abrir un diálogo.
+El diseño respeta la preferencia del sistema de reducir el movimiento.
 
 ## Qué tiene
 
@@ -77,9 +69,9 @@ Para usarla en el celular, publica estos archivos en cualquier hosting de págin
 
 ## Datos iniciales y privacidad
 
-La primera vez que abres la app se cargan los datos de `js/semilla.js` (montos y nombres reales).
-Si algún día publicas el repositorio, vacía ese archivo antes (haz que `semilla()` devuelva
-`datosVacios()`). Si ya usabas una versión anterior, tus datos se conservan y se actualizan solos.
+Una instalación nueva empieza vacía. Los datos guardados en el mismo navegador se conservan
+al actualizar. Si cambias de dirección o dispositivo, exporta un respaldo desde la instalación
+anterior e impórtalo en la nueva. Guarda el JSON en un lugar privado porque contiene tus datos.
 
 ## Compatibilidad
 
