@@ -23,6 +23,24 @@ function valorBien(b) {
   return Math.round(compra * Math.max(.1, 1 - anos / vida));
 }
 
+// Deuda con la que pagas un bien (se guarda la serie de cuotas para seguirla mes a mes).
+const serieDe = p => p.serieMensual || p.id;
+function deudaDeBien(b) {
+  if (!b.deuda) return null;
+  const cuotas = datos.pagos.filter(p => p.tipo === 'deuda' && (serieDe(p) === b.deuda || p.id === b.deuda));
+  if (!cuotas.length) return { pendiente: null, nombre: '' };
+  const pendiente = cuotas.filter(p => !p.pagado).sort(porFecha)[0] || null;
+  return { pendiente, nombre: (pendiente || cuotas[0]).nombre };
+}
+// Cuánto del bien ya es tuyo: lo pagado frente a lo que costó (o a lo que vale hoy si no anotaste el costo).
+function propiedadBien(b) {
+  const d = deudaDeBien(b);
+  const debe = d && d.pendiente ? montoDeuda(d.pendiente) : 0;
+  const base = Number(b.valorCompra) || valorBien(b);
+  const pct = !debe ? 100 : base ? Math.max(0, Math.min(100, Math.round((base - debe) / base * 100))) : 0;
+  return { deuda: d, debe, pct, sinTotal: !!(d && d.pendiente && !Number(d.pendiente.saldo)) };
+}
+
 const deudasActivas = () => datos.pagos.filter(p => p.tipo === 'deuda' && !p.pagado);
 const montoDeuda = p => Number(p.saldo) || Number(p.monto) || 0;
 
@@ -179,11 +197,28 @@ function tarjetaResultados() {
       : '<p class="detalle">Registra ingresos y gastos en <a class="enlace" href="#cuentas">Cuentas</a> para armar tu estado de resultados.</p>'}`;
 }
 
+function propiedadHtml(b) {
+  const pr = propiedadBien(b);
+  if (!pr.deuda) return '<span class="tuyo listo">100% tuyo</span>';
+  if (!pr.deuda.pendiente) return `<span class="tuyo listo">100% tuyo · ya pagaste ${esc(pr.deuda.nombre || 'la deuda')}</span>`;
+  return `<div class="propiedad">
+      <div class="linea"><span>Tuyo el <b>${pr.pct}%</b></span><span>debes <b class="rojo">${peso(pr.debe)}</b> · ${esc(pr.deuda.nombre)}</span></div>
+      ${barraProg(pr.pct)}
+      ${pr.sinTotal ? '<span class="ambar">Esto es solo una cuota: escribe la deuda total en <a class="enlace" href="#finanzas">Finanzas</a> para saber cuánto falta.</span>' : ''}
+    </div>`;
+}
+
 function tarjetaInventario(total) {
+  const deben = suma(datos.bienes, b => propiedadBien(b).debe);
   const grupos = CATEGORIAS_BIEN.map(([k, t]) => [t, datos.bienes.filter(b => (VIDA_UTIL[b.categoria] !== undefined ? b.categoria : 'otro') === k)])
     .filter(([, lista]) => lista.length);
   const puntos = n => `<span class="aprecio" aria-label="Lo valoras ${n} de 5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
   return `${cab('Inventario', datos.bienes.length ? `${datos.bienes.length} ${datos.bienes.length === 1 ? 'cosa' : 'cosas'} · ${peso(total)}` : '', 'caja', btnNuevo('bien', 'Agregar'))}
+    ${deben ? `<div class="stats tres resumen-inv">
+        <div><span>Valen hoy</span><b class="num">${peso(total)}</b></div>
+        <div><span>Debes en ellas</span><b class="num rojo">${peso(deben)}</b></div>
+        <div><span>Tuyo de verdad</span><b class="num verde">${peso(Math.max(0, total - deben))}</b></div>
+      </div>` : ''}
     ${grupos.length ? grupos.map(([titulo, lista]) => `<h4 class="grupo">${titulo} <span>${peso(suma(lista, valorBien))}</span></h4>
       ${ul(lista.sort((a, c) => valorBien(c) - valorBien(a)).map(b => {
         const hoyVale = valorBien(b), compra = Number(b.valorCompra) || 0;
@@ -191,10 +226,10 @@ function tarjetaInventario(total) {
           col: 'bienes', id: b.id, izquierda: ico('caja', 'acc'), titulo: esc(b.nombre),
           derecha: peso(hoyVale),
           detalle: [compra ? 'costó ' + peso(compra) : '', b.fecha ? fechaCorta(b.fecha) : '', compra && hoyVale < compra ? `perdió ${Math.round((1 - hoyVale / compra) * 100)}%` : '', b.nota ? esc(b.nota) : ''].filter(Boolean).join(' · '),
-          extra: b.aprecio ? puntos(Number(b.aprecio)) : '',
+          extra: (b.aprecio ? puntos(Number(b.aprecio)) : '') + propiedadHtml(b),
         });
       }))}`).join('')
-      : '<p class="vacio">Empieza tu inventario: tu celular, tu portátil, tu ropa buena, lo que tenga valor para ti. Es tu punto de partida.</p>'}`;
+      : '<p class="vacio">Empieza tu inventario: tu computador, tu celular y las cosas grandes una por una. La ropa y las cosas pequeñas puedes agregarlas juntas, por ejemplo "Ropa y cosas varias", con un valor aproximado.</p>'}`;
 }
 
 // ---------- Línea de tiempo ----------
@@ -249,6 +284,16 @@ function lineaTiempo() {
 }
 
 // ---------- Formulario del inventario ----------
+// Opciones: "ya es mío" o una de tus deudas pendientes (una por serie de cuotas).
+function opcionesDeudaBien(b) {
+  const vistas = new Map();
+  for (const p of datos.pagos.filter(x => x.tipo === 'deuda').sort(porFecha)) {
+    const k = serieDe(p);
+    if ((!p.pagado || k === b.deuda) && !vistas.has(k)) vistas.set(k, 'Lo pago con: ' + p.nombre);
+  }
+  return [['', 'Ya es mío (está pagado)'], ...vistas];
+}
+
 FORMULARIOS.bien = {
   col: 'bienes', boton: 'Agregar al inventario',
   titulo: b => b ? 'Editar del inventario' : 'Agregar al inventario',
@@ -259,6 +304,7 @@ FORMULARIOS.bien = {
       + campoDinero('Cuánto costó', 'valorCompra', b.valorCompra)
       + campoFecha('Cuándo lo compraste', 'fecha', b.fecha)
       + campoDinero('Cuánto vale hoy (vacío = lo calcula Jarvis)', 'valorActual', b.valorActual)
+      + selector('¿Ya es tuyo o lo estás pagando?', 'deuda', opcionesDeudaBien(b), b.deuda || '')
       + selector('Cuánto lo valoras', 'aprecio', [['5', '5 · Imprescindible'], ['4', '4 · Mucho'], ['3', '3 · Normal'], ['2', '2 · Poco'], ['1', '1 · Podría venderlo']], String(b.aprecio || 3))
       + campo('Nota', 'nota', b.nota, 'placeholder="Ej.: estado, garantía, dónde está"');
   },
@@ -266,6 +312,7 @@ FORMULARIOS.bien = {
     guardarItem('bienes', {
       ...previo, id: previo.id || uid(), nombre: d.nombre, categoria: d.categoria,
       valorCompra: d.valorCompra || 0, fecha: d.fecha, valorActual: d.valorActual, aprecio: Number(d.aprecio) || 3, nota: d.nota,
+      deuda: d.deuda || '',
     });
   },
 };
