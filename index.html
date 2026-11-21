@@ -10,38 +10,39 @@
   <body>
     <div id="mapa" aria-label="Mapa de Bogotá"></div>
 
+    <div id="estado-mapa" role="status"><strong>Cargando el mapa de Bogotá…</strong><button type="button" onclick="location.reload()">Reintentar</button><a href="https://www.openstreetmap.org/#map=13/4.6500/-74.0800" target="_blank" rel="noopener noreferrer">Abrir Bogotá en OpenStreetMap ↗</a></div>
     <aside id="panel" class="panel">
       <header class="panel__cabecera">
         <button id="asa" class="asa" aria-label="Expandir o contraer panel"></button>
-        <h1><span class="ojo">◉</span> OJO_DE_DIOS <small>// BOGOTÁ</small></h1>
+        <h1><span class="ojo">◉</span> Ojo de Dios <small>Bogotá</small></h1>
         <form id="buscador" class="buscador" role="search">
-          <input id="busqueda" type="search" placeholder="Busca dirección o lugar…" autocomplete="off" />
+          <input aria-label="Buscar dirección o lugar" id="busqueda" type="search" placeholder="Busca dirección o lugar…" autocomplete="off" />
         </form>
-        <nav class="pestanas" role="tablist">
-          <button role="tab" data-tab="zona" aria-selected="true">Zona</button>
-          <button role="tab" data-tab="vivo">Vivo</button>
-          <button role="tab" data-tab="intereses">Gustos</button>
-          <button role="tab" data-tab="lugares">Lugares</button>
-          <button role="tab" data-tab="capas">Capas</button>
+        <nav class="pestanas" role="tablist" aria-label="Secciones del mapa">
+          <button role="tab" id="pestana-zona" aria-controls="tab-zona" data-tab="zona" aria-selected="true">Zona</button>
+          <button role="tab" id="pestana-vivo" aria-controls="tab-vivo" aria-selected="false" tabindex="-1" data-tab="vivo">Vivo</button>
+          <button role="tab" id="pestana-intereses" aria-controls="tab-intereses" aria-selected="false" tabindex="-1" data-tab="intereses">Gustos</button>
+          <button role="tab" id="pestana-lugares" aria-controls="tab-lugares" aria-selected="false" tabindex="-1" data-tab="lugares">Lugares</button>
+          <button role="tab" id="pestana-capas" aria-controls="tab-capas" aria-selected="false" tabindex="-1" data-tab="capas">Capas</button>
           <span class="indicador" aria-hidden="true"></span>
         </nav>
       </header>
 
-      <section id="tab-zona" class="tab" role="tabpanel">
-        <p class="vacio">Toca cualquier punto del mapa para leer la zona: localidad, UPZ, barrio, estrato, valor del suelo, clima, aire y qué hay cerca.</p>
+      <section aria-labelledby="pestana-zona" id="tab-zona" class="tab" role="tabpanel">
+        <div class="zona-inicio"><h2>Explora Bogotá</h2><p>Busca una dirección o selecciona un punto para consultar su barrio, el clima y los lugares cercanos.</p></div>
       </section>
-      <section id="tab-vivo" class="tab" role="tabpanel" hidden><div id="vivo-hoy"></div><div id="vivo-planeta"></div><div id="vivo-datos"></div><div id="vivo-camaras"></div></section>
-      <section id="tab-intereses" class="tab" role="tabpanel" hidden></section>
-      <section id="tab-lugares" class="tab" role="tabpanel" hidden></section>
-      <section id="tab-capas" class="tab" role="tabpanel" hidden></section>
+      <section aria-labelledby="pestana-vivo" id="tab-vivo" class="tab" role="tabpanel" hidden><div id="vivo-hoy"></div><div id="vivo-planeta"></div><div id="vivo-datos"></div><div id="vivo-camaras"></div></section>
+      <section aria-labelledby="pestana-intereses" id="tab-intereses" class="tab" role="tabpanel" hidden></section>
+      <section aria-labelledby="pestana-lugares" id="tab-lugares" class="tab" role="tabpanel" hidden></section>
+      <section aria-labelledby="pestana-capas" id="tab-capas" class="tab" role="tabpanel" hidden></section>
     </aside>
 
     <div class="vista">
       <button id="boton-jarvis" class="boton-mapa" title="Jarvis: pídele cosas al mapa (J)">J</button>
-      <button id="boton-tierra" class="boton-mapa" aria-pressed="true" title="Ver la Tierra completa / volver a Bogotá">🌍</button>
+      <button id="boton-tierra" class="boton-mapa" aria-pressed="false" title="Ver la Tierra completa / volver a Bogotá">🌍</button>
       <button id="boton-casa" class="boton-mapa" title="Mi casa">⌂</button>
       <button id="boton-mas" class="boton-mapa" aria-expanded="false" title="Más: satélite, 2D/3D, tema, giro, salir">☰</button>
-      <div class="vista__extra" id="vista-extra">
+      <div class="vista__extra" id="vista-extra" inert>
         <button id="boton-sat" class="boton-mapa" title="Vista desde el satélite">🛰</button>
         <button id="boton-3d" class="boton-mapa" aria-pressed="true" title="Cambiar entre relieve 3D y plano">2D</button>
         <button id="boton-tema" class="boton-mapa" title="Cambiar tema: blanco y negro o Matrix">◐</button>

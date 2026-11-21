@@ -1,0 +1,43 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ojo de Dios · Explorador 3D</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#263541;color:#eff6e8;font:16px/1.55 "Segoe UI",system-ui,sans-serif}header,footer{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:17px 5vw;border-bottom:1px solid #627580}header b{letter-spacing:-.04em;font-size:22px}header b span{color:#f2ce92}header small,footer{color:#bfd1c6}main{display:grid;grid-template-columns:minmax(260px,30%) 1fr;min-height:76vh}aside{padding:7vh 3vw 4vh 5vw;background:#334552;border-right:1px solid #627580}h1{font-size:clamp(42px,5vw,76px);letter-spacing:-.065em;line-height:.98;margin:0 0 24px}p{color:#c5d8cb;max-width:32ch}fieldset{padding:0;margin:28px 0;border:none}legend{font-weight:650;margin-bottom:12px}label{display:flex;gap:12px;margin:8px 0;align-items:center}input{accent-color:#f2ce92}input[type=range]{width:100%}button{background:#f2ce92;color:#2c3439;border:0;border-radius:8px;font:inherit;font-weight:600;padding:10px 18px;cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #fff}figure{position:relative;margin:0;min-height:420px;overflow:hidden;background:#263541}canvas{display:block;width:100%;height:100%;position:absolute;inset:0}figcaption{position:absolute;bottom:18px;left:22px;font-size:14px;color:#d0e5d8;background:#263541ef;padding:6px 12px;border-radius:5px}footer{font-size:14px;border-top:1px solid #627580}a{color:#f2ce92}@media(max-width:760px){main{display:flex;flex-direction:column}aside{padding:20px 5vw}figure{order:-1;min-height:40vh}h1{font-size:40px}fieldset{margin:13px 0}fieldset label{display:inline-flex;margin-right:14px}p{max-width:unset}header,footer{flex-wrap:wrap}}
+</style>
+<header><b><span>◉</span> Ojo de Dios</b><small>Bogotá · Explorador 3D</small></header>
+<main><aside><h1>La ciudad<br>en relieve.</h1><p>Gira la escena y activa las capas para explorar las fachadas, las cúpulas de calor y la silueta del avión.</p>
+<fieldset><legend>Capas visibles</legend><label><input id="edificios" type="checkbox" checked>Edificios</label><label><input id="calor" type="checkbox" checked>Cúpula de calor</label><label><input id="avion" type="checkbox" checked>Avión</label></fieldset>
+<label for="giro">Orientación <output id="grados">32°</output></label><input id="giro" type="range" min="-65" max="75" value="32">
+<p><button id="pausa">Pausar animación</button></p></aside>
+<figure><canvas aria-label="Maqueta urbana isométrica con edificios, una cúpula y un avión"></canvas><figcaption>Maqueta ilustrativa · Datos simulados</figcaption></figure></main>
+<footer><span>Vista de demostración sin conexión</span><a href="./">Abrir Ojo de Dios</a></footer>
+<script>
+const el=id=>document.getElementById(id), canvas=document.querySelector('canvas'), ctx=canvas.getContext('2d');
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const fondo=document.createElement("canvas");
+let fondoValido=false;
+let playing=!reduced.matches,time=0,last=0,frame;
+const towers=[];
+for(let x=-4;x<=4;x++)for(let y=-3;y<=3;y++){const seed=Math.abs(Math.sin(x*73+y*39+3));if(x===2&&y===1||seed<.15)continue;towers.push({x,y,h:.22+seed*seed*(2.7-Math.abs(x)*.34),w:.28+(seed%0.14)});}
+function paint(now){if(playing&&last)time+=Math.min(now-last,60)/1000;last=now;
+const W=canvas.clientWidth,H=canvas.clientHeight,d=Math.min(devicePixelRatio,2);if(canvas.width!==Math.round(W*d)||canvas.height!==Math.round(H*d)){canvas.width=Math.round(W*d);canvas.height=Math.round(H*d)}ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,W,H);
+const angle=+el('giro').value*Math.PI/180,C=Math.cos(angle),S=Math.sin(angle),scale=Math.min(W/13,H/8.2);
+const depth=(x,y)=>x*S+y*C, pt=(x,y,z=0)=>[W*.5+(x*C-y*S)*scale,H*.57+(depth(x,y)*.48-z*.88)*scale];
+function poly(points,color,edge){ctx.beginPath();points.forEach((p,i)=>ctx[i?'lineTo':'moveTo'](...p));ctx.closePath();ctx.fillStyle=color;ctx.fill();if(edge){ctx.strokeStyle=edge;ctx.lineWidth=.9;ctx.stroke()}}
+function line(a,b,color,width=1){ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
+if (!fondoValido) {
+poly([pt(-5,-4),pt(5,-4),pt(5,4),pt(-5,4)],'#53656a','#9aa9ac');
+for(let i=-5;i<=5;i++)line(pt(i-.5,-4),pt(i-.5,4),'#819294');for(let i=-4;i<=4;i++)line(pt(-5,i-.5),pt(5,i-.5),'#819294');
+function tower(t){let {x,y,h,w}=t;let corners=[[-w,-w],[w,-w],[w,w],[-w,w]].map(([a,b])=>[x+a,y+b]);let faces=corners.map((a,i)=>[a,corners[(i+1)%4]]).sort(([a,b],[c,d])=>depth(a[0]+b[0],a[1]+b[1])-depth(c[0]+d[0],c[1]+d[1]));for(const [a,b] of faces){poly([pt(...a),pt(...b),pt(...b,h),pt(...a,h)],a[0]===b[0]?'#84949b':'#697d89');for(let z=.23;z<h;z+=.28)line(pt(...a,z),pt(...b,z),'#acb7b7',.65)}poly(corners.map(a=>pt(...a,h)),h>1.7?'#f0dab6':'#c9c7b9','#e3ded2')}
+function dome(){const [x,y]=pt(2,1);ctx.save();ctx.translate(x,y);const g=ctx.createRadialGradient(-scale*.1,-scale*.32,0,0,0,scale*.7);g.addColorStop(0,'#ffe799');g.addColorStop(.45,'#ffb74d');g.addColorStop(1,'#c97332');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,scale*.68,scale*.66,0,Math.PI,2*Math.PI);ctx.ellipse(0,0,scale*.68,scale*.29,0,0,Math.PI);ctx.fill();ctx.restore()}
+const items=el('edificios').checked?[...towers]:[];if(el('calor').checked)items.push({x:2,y:1,dome:true});items.sort((a,b)=>depth(a.x,a.y)-depth(b.x,b.y)).forEach(t=>t.dome?dome():tower(t));
+fondo.width=canvas.width;fondo.height=canvas.height;fondo.getContext('2d').drawImage(canvas,0,0);fondoValido=true;
+} else {ctx.drawImage(fondo,0,0,W,H)}
+if(el('avion').checked){const x=2.9*Math.sin(time*.22),y=-.9;line(pt(x,y),pt(x,y,3.4),'#c1decb70');const shape=[
+    [0, 1], [0.09, 0.77], [0.1, 0.22], [0.85, -0.27], [0.84, -0.43],
+    [0.09, -0.14], [0.07, -0.65], [0.31, -0.83], [0.3, -0.94], [0, -0.83],
+    [-0.3, -0.94], [-0.31, -0.83], [-0.07, -0.65], [-0.09, -0.14],
+    [-0.84, -0.43], [-0.85, -0.27], [-0.1, 0.22], [-0.09, 0.77], [0, 1],
+  ];poly(shape.map(([a,b])=>pt(x+b*.48,y+a*.48,3.4)),'#e5fff3','#87ecbe')}
+if(playing)frame=requestAnimationFrame(paint)}
+function redraw(){fondoValido=false;cancelAnimationFrame(frame);last=0;el('grados').value=el('giro').value+'°';el('pausa').textContent=playing?'Pausar animación':'Reproducir animación';frame=requestAnimationFrame(paint)}
+document.querySelectorAll('input').forEach(i=>i.oninput=redraw);el('pausa').onclick=()=>{playing=!playing;redraw()};reduced.onchange=e=>{playing=!e.matches;redraw()};new ResizeObserver(redraw).observe(canvas);redraw();
+</script></html>

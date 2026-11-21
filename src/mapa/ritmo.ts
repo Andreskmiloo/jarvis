@@ -6,7 +6,7 @@ let moviendo = false;
 /** setPixelRatio redimensiona y MapLibre emite movestart/moveend: esos eventos se ignoran. */
 let propio = false;
 let conectado: Mapa | null = null;
-const reducido = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reducido = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)");
 export const MOVIL = typeof matchMedia === "function" && matchMedia("(max-width: 720px)").matches;
 
 export function conectarRitmo(mapa: Mapa) {
@@ -47,5 +47,5 @@ export function nitidezAdaptativa(mapa: Mapa) {
 
 /** ¿Vale la pena pintar un cuadro de animación ahora? */
 export function puedeAnimar(): boolean {
-  return !moviendo && !(typeof document !== "undefined" && document.hidden) && !reducido;
+  return !moviendo && !(typeof document !== "undefined" && document.hidden) && !(reducido && reducido.matches);
 }

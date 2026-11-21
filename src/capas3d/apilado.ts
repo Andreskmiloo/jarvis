@@ -219,7 +219,7 @@ export class Apilado implements CustomLayerInterface {
     const ahora = performance.now();
     const dt = Math.min(100, ahora - (this.ultimoCuadro || ahora - 16));
     this.ultimoCuadro = ahora;
-    const k = 1 - Math.exp(-dt / 170);
+    const k = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 1 - Math.exp(-dt / 140);
     const dif = this.objetivo - this.separacion;
     if (Math.abs(dif) > 1) {
       this.separacion += dif * k;

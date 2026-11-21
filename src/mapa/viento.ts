@@ -103,25 +103,28 @@ export class CapaViento {
 
   private animar() {
     const [o, s, e, n] = CAJA_VIENTO;
-    const paso = () => {
+    let anterior = performance.now();
+    const paso = (ahora: number) => {
+      const cuadros = Math.min(3, (ahora - anterior) / (1000 / 60));
+      anterior = ahora;
       this.raf = requestAnimationFrame(paso);
       if (!this.malla || !puedeAnimar()) return;
       const c = this.ctx, w = this.canvas.clientWidth, h = this.canvas.clientHeight;
       // Estela: se desvanece lo anterior en vez de borrarlo.
       c.globalCompositeOperation = "destination-in";
-      c.fillStyle = "rgba(0,0,0,0.92)";
+      c.fillStyle = `rgba(0,0,0,${0.92 ** cuadros})`;
       c.fillRect(0, 0, w, h);
       c.globalCompositeOperation = "source-over";
       c.lineWidth = 1.2;
       c.strokeStyle = "rgba(190, 230, 255, 0.75)";
       c.beginPath();
-      const escala = 0.00004; // grados por (m/s · cuadro): velocidad visual
+      const escala = 0.00004 * cuadros; // grados por (m/s · cuadro): velocidad visual
       for (const p of this.parts) {
         const [u, v] = vientoEn(this.malla, p.lng, p.lat);
         const a = this.mapa.project([p.lng, p.lat]);
         p.lng += u * escala;
         p.lat += v * escala;
-        p.edad++;
+        p.edad += cuadros;
         const b = this.mapa.project([p.lng, p.lat]);
         if (p.edad > 90 || p.lng < o || p.lng > e || p.lat < s || p.lat > n) {
           p.lng = o + Math.random() * (e - o);

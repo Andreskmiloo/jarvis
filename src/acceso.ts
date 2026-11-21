@@ -76,8 +76,7 @@ export function iniciarAcceso(listo: Promise<unknown>): Promise<void> {
   const error = el.querySelector<HTMLElement>("#acceso-error")!;
 
   let mapaListo = false;
-  // Aunque el mapa tarde (red lenta), no se bloquea la entrada más de 8 s.
-  const listoOTiempo = Promise.race([listo, new Promise((ok) => setTimeout(ok, 8000))]).then(() => {
+  void listo.then(() => {
     mapaListo = true;
     barra.classList.add("llena");
     estado.textContent = form.hidden ? "Listo" : "Mapa listo · ingresa para entrar";
@@ -92,15 +91,15 @@ export function iniciarAcceso(listo: Promise<unknown>): Promise<void> {
       }, 650);
     });
 
-  if (sesionVigente()) return listoOTiempo.then(salir);
+  if (sesionVigente()) return salir();
 
   return new Promise<void>((ok) => {
-    setTimeout(() => {
+    {
       form.hidden = false;
       el.classList.add("pide");
       estado.textContent = mapaListo ? "Mapa listo · ingresa para entrar" : "Cargando el mapa detrás… ya puedes ingresar";
       form.querySelector<HTMLInputElement>("input[name=usuario]")?.focus({ preventScroll: true });
-    }, 700);
+    }
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const d = new FormData(form);
@@ -110,7 +109,6 @@ export function iniciarAcceso(listo: Promise<unknown>): Promise<void> {
         guardarSesion(d.get("recordar") === "on");
         error.textContent = "";
         estado.textContent = "Acceso concedido";
-        await listoOTiempo;
         await salir();
         ok();
       } else {

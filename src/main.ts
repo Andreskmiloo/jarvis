@@ -59,9 +59,9 @@ maplibregl.setWorkerUrl(workerUrl);
 // Tema visual: blanco y negro (por defecto) o Matrix. Se recuerda en este navegador.
 function temaGuardado(): Tema {
   try {
-    return localStorage.getItem("ojo-de-dios:tema") === "matrix" ? "matrix" : "mono";
+    return localStorage.getItem("ojo-de-dios:tema") === "mono" ? "mono" : "matrix";
   } catch {
-    return "mono";
+    return "matrix";
   }
 }
 const tema = temaGuardado();
@@ -76,56 +76,57 @@ document.getElementById("boton-tema")!.addEventListener("click", () => {
 });
 
 const movil = matchMedia("(max-width: 720px)").matches;
-const mapa = new maplibregl.Map({
+const mensajeCarga = document.querySelector("#estado-mapa strong")!;
+const esperaMapa = setTimeout(() => { mensajeCarga.textContent = "La cartografía está tardando en cargar"; }, 8000);
+const opcionesMapa: ConstructorParameters<typeof maplibregl.Map>[0] = {
   container: "mapa",
   style: estiloMapa(tema),
-  // Arranca viendo la Tierra entera; al entrar vuela hasta Bogotá.
-  ...VISTA_TIERRA,
-  zoom: movil ? VISTA_TIERRA.zoom - 0.5 : VISTA_TIERRA.zoom,
+  ...VISTA_3D,
+  zoom: movil ? VISTA_3D.zoom - 0.9 : VISTA_3D.zoom,
   maxPitch: 78,
   // En pantallas densas se limita la resolución: se ve igual y va más fluido.
   // Empieza nítido; mientras se mueve baja la resolución (ver nitidezAdaptativa).
   pixelRatio: Math.min(devicePixelRatio, 2),
   attributionControl: { compact: true },
-});
+};
+function crearMapa() {
+  try {
+    return new maplibregl.Map(opcionesMapa);
+  } catch (error) {
+    clearTimeout(esperaMapa);
+    mensajeCarga.textContent = "No se pudo iniciar el mapa 3D en este navegador.";
+    throw error;
+  }
+}
+const mapa = crearMapa();
 conectarRitmo(mapa);
 nitidezAdaptativa(mapa);
 const VISTA_BOGOTA = { ...VISTA_3D, zoom: movil ? VISTA_3D.zoom - 0.9 : VISTA_3D.zoom };
 
-// La Tierra gira despacio detrás de la pantalla de acceso.
-let girando = !matchMedia("(prefers-reduced-motion: reduce)").matches;
-let ultimoGiro = 0;
-function girar(t: number) {
-  if (!girando) return;
-  if (t - ultimoGiro > 33 && !document.hidden) {
-    const c = mapa.getCenter();
-    mapa.jumpTo({ center: [c.lng - (ultimoGiro ? (t - ultimoGiro) * 0.004 : 0), c.lat] });
-  }
-  if (t - ultimoGiro > 33) ultimoGiro = t;
-  requestAnimationFrame(girar);
-}
-requestAnimationFrame(girar);
-
 /** Vuelo tipo Google Earth: del espacio a Bogotá en 3D. */
 function volarABogota(duracion = 5200) {
-  girando = false;
   enTierra = false;
   botonTierra.setAttribute("aria-pressed", "false");
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return mapa.jumpTo({ ...VISTA_BOGOTA, padding: PADDING });
-  mapa.flyTo({ ...VISTA_BOGOTA, padding: PADDING, duration: duracion, curve: 1.6, essential: true, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2) });
+  mapa.flyTo({ ...VISTA_BOGOTA, padding: PADDING, duration: duracion, curve: 1.6, essential: false, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2) });
 }
-let enTierra = true;
+let enTierra = false;
 const botonTierra = document.getElementById("boton-tierra")!;
 botonTierra.addEventListener("click", () => {
-  if (enTierra) return volarABogota(4200);
+  if (enTierra) return volarABogota(1800);
   enTierra = true;
   botonTierra.setAttribute("aria-pressed", "true");
   if (capas3d.activo()) capas3d.salir();
-  mapa.flyTo({ ...VISTA_TIERRA, padding: SIN_PADDING, zoom: movil ? VISTA_TIERRA.zoom - 0.5 : VISTA_TIERRA.zoom, duration: 4200, curve: 1.6, essential: true });
+  mapa.flyTo({ ...VISTA_TIERRA, padding: SIN_PADDING, zoom: movil ? VISTA_TIERRA.zoom - 0.5 : VISTA_TIERRA.zoom, duration: 1800, curve: 1.6, essential: false });
 });
 
-// Pantalla de carga y acceso: el mapa sigue cargando detrás; al entrar, vuelo a Bogotá.
-void iniciarAcceso(new Promise((ok) => mapa.once("load", ok))).then(() => volarABogota());
+const estadoMapa = document.getElementById("estado-mapa")!;
+const mapaListo = new Promise<void>((ok) => mapa.once("load", () => {
+  clearTimeout(esperaMapa);
+  estadoMapa.hidden = true;
+  ok();
+}));
+void iniciarAcceso(mapaListo).then(() => mapa.setPadding(PADDING));
 document.getElementById("boton-salir")?.addEventListener("click", () => {
   if (confirm("¿Cerrar sesión en este dispositivo?")) cerrarSesion();
 });
@@ -213,8 +214,6 @@ mapa.on("load", () => {
   // Capas que dejaste encendidas la última vez (por defecto, ninguna: mapa en calma).
   for (const id of leerPref<string[]>("poi", [])) if (CAPAS_POI.some((c) => c.id === id)) alternarPOI(id, true);
   pintarCapas();
-  pintarIntereses();
-  pintarLugares();
 });
 
 mapa.on("click", (e: MapMouseEvent) => {
@@ -271,12 +270,34 @@ requestAnimationFrame(moverIndicador);
 function abrirTab(t: Tab) {
   const cambia = tabs[t].hidden;
   for (const [k, el] of Object.entries(tabs)) el.hidden = k !== t;
-  if (cambia) animar(tabs[t]);
-  document.querySelectorAll<HTMLButtonElement>(".pestanas button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === t)));
+  if (cambia) {
+    if (t === "capas") pintarCapas();
+    if (t === "intereses") pintarIntereses();
+    if (t === "lugares") pintarLugares();
+    animar(tabs[t]);
+  }
+  for (const boton of botonesTab) {
+    const activo = boton.dataset.tab === t;
+    boton.setAttribute("aria-selected", String(activo));
+    boton.tabIndex = activo ? 0 : -1;
+  }
   moverIndicador();
   if (panel.classList.contains("contraido")) panel.classList.remove("contraido");
 }
-document.querySelectorAll<HTMLButtonElement>(".pestanas button").forEach((b) => b.addEventListener("click", () => abrirTab(b.dataset.tab as Tab)));
+const botonesTab = Array.from(document.querySelectorAll<HTMLButtonElement>(".pestanas button"));
+botonesTab.forEach((boton, i) => {
+  boton.addEventListener("click", () => abrirTab(boton.dataset.tab as Tab));
+  boton.addEventListener("keydown", (e) => {
+    const n = botonesTab.length;
+    const destinos: Record<string, number> = { ArrowRight: (i + 1) % n, ArrowLeft: (i + n - 1) % n, Home: 0, End: n - 1 };
+    const destino = destinos[e.key];
+    if (destino === undefined) return;
+    e.preventDefault();
+    const siguiente = botonesTab[destino];
+    abrirTab(siguiente.dataset.tab as Tab);
+    siguiente.focus();
+  });
+});
 document.getElementById("asa")!.addEventListener("click", () => {
   if (panel.classList.contains("expandido")) panel.classList.replace("expandido", "contraido");
   else if (panel.classList.contains("contraido")) panel.classList.remove("contraido");
@@ -438,10 +459,10 @@ function caerEn(lat: number, lng: number, zoom = 16.2) {
     pitch: en3d ? 66 : 0,
     bearing: en3d ? mapa.getBearing() + 35 : 0,
     curve: lejos ? 1.9 : 1.2,
-    duration: lejos ? 3600 : 2200,
+    duration: lejos ? 1800 : 850,
     // Cae acelerando y los últimos metros van en cámara lenta.
     easing: (t) => (t < 0.55 ? 0.88 * (t / 0.55) ** 2.4 : 0.88 + 0.12 * (1 - (1 - (t - 0.55) / 0.45) ** 3)),
-    essential: true,
+    essential: false,
   });
   leerZona(lat, lng);
   mapa.once("moveend", () => {
@@ -461,20 +482,21 @@ async function leerZona(lat: number, lng: number) {
   abrirTab("zona");
   controlZona?.abort();
   controlZona = new AbortController();
+  const signal = controlZona.signal;
   tabs.zona.innerHTML = `<p class="cargando">Leyendo la zona (${lat.toFixed(5)}, ${lng.toFixed(5)})</p>`;
   try {
-    const r = await resumir(lat, lng, 500, controlZona.signal);
-    if (controlZona.signal.aborted) return;
+    const r = await resumir(lat, lng, 500, signal);
+    if (signal.aborted) return;
     tabs.zona.innerHTML = htmlZona(r);
     plegar(tabs.zona, /^Ahora/);
     animar(tabs.zona);
-    if (CLAVE_WINDY) pintarWebcams(lat, lng, controlZona.signal);
-    void ahoraAqui(r, controlZona.signal);
+    if (CLAVE_WINDY) pintarWebcams(lat, lng, signal);
+    void ahoraAqui(r, signal);
     tabs.zona.querySelector("[data-guardar]")?.addEventListener("click", () => guardarPunto(lat, lng));
     tabs.zona.querySelector("[data-waze-zona]")?.addEventListener("click", () => abrirWaze(lat, lng));
     tabs.zona.querySelectorAll<HTMLButtonElement>("[data-webcam]").forEach((b) => b.addEventListener("click", () => camarasUI.abrirExterna(b.dataset.titulo ?? "Webcam", b.dataset.webcam!)));
   } catch (e) {
-    if (!controlZona.signal.aborted) tabs.zona.innerHTML = `<p class="errores">No pude leer la zona: ${esc(e)}</p>`;
+    if (!signal.aborted) tabs.zona.innerHTML = `<p class="errores">No pude leer la zona: ${esc(e)}</p>`;
   }
 }
 
@@ -685,6 +707,7 @@ async function pintarWebcams(lat: number, lng: number, signal: AbortSignal) {
 
 // ---------- Capas ----------
 function pintarCapas() {
+  if (tabs.capas.hidden) return;
   const grupos = new Map<string, CapaPOI[]>();
   for (const c of CAPAS_POI) grupos.set(c.grupo, [...(grupos.get(c.grupo) ?? []), c]);
   const z = mapa.getZoom();
@@ -839,7 +862,8 @@ function referencia(): { lat: number; lng: number } {
 }
 
 function pintarIntereses() {
-  let h = `<p class="nota">${perfil.actualizado ? `Perfil de gustos actualizado ${esc(perfil.actualizado)}.` : "Usando intereses de arranque; tu perfil real llegará de la sesión de gustos."} Toca un interés para buscarlo en la vista actual (o en toda Bogotá si estás lejos).</p>`;
+  if (tabs.intereses.hidden) return;
+  let h = `<h2>Mis gustos</h2><p class="nota">Elige un interés para buscar lugares en el mapa.${perfil.actualizado ? ` Perfil actualizado el ${esc(perfil.actualizado)}.` : ""}</p>`;
   for (const a of perfil.areas) {
     h += `<h3>${esc(a.area)}</h3><div class="chips">`;
     for (const g of a.gustos) {
@@ -1036,16 +1060,17 @@ function guardarPunto(lat: number, lng: number) {
 }
 
 function pintarLugares() {
+  if (tabs.lugares.hidden) return;
   const todos = lugares.todos();
   const lista = todos.filter((l) => (filtroLugares === "todos" ? true : filtroLugares === "visitados" ? l.visitado : !l.visitado));
   const v = todos.filter((l) => l.visitado).length;
-  let h = `<div class="tarjetas"><div class="tarjeta"><b>${todos.length}</b><span>lugares</span></div><div class="tarjeta"><b>${v}</b><span>ya fui</span></div><div class="tarjeta"><b>${todos.length - v}</b><span>pendientes</span></div></div>
+  let h = `<h2>Mis lugares</h2><div class="tarjetas"><div class="tarjeta"><b>${todos.length}</b><span>lugares</span></div><div class="tarjeta"><b>${v}</b><span>ya fui</span></div><div class="tarjeta"><b>${todos.length - v}</b><span>pendientes</span></div></div>
   <div class="acciones">
     <button class="boton" data-agregar>＋ Agregar tocando el mapa</button>
     <button class="boton sec" data-exportar>Exportar</button>
     <label class="boton sec">Importar<input type="file" accept="application/json" hidden data-importar></label>
   </div>
-  <p class="nota">Se guardan solo en este navegador. Exporta el JSON para respaldarlos o pasárselos a Claude.</p>
+  <p class="nota">Tus lugares se guardan en este navegador. Exporta una copia para conservarlos.</p>
   <div class="chips" style="margin:10px 0">${(["todos", "visitados", "pendientes"] as const)
     .map((f) => `<button class="chip" data-filtro="${f}" aria-pressed="${filtroLugares === f}">${f === "todos" ? "Todos" : f === "visitados" ? "Ya fui" : "Pendientes"}</button>`)
     .join("")}</div><ul class="lista">`;
@@ -1061,7 +1086,7 @@ function pintarLugares() {
         <button class="boton sec peq" data-borrar="${l.id}">Borrar</button>
       </div></li>`;
   }
-  h += `</ul>${lista.length ? "" : `<p class="vacio">Aún no hay lugares aquí.</p>`}`;
+  h += `</ul>${lista.length ? "" : `<p class="vacio">${todos.length ? "No tienes lugares con este filtro." : "Selecciona «Agregar tocando el mapa» para guardar tu primer lugar."}</p>`}`;
   tabs.lugares.innerHTML = h;
 
   const q = <T extends HTMLElement>(sel: string) => tabs.lugares.querySelectorAll<T>(sel);
@@ -1121,9 +1146,6 @@ lugares.alCambiar(() => {
   if (gustoActivo) actualizarIntereses();
 });
 
-pintarCapas();
-pintarIntereses();
-pintarLugares();
 
 // ---------- Jarvis: el asistente usa las mismas funciones del mapa ----------
 async function resolverLugar(lugar?: string, lat?: number, lng?: number): Promise<{ lat: number; lng: number; nombre: string }> {
@@ -1188,7 +1210,7 @@ const jarvisUI = iniciarJarvis({
   async vista(tipo) {
     if (tipo === "tierra") {
       if (!enTierra) botonTierra.click();
-    } else if (tipo === "bogota") volarABogota(4200);
+    } else if (tipo === "bogota") volarABogota(1800);
     else if (tipo === "satelite_hd") await satelite.poner("esri");
     else if (tipo === "satelite_2026") await satelite.poner("sentinel");
     else if (tipo === "mapa") await satelite.poner("mapa");
@@ -1259,6 +1281,7 @@ const botonMas = document.getElementById("boton-mas")!;
 const extra = document.getElementById("vista-extra")!;
 botonMas.addEventListener("click", () => {
   const abierto = !extra.classList.contains("abierta");
+  extra.inert = !abierto;
   extra.classList.toggle("abierta", abierto);
   botonMas.setAttribute("aria-expanded", String(abierto));
 });

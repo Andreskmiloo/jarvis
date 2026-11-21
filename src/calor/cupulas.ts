@@ -174,7 +174,7 @@ export class Cupulas {
           "fill-extrusion-color": RAMPA(peso),
           "fill-extrusion-height": ["*", ["get", "k"], peso],
           "fill-extrusion-opacity": 0.32,
-          "fill-extrusion-vertical-gradient": false,
+          "fill-extrusion-vertical-gradient": true,
         },
       },
       antes,

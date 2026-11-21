@@ -100,8 +100,9 @@ function dibujarPin(icono: string, color: string): ImageData | null {
   x.arc(cx, cy, r, Math.PI / 2 + ang, Math.PI / 2 - ang);
   x.lineTo(cx, H - 4);
   x.closePath();
-  const grad = x.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, color);
+  const grad = x.createLinearGradient(cx - r, 4, cx + r, H);
+  grad.addColorStop(0, "#f2f9ff");
+  grad.addColorStop(0.28, color);
   grad.addColorStop(1, sombrear(color, 0.55));
   x.fillStyle = grad;
   x.fill();

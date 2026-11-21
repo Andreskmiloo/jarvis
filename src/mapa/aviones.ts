@@ -11,7 +11,12 @@ const SUELO_M = 2550;
 const ESCALA_ALTURA = 0.45;
 
 export function flecha(lng: number, lat: number, rumbo: number, largoM: number): number[][] {
-  const forma = [[0, 1], [0.55, -0.7], [0, -0.35], [-0.55, -0.7], [0, 1]];
+  const forma = [
+    [0, 1], [0.09, 0.77], [0.1, 0.22], [0.85, -0.27], [0.84, -0.43],
+    [0.09, -0.14], [0.07, -0.65], [0.31, -0.83], [0.3, -0.94], [0, -0.83],
+    [-0.3, -0.94], [-0.31, -0.83], [-0.07, -0.65], [-0.09, -0.14],
+    [-0.84, -0.43], [-0.85, -0.27], [-0.1, 0.22], [-0.09, 0.77], [0, 1],
+  ];
   const r = (rumbo * Math.PI) / 180;
   const k = 1 / 111_320;
   const kx = k / Math.cos((lat * Math.PI) / 180);
@@ -33,7 +38,7 @@ export function geojsonAviones(lista: Avion[], seg: number, zoom: number): GeoJS
     features.push({
       type: "Feature",
       geometry: { type: "Polygon", coordinates: [flecha(p.lng, p.lat, a.rumbo, 18 * m)] },
-      properties: { ...props, base: alto, alto: alto + 6 * m, tierra: a.enTierra, linea: false },
+      properties: { ...props, base: alto, alto: alto + 2.4 * m, tierra: a.enTierra, linea: false },
     });
     if (!a.enTierra)
       features.push({
@@ -50,6 +55,7 @@ export class CapaAviones {
   private hora = 0;
   private raf = 0;
   private ultimo = 0;
+  private activa = true;
 
   constructor(private mapa: Mapa) {
     const crear = () => {
@@ -73,14 +79,16 @@ export class CapaAviones {
   poner(lista: Avion[], hora: number) {
     this.lista = lista;
     this.hora = hora;
+    (this.mapa.getSource("aviones") as GeoJSONSource | undefined)?.setData(geojsonAviones(lista, 0, this.mapa.getZoom()));
     this.animar();
   }
 
   private animar() {
     cancelAnimationFrame(this.raf);
+    if (!this.activa || !this.lista.length) return;
     const paso = (t: number) => {
       this.raf = requestAnimationFrame(paso);
-      if (t - this.ultimo < 500 || !puedeAnimar() || !this.algunoEnVista()) return; // 2 cuadros/s bastan
+      if (t - this.ultimo < 125 || !puedeAnimar() || !this.algunoEnVista()) return;
       this.ultimo = t;
       const seg = Date.now() / 1000 - this.hora;
       (this.mapa.getSource("aviones") as GeoJSONSource | undefined)?.setData(geojsonAviones(this.lista, seg, this.mapa.getZoom()));
@@ -99,6 +107,10 @@ export class CapaAviones {
   }
 
   visible(v: boolean) {
+    if (v !== this.activa) {
+      this.activa = v;
+      this.animar();
+    }
     if (this.mapa.getLayer("aviones")) this.mapa.setLayoutProperty("aviones", "visibility", v ? "visible" : "none");
   }
 }
