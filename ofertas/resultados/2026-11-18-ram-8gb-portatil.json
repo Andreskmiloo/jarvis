@@ -1,0 +1,391 @@
+{
+  "consulta": "Memoria RAM 8 GB para portátil",
+  "categoria": "tecnologia",
+  "fecha": "2026-11-18T00:33:42.993Z",
+  "trm": {
+    "valor": 3309.55,
+    "vigencia": "2026-11-18",
+    "fuente": "Superfinanciera (datos.gov.co)"
+  },
+  "requisito": "SO-DIMM para portátil · elige el tipo (DDR3L, DDR4 o DDR5) que use tu PC",
+  "top3": [
+    {
+      "url": "https://www.falabella.com.co/falabella-co/product/159536345/memoria-ram-8gb-walram-ddr3l-8gb-12800-1600mhz-para-portatil",
+      "etiqueta": "Más barata · DDR3L (2012–2016)",
+      "por_que": "$99.800 en Falabella. Marca poco conocida; si prefieres marca, la Kingston original cuesta $150.000."
+    },
+    {
+      "url": "https://listado.mercadolibre.com.co/memoria-ram-8gb-ddr4-sodimm-2400",
+      "etiqueta": "Más barata · DDR4 (2017–2022)",
+      "por_que": "$168.316 en Mercado Libre. Es de 2400 MHz: sirve en cualquier portátil DDR4 (en uno de 3200 funciona un poco más lento). La Crucial de 3200 MHz cuesta $202.474 con envío gratis."
+    },
+    {
+      "url": "https://www.amazon.com/-/es/Hynix-M%C3%B3dulo-memoria-PC5-4800B-HMCG66MEBSA092N/dp/B0G5Q3YN1H",
+      "etiqueta": "Más barata · DDR5 (2022+)",
+      "por_que": "$370.670 en Amazon (más envío). En Colombia la más barata encontrada cuesta $642.900."
+    }
+  ],
+  "gamas": {
+    "economica": "DDR3L · portátiles de 2012–2016",
+    "media": "DDR4 · portátiles de 2017–2022 (la mayoría)",
+    "alta": "DDR5 · portátiles de 2022 en adelante",
+    "premium": ""
+  },
+  "recomendacion": {
+    "url": "https://listado.mercadolibre.com.co/memoria-ram-8gb-ddr4-sodimm",
+    "texto": "Para la mayoría: DDR4 3200 de marca a buen precio con envío gratis."
+  },
+  "resultados": [
+    {
+      "tienda": "Amazon",
+      "origen": "internacional",
+      "producto": "Samsung 8 GB DDR4 3200 MHz PC4-25600 (PC4-3200AA) CL22 SODIMM 1Rx16 Rango único 1.2 V 260 pines Memoria RAM para laptop, portátil",
+      "precio_usd": 59.94,
+      "precio_cop": 239760,
+      "precio_antes_cop": 251960,
+      "descuento_pct": 5,
+      "calificacion": 4.8,
+      "url": "https://www.amazon.com/-/es/Samsung-PC4-25600-PC4-3200AA-Memoria-port%C3%A1til/dp/B0DX7LTSFT",
+      "imagen": "https://m.media-amazon.com/images/I/71l+vH5s4SL._AC_UY218_.jpg",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 239760,
+      "modelo": "Samsung 8 GB DDR4 3200",
+      "marca": "Samsung",
+      "gama": "media",
+      "spec_clave": "DDR4 · 3200 MHz · SO-DIMM 260 pines · CL22",
+      "fuente": "directa",
+      "alertas": [
+        "Envío de Amazon no incluido"
+      ],
+      "tambien_en": [],
+      "entrega": "7–15 días",
+      "puntaje_cp": 76
+    },
+    {
+      "tienda": "Amazon",
+      "origen": "internacional",
+      "producto": "Crucial Memoria RAM DDR4 de 8 GB 3200 MHz (PC4-25600), reducible a 2933/2666 MHz, memoria para portátil, SODIMM 260 pines CL22, compatible con Intel Core de 13ª generación y AMD Ryzen 7000",
+      "precio_usd": 70.02,
+      "precio_cop": 280080,
+      "precio_antes_cop": 316560,
+      "descuento_pct": 12,
+      "calificacion": 4.8,
+      "url": "https://www.amazon.com/-/es/Crucial-PC4-25600-reducible-compatible-generaci%C3%B3n/dp/B08C4Z69LN",
+      "imagen": "https://m.media-amazon.com/images/I/61FsaYbk3UL._AC_UY218_.jpg",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 280080,
+      "modelo": "Crucial 8 GB DDR4 3200 (Amazon)",
+      "marca": "Crucial",
+      "gama": "media",
+      "spec_clave": "DDR4 · 3200 MHz (baja a 2666/2933 si tu PC lo pide) · SO-DIMM",
+      "fuente": "directa",
+      "alertas": [
+        "Envío de Amazon no incluido"
+      ],
+      "tambien_en": [],
+      "entrega": "7–15 días",
+      "puntaje_cp": 70
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Memoria Ram DDR4 8gb 2400 Mhz Para Portatil / Todo En Uno",
+      "marca": "Genérica",
+      "precio_cop": 240900,
+      "precio_antes_cop": 313170,
+      "descuento_pct": 23,
+      "precio_tipo": "eventPrice",
+      "vendedor": "Siat Tecnologia",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/151608650/memoria-ram-kingston-8gb-2400-mhz-para-portatil-todo-en-uno",
+      "imagen": "https://media.falabella.com.co/falabellaCO/151608651_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 240900,
+      "modelo": "DDR4 8 GB 2400 SO-DIMM",
+      "gama": "media",
+      "spec_clave": "DDR4 · 2400 MHz · SO-DIMM 260 pines",
+      "fuente": "directa",
+      "alertas": [
+        "Marca poco conocida"
+      ],
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 68
+    },
+    {
+      "tienda": "Amazon",
+      "origen": "internacional",
+      "producto": "Hynix - Módulo de memoria RAM de 8 GB DDR5 4800 MHz PC5-4800B SODIMM 1Rx8 1.1V 262 pines no ECC para Dell HP ASUS Lenovo PC HMCG66MEBSA092N",
+      "precio_usd": 112,
+      "precio_cop": 370670,
+      "precio_antes_cop": null,
+      "descuento_pct": null,
+      "calificacion": 5,
+      "url": "https://www.amazon.com/-/es/Hynix-M%C3%B3dulo-memoria-PC5-4800B-HMCG66MEBSA092N/dp/B0G5Q3YN1H",
+      "imagen": "https://m.media-amazon.com/images/I/61PINejj4PL._AC_UY218_.jpg",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 370670,
+      "modelo": "SK Hynix 8 GB DDR5 4800",
+      "marca": "SK Hynix",
+      "gama": "alta",
+      "spec_clave": "DDR5 · 4800 MHz · SO-DIMM 262 pines · 1,1 V",
+      "fuente": "directa",
+      "alertas": [
+        "Envío de Amazon no incluido"
+      ],
+      "tambien_en": [],
+      "entrega": "7–15 días",
+      "puntaje_cp": 73
+    },
+    {
+      "tienda": "Amazon",
+      "origen": "internacional",
+      "producto": "Samsung 8GB DDR5 5600MHz PC5-44800 CL46 SODIMM 1Rx16 Rango único 1.1V 262-Pin portátil, memoria RAM para portátil",
+      "precio_usd": 128.99,
+      "precio_cop": 426899,
+      "precio_antes_cop": null,
+      "descuento_pct": null,
+      "calificacion": 4.8,
+      "url": "https://www.amazon.com/-/es/Samsung-5600MHz-PC5-44800-262-Pin-port%C3%A1til/dp/B0DTJGYCBK",
+      "imagen": "https://m.media-amazon.com/images/I/71M48ew46aL._AC_UY218_.jpg",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 426899,
+      "modelo": "Samsung 8 GB DDR5 5600",
+      "marca": "Samsung",
+      "gama": "alta",
+      "spec_clave": "DDR5 · 5600 MHz · SO-DIMM 262 pines",
+      "fuente": "directa",
+      "alertas": [
+        "Envío de Amazon no incluido"
+      ],
+      "tambien_en": [
+        {
+          "tienda": "Amazon",
+          "precio_cop": 436828,
+          "url": "https://www.amazon.com/-/es/Samsung-5600MHz-PC5-44800-262-Pin-M425R1GB4BB0-CWM/dp/B0D2LX9TGH"
+        }
+      ],
+      "entrega": "7–15 días",
+      "puntaje_cp": 70
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "MEMORIA RAM PORTATIL DDR5 8GB BUS 5600",
+      "marca": "Genérica",
+      "precio_cop": 642900,
+      "precio_antes_cop": 889958,
+      "descuento_pct": 28,
+      "precio_tipo": "eventPrice",
+      "vendedor": "Castor Data",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/145920312/MEMORIA-ADATA-RAM-PORTATIL-DDR5-8GB-BUS-5600",
+      "imagen": "https://media.falabella.com.co/falabellaCO/145920313_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 642900,
+      "modelo": "DDR5 8 GB 5600 SO-DIMM (Falabella)",
+      "gama": "alta",
+      "spec_clave": "DDR5 · 5600 MHz · SO-DIMM 262 pines",
+      "fuente": "directa",
+      "alertas": [
+        "Marca poco conocida"
+      ],
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 49
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Memoria Ram 8Gb WALRAM Ddr3l 8Gb 12800 1600mhz Para Portátil",
+      "marca": "Walram",
+      "precio_cop": 99800,
+      "precio_antes_cop": 120000,
+      "descuento_pct": 17,
+      "precio_tipo": "eventPrice",
+      "vendedor": "Country En Linea",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/159536345/memoria-ram-8gb-walram-ddr3l-8gb-12800-1600mhz-para-portatil",
+      "imagen": "https://media.falabella.com.co/falabellaCO/159536346_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 99800,
+      "modelo": "Walram 8 GB DDR3L",
+      "gama": "economica",
+      "spec_clave": "DDR3L · 1600 MHz · SO-DIMM 204 pines",
+      "fuente": "directa",
+      "alertas": [
+        "Marca poco conocida"
+      ],
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 68
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Memoria Ram Ddr3-ddr3l 8gb Skhynix 12800 -1600mhz Laptop",
+      "marca": "SK Hynix",
+      "precio_cop": 150000,
+      "precio_antes_cop": 180000,
+      "descuento_pct": 17,
+      "precio_tipo": "eventPrice",
+      "vendedor": "Country En Linea",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/139244718/Memoria-Ram-Ddr3-ddr3l-8gb-Skhynix-12800-1600mhz-Laptop",
+      "imagen": "https://media.falabella.com.co/falabellaCO/139244719_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 150000,
+      "modelo": "SK Hynix 8 GB DDR3L",
+      "gama": "economica",
+      "spec_clave": "DDR3/DDR3L · 1600 MHz · SO-DIMM 204 pines",
+      "fuente": "directa",
+      "alertas": [],
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 76
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Memoria RAM DDR3L 8GB 12800 - 1600 MHz Kvr16ls11/8",
+      "marca": "Kingston",
+      "precio_cop": 150000,
+      "precio_antes_cop": 180000,
+      "descuento_pct": 17,
+      "precio_tipo": "eventPrice",
+      "vendedor": "Country En Linea",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/128881356/Memoria-RAM-DDR3L-8GB-12800-1600-MHz-Kingston-Kvr16ls11-8",
+      "imagen": "https://media.falabella.com.co/falabellaCO/128881357_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 150000,
+      "modelo": "Kingston ValueRAM 8 GB DDR3L",
+      "gama": "economica",
+      "spec_clave": "DDR3L · 1600 MHz · SO-DIMM 204 pines · 1,35 V",
+      "fuente": "directa",
+      "alertas": [],
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 79
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Memoria RAM DDR4 SODIMM 8GB 3200MT/s",
+      "marca": "Genérica",
+      "precio_cop": 309900,
+      "precio_antes_cop": 349900,
+      "descuento_pct": 11,
+      "precio_tipo": "eventPrice",
+      "vendedor": "Technology Hub",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/158788090/memoria-ram-ddr4-sodimm-8gb-3200mt-s",
+      "imagen": "https://media.falabella.com.co/falabellaCO/158788091_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 309900,
+      "modelo": "DDR4 8 GB 3200 SO-DIMM (Falabella)",
+      "gama": "media",
+      "spec_clave": "DDR4 · 3200 MHz · SO-DIMM 260 pines",
+      "fuente": "directa",
+      "alertas": [
+        "Marca poco conocida"
+      ],
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 58
+    },
+    {
+      "tienda": "Mercado Libre",
+      "origen": "nacional",
+      "producto": "Memoria SK hynix 8 GB DDR4 2400 SODIMM",
+      "modelo": "SK Hynix 8 GB DDR4 2400",
+      "marca": "SK Hynix",
+      "gama": "media",
+      "spec_clave": "DDR4 · 2400 MHz · SO-DIMM 260 pines",
+      "precio_cop": 168316,
+      "precio_final_estimado_cop": 168316,
+      "url": "https://listado.mercadolibre.com.co/memoria-ram-8gb-ddr4-sodimm-2400",
+      "fuente": "web",
+      "condicion": "nuevo",
+      "garantia_local": true,
+      "entrega": "1–5 días",
+      "alertas": [
+        "Precio de búsqueda web: confírmalo en el enlace"
+      ],
+      "tambien_en": []
+    },
+    {
+      "tienda": "Mercado Libre",
+      "origen": "nacional",
+      "producto": "Memoria Crucial 8 GB DDR4 3200 Mhz CT8G4SFRA32A",
+      "modelo": "Crucial 8 GB DDR4 3200 (CT8G4SFRA32A)",
+      "marca": "Crucial",
+      "gama": "media",
+      "spec_clave": "DDR4 · 3200 MHz · SO-DIMM 260 pines",
+      "precio_cop": 202474,
+      "precio_final_estimado_cop": 202474,
+      "envio_gratis": true,
+      "url": "https://listado.mercadolibre.com.co/memoria-ram-8gb-ddr4-sodimm",
+      "fuente": "web",
+      "condicion": "nuevo",
+      "garantia_local": true,
+      "entrega": "1–5 días",
+      "alertas": [
+        "Precio de búsqueda web: confírmalo en el enlace"
+      ],
+      "tambien_en": []
+    }
+  ],
+  "descartados": [
+    "Módulos DIMM de escritorio (Kingston FURY Beast, HyperX Fury HX432C16FB3): no entran en un portátil",
+    "Memorias 'segunda mano' o lotes aleatorios de AliExpress",
+    "Kits de 16 GB (2×8 GB) para escritorio",
+    "AliExpress: muestra precios 'desde' de 2 o 4 GB; no se pudo confirmar el precio real de la variante de 8 GB"
+  ],
+  "cupones": [
+    {
+      "tienda": "Black Friday",
+      "codigo": "",
+      "descripcion": "27 de noviembre: Amazon y Falabella suelen rebajar memorias Crucial y Kingston",
+      "vigencia": "27–30 nov 2026",
+      "url": "https://www.diariodelsur.com.co/noticias/cuando-es-el-black-friday-2026-en-colombia-fechas-y-tips"
+    }
+  ],
+  "consejos": [
+    "Precios más bajos encontrados por tipo: DDR3L $99.800 · DDR4 $168.316 · DDR5 $370.670.",
+    "Antes de comprar: en Windows abre el Administrador de tareas → Rendimiento → Memoria. Ahí ves el tipo (DDR3/DDR4/DDR5), la velocidad y las 'Ranuras usadas' (si dice 1 de 2, tienes una libre).",
+    "Si dice 'Ranuras usadas: 1 de 1' o no aparece, la RAM puede estar soldada: entonces no se puede ampliar o solo cambiando el módulo existente.",
+    "Si ya tienes 8 GB, comprar otro de 8 GB igual te deja 16 GB en doble canal, que se nota en rendimiento.",
+    "Para portátil siempre SO-DIMM (corta). La DIMM (larga) es de escritorio y no entra."
+  ],
+  "no_cubiertas": [
+    "Mercado Libre (requiere token)",
+    "Alkosto y Ktronix (bloquean consultas automáticas)"
+  ]
+}

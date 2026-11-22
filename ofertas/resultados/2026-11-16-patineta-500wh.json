@@ -1,0 +1,494 @@
+{
+  "consulta": "Patineta eléctrica con batería de 500 Wh o más",
+  "categoria": "movilidad",
+  "fecha": "2026-11-16T17:36:56.579Z",
+  "trm": {
+    "valor": 3316.7,
+    "vigencia": "2026-11-14",
+    "fuente": "Superfinanciera (datos.gov.co)"
+  },
+  "requisito": "Batería ≥ 500 Wh (verificada en la ficha de la tienda o de la marca)",
+  "top3": [
+    {
+      "url": "https://www.ktronix.com/patineta-electrica-niu-kqi300p/p/7700149312783",
+      "etiqueta": "Económica",
+      "por_que": "La más barata con más de 500 Wh, marca NIU con buenas reseñas y garantía en Colombia."
+    },
+    {
+      "url": "https://www.jumbocolombia.com/patineta-electrica-segway-ninebot-max-g3-20131617/p",
+      "etiqueta": "Mejor calidad-precio",
+      "por_que": "La más probada para ciudad: suspensión, 65–80 km de autonomía y repuestos fáciles de conseguir."
+    },
+    {
+      "url": "https://www.falabella.com.co/falabella-co/product/121032064/patineta-electrica-mantis-10-kaabo",
+      "etiqueta": "Premium · más potencia",
+      "por_que": "Doble motor de 1000 W, 1092 Wh y 60 km/h; si quieres aún más, la Dualtron Spider (1440 Wh) cuesta unos $4 millones más."
+    }
+  ],
+  "gamas": {
+    "economica": "Hasta $3,9 millones · para ciudad",
+    "media": "$4,2–4,4 millones · más autonomía y suspensión",
+    "alta": "$4,5–7,4 millones · doble motor o batería grande",
+    "premium": "Más de $8 millones · máxima potencia"
+  },
+  "recomendacion": {
+    "url": "https://www.jumbocolombia.com/patineta-electrica-segway-ninebot-max-g3-20131617/p",
+    "texto": "La más equilibrada para uso diario en Bogotá."
+  },
+  "resultados": [
+    {
+      "tienda": "Olímpica",
+      "origen": "nacional",
+      "producto": "Patineta eléctrica Xiaomi Electric Scooter 6 Ultra",
+      "marca": "Xiaomi",
+      "precio_cop": 3799900,
+      "precio_antes_cop": 5839900,
+      "descuento_pct": 35,
+      "disponible": true,
+      "url": "https://www.olimpica.com/patineta-electrica-xiaomi-electric-scooter-6-ultra-1002416089/p",
+      "imagen": "https://olimpica.vteximg.com.br/arquivos/ids/2503861/image-92e9219472f64d9db3c25285b8f26233.jpg?v=639286358718030000",
+      "condicion": "nuevo",
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 3799900,
+      "modelo": "Xiaomi Electric Scooter 6 Ultra",
+      "bateria_wh": 585,
+      "gama": "economica",
+      "spec_clave": "585 Wh · 500 W · 25 km/h",
+      "alertas": [],
+      "fuente": "directa",
+      "tambien_en": [
+        {
+          "tienda": "Falabella",
+          "precio_cop": 3899900,
+          "url": "https://www.falabella.com.co/falabella-co/product/156510521/patineta-xiaomi-electric-6-ultra"
+        }
+      ],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 79
+    },
+    {
+      "tienda": "Jumbo",
+      "origen": "nacional",
+      "producto": "Patineta Eléctrica Segway Ninebot Max G3",
+      "marca": "Segway",
+      "precio_cop": 4399900,
+      "precio_antes_cop": null,
+      "descuento_pct": null,
+      "disponible": true,
+      "url": "https://www.jumbocolombia.com/patineta-electrica-segway-ninebot-max-g3-20131617/p",
+      "imagen": "https://jumbocolombiaio.vteximg.com.br/arquivos/ids/832173/image-b247327f2f4343349e79532efa10f2a8.jpg?v=639208674361230000",
+      "condicion": "nuevo",
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 4399900,
+      "modelo": "Segway Ninebot Max G3",
+      "bateria_wh": 597,
+      "gama": "media",
+      "spec_clave": "597 Wh · 2000 W pico · 65–80 km",
+      "alertas": [],
+      "fuente": "directa",
+      "tambien_en": [
+        {
+          "tienda": "Falabella",
+          "precio_cop": 4699900,
+          "url": "https://www.falabella.com.co/falabella-co/product/73664886/patinetaelectricamaxg3altorendimien"
+        },
+        {
+          "tienda": "Falabella",
+          "precio_cop": 4799900,
+          "url": "https://www.falabella.com.co/falabella-co/product/142277311/patineta-electrica-segway-max-g3-2000w-45kmh-80km-autonomia"
+        },
+        {
+          "tienda": "Olímpica",
+          "precio_cop": 5099900,
+          "url": "https://www.olimpica.com/patineta-electrica-segway-maxg3-2000wmax-45kmh-80km-autonomia-1002387935/p"
+        }
+      ],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 73
+    },
+    {
+      "tienda": "Amazon",
+      "origen": "internacional",
+      "producto": "Segway ZT3 Pro - Patinete eléctrico, hasta 24.9 MPH, rango de 43.5 millas, suspensión doble, carga flash, motor pico de 1600 W, scooter todoterreno para adultos con certificación UL (UL2272/2271)",
+      "precio_usd": 789.98,
+      "precio_cop": 2620127,
+      "precio_antes_cop": 3316667,
+      "descuento_pct": 21,
+      "calificacion": 4.5,
+      "url": "https://www.amazon.com/-/es/Segway-ZT3-Pro-todoterreno-certificaci%C3%B3n/dp/B0DDTFMPS6",
+      "imagen": "https://m.media-amazon.com/images/I/61sLM-QIp5L._AC_UL320_.jpg",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 809619,
+      "precio_final_estimado_cop": 3429746,
+      "modelo": "Segway ZT3 Pro",
+      "marca": "Segway",
+      "bateria_wh": 597,
+      "gama": "media",
+      "spec_clave": "597 Wh · 1600 W pico · todoterreno",
+      "alertas": [
+        "Sin garantía en Colombia"
+      ],
+      "fuente": "directa",
+      "tambien_en": [
+        {
+          "tienda": "Jumbo",
+          "precio_cop": 4299900,
+          "url": "https://www.jumbocolombia.com/patineta-electrica-segway-zt3pro-1600w--70km-autonomia-20135486/p"
+        },
+        {
+          "tienda": "Falabella",
+          "precio_cop": 4299900,
+          "url": "https://www.falabella.com.co/falabella-co/product/140643872/patineta-electrica-segway-zt3pro-1600w-40kmh-70km-autonomia"
+        },
+        {
+          "tienda": "Olímpica",
+          "precio_cop": 4349900,
+          "url": "https://www.olimpica.com/patineta-electrica-segway-zt3pro-1600w-40kmh-70km-autonomia-1002387936/p"
+        }
+      ],
+      "entrega": "7–15 días",
+      "puntaje_cp": 69
+    },
+    {
+      "tienda": "Pepe Ganga",
+      "origen": "nacional",
+      "producto": "Patineta Eléctrica Spider - Dualtron",
+      "marca": "Dualtron",
+      "precio_cop": 12999900,
+      "precio_antes_cop": null,
+      "descuento_pct": null,
+      "disponible": true,
+      "url": "https://www.pepeganga.com/patineta-electrica-spider-dualtron-spider/p",
+      "imagen": "https://pepeganga.vteximg.com.br/arquivos/ids/1199089/107981234-1.jpg?v=638738479740800000",
+      "condicion": "nuevo",
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 12999900,
+      "modelo": "Dualtron Spider",
+      "bateria_wh": 1440,
+      "gama": "premium",
+      "spec_clave": "1440 Wh · 2200 W · 60 km/h",
+      "alertas": [],
+      "fuente": "directa",
+      "tambien_en": [
+        {
+          "tienda": "Falabella",
+          "precio_cop": 12999900,
+          "url": "https://www.falabella.com.co/falabella-co/product/146952419/patineta-electrica-scooter-spider-2200w-60km-h-dualtron"
+        }
+      ],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 64
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Patineta Eléctrica Scooter LONG BODY Single 450 W 68 km/h Dualtron",
+      "precio_cop": 4549900,
+      "precio_antes_cop": 6999900,
+      "descuento_pct": 35,
+      "precio_tipo": "internetPrice",
+      "vendedor": "Homecenter",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/145651295/patineta-electrica-scooter-long-body-single-450-w-68-km-h-dualtron",
+      "imagen": "https://media.falabella.com.co/sodimacCO/745413_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 4549900,
+      "modelo": "Dualtron Long Body",
+      "marca": "Dualtron",
+      "bateria_wh": 520,
+      "gama": "alta",
+      "spec_clave": "520 Wh · 450 W · 68 km/h",
+      "alertas": [
+        "Cara para su batería"
+      ],
+      "fuente": "directa",
+      "tambien_en": [
+        {
+          "tienda": "Falabella",
+          "precio_cop": 4899900,
+          "url": "https://www.falabella.com.co/falabella-co/product/143278150/patineta-electrica-scooter-long-body-single-450w-68-km-h"
+        },
+        {
+          "tienda": "Pepe Ganga",
+          "precio_cop": 6999900,
+          "url": "https://www.pepeganga.com/patineta-electrica-mini-special-llong-body-single-motor-dualtron-special/p"
+        }
+      ],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 59
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Patineta Eléctrica 800W Skywalker 8S.",
+      "marca": "Kaabo",
+      "precio_cop": 4400000,
+      "precio_antes_cop": null,
+      "descuento_pct": null,
+      "precio_tipo": "internetPrice",
+      "vendedor": "Grupo Forsa Sas",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/121032325/patineta-electrica-kaabo-800w-skywalker-8s",
+      "imagen": "https://media.falabella.com.co/falabellaCO/121032326_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 4400000,
+      "modelo": "Kaabo Skywalker 8S",
+      "bateria_wh": 624,
+      "gama": "media",
+      "spec_clave": "624 Wh · 800 W · 40 km/h",
+      "alertas": [],
+      "fuente": "directa",
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 73
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Patineta Electrica - Mantis 8 - Kaabo.",
+      "marca": "Kaabo",
+      "precio_cop": 7400000,
+      "precio_antes_cop": null,
+      "descuento_pct": null,
+      "precio_tipo": "internetPrice",
+      "vendedor": "Grupo Forsa Sas",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/121033581/patineta-electrica-mantis-8-kaabo",
+      "imagen": "https://media.falabella.com.co/falabellaCO/121033582_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 7400000,
+      "modelo": "Kaabo Mantis 8",
+      "bateria_wh": 874,
+      "gama": "alta",
+      "spec_clave": "874 Wh · 2×800 W · 50 km/h",
+      "alertas": [],
+      "fuente": "directa",
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 67
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Patineta Electrica - Mantis 10 - Kaabo.",
+      "marca": "Kaabo",
+      "precio_cop": 8600000,
+      "precio_antes_cop": null,
+      "descuento_pct": null,
+      "precio_tipo": "internetPrice",
+      "vendedor": "Grupo Forsa Sas",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/121032064/patineta-electrica-mantis-10-kaabo",
+      "imagen": "https://media.falabella.com.co/falabellaCO/121032065_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 8600000,
+      "modelo": "Kaabo Mantis 10",
+      "bateria_wh": 1092,
+      "gama": "premium",
+      "spec_clave": "1092 Wh · 2×1000 W · 60 km/h",
+      "alertas": [],
+      "fuente": "directa",
+      "tambien_en": [
+        {
+          "tienda": "Falabella",
+          "precio_cop": 8600000,
+          "url": "https://www.falabella.com.co/falabella-co/product/121031739/patineta-electrica-mantis-10-kaabo"
+        }
+      ],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 69
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Patineta Eléctrica BE-X9 PRO 48V 550W 40km/h Autonomía hasta 100km IPX4",
+      "marca": "Be",
+      "precio_cop": 3119900,
+      "precio_antes_cop": null,
+      "descuento_pct": null,
+      "precio_tipo": "internetPrice",
+      "vendedor": "Nexsa S.a.s.",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/156599021/patineta-electrica-be-x9-pro-48v-550w-40km-h-autonomia-hasta-100km-ipx4",
+      "imagen": "https://media.falabella.com.co/falabellaCO/156599024_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 3119900,
+      "modelo": "Be X9 Pro",
+      "bateria_wh": 624,
+      "gama": "economica",
+      "spec_clave": "624 Wh · 1100 W pico · 40 km/h",
+      "alertas": [
+        "Marca con pocas reseñas",
+        "Batería 13 o 15,6 Ah según versión"
+      ],
+      "fuente": "directa",
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 68
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Patineta Eléctrica ROLDERS ORBIX 1000W con Batería 48V 20Ah",
+      "marca": "Rolders",
+      "precio_cop": 4199900,
+      "precio_antes_cop": 5499900,
+      "descuento_pct": 24,
+      "precio_tipo": "eventPrice",
+      "vendedor": "Emove.",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/159179917/patineta-electrica-rolders-orbix-1000w-con-bateria-48v-20ah",
+      "imagen": "https://media.falabella.com.co/falabellaCO/159179919_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 4199900,
+      "modelo": "Rolders Orbix (Emove)",
+      "bateria_wh": 960,
+      "gama": "media",
+      "spec_clave": "960 Wh · 1000 W · 60 km/h",
+      "alertas": [
+        "Marca con pocas reseñas"
+      ],
+      "fuente": "directa",
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 82
+    },
+    {
+      "tienda": "Amazon",
+      "origen": "internacional",
+      "producto": "Segway Ninebot MAX G2 Patinete eléctrico, impulsado por motor de 1000 W, alcance de hasta 43 millas y 22 MPH, con neumáticos de 10 pulgadas, frenos dobles y suspensión, scooter eléctrico para adultos",
+      "precio_usd": 629.98,
+      "precio_cop": 2089455,
+      "precio_antes_cop": 3316667,
+      "descuento_pct": 37,
+      "calificacion": 4.1,
+      "url": "https://www.amazon.com/-/es/Segway-el%C3%A9ctrico-impulsado-neum%C3%A1ticos-suspensi%C3%B3n/dp/B0C65CMKTK",
+      "imagen": "https://m.media-amazon.com/images/I/61voJ8aLMUL._AC_UL320_.jpg",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 645642,
+      "precio_final_estimado_cop": 2735097,
+      "modelo": "Segway Ninebot Max G2",
+      "marca": "Segway",
+      "bateria_wh": 551,
+      "gama": "economica",
+      "spec_clave": "551 Wh · 900 W pico · 70 km",
+      "alertas": [
+        "Sin garantía en Colombia"
+      ],
+      "fuente": "directa",
+      "tambien_en": [],
+      "entrega": "7–15 días",
+      "puntaje_cp": 77
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Patineta Eléctrica Max G3plus",
+      "marca": "Segway",
+      "precio_cop": 4799900,
+      "precio_antes_cop": 4949900,
+      "descuento_pct": 3,
+      "precio_tipo": "internetPrice",
+      "vendedor": "Homecenter",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/159026147/patineta-electrica-segway-max-g3plus",
+      "imagen": "https://media.falabella.com.co/sodimacCO/3111059_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 4799900,
+      "modelo": "Segway Ninebot Max G3 Plus",
+      "bateria_wh": 717,
+      "gama": "alta",
+      "spec_clave": "717 Wh · 2200 W pico · 80 km",
+      "alertas": [],
+      "fuente": "directa",
+      "tambien_en": [
+        {
+          "tienda": "Falabella",
+          "precio_cop": 4799900,
+          "url": "https://www.falabella.com.co/falabella-co/product/156503754/patineta-electrica-segway-max-g3-plus-2200w-40kmh-80km-autonomia"
+        }
+      ],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 77
+    },
+    {
+      "tienda": "Ktronix",
+      "origen": "nacional",
+      "producto": "Patineta eléctrica NIU KQi300P",
+      "precio_cop": 2200000,
+      "precio_antes_cop": 2600000,
+      "precio_final_estimado_cop": 2200000,
+      "url": "https://www.ktronix.com/patineta-electrica-niu-kqi300p/p/7700149312783",
+      "imagen": "https://cdn.dam.ktronix.com/products/7700149312783/7700149312783-001.webp/patineta-electrica-niu-kqi300p?scale.option=fill&w=240&h=0",
+      "fuente": "web",
+      "modelo": "NIU KQi300P",
+      "marca": "NIU",
+      "bateria_wh": 504,
+      "gama": "economica",
+      "spec_clave": "504 Wh · 900 W pico · 35 km/h",
+      "condicion": "nuevo",
+      "alertas": [],
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 100
+    }
+  ],
+  "descartados": [
+    "Xiaomi 6 Max y 6 Pro: 468 Wh",
+    "Segway F3: 477 Wh",
+    "NIU KQi3 Pro: menos de 500 Wh",
+    "Segway E3 Pro y E2 Plus II: menos de 500 Wh"
+  ],
+  "cupones": [
+    {
+      "tienda": "Falabella",
+      "codigo": "CYBER",
+      "descripcion": "10% adicional, tope de $80.000",
+      "vigencia": "Cuponera oficial; fecha final sin confirmar",
+      "url": "https://www.falabella.com.co/falabella-co/page/cuponera"
+    },
+    {
+      "tienda": "Black Friday",
+      "codigo": "",
+      "descripcion": "27 de noviembre: Falabella, Jumbo, Olímpica y Ktronix suelen bajar movilidad eléctrica",
+      "vigencia": "27–30 nov 2026",
+      "url": "https://www.diariodelsur.com.co/noticias/cuando-es-el-black-friday-2026-en-colombia-fechas-y-tips"
+    }
+  ],
+  "consejos": [
+    "Las de más de 25 km/h (Kaabo, Dualtron, Rolders) son para uso recreativo: revisa la Ley 2486 de 2025 sobre velocidad y dónde puedes circular.",
+    "Usa casco certificado y luces; pide factura y registro de garantía.",
+    "Amazon sale más barata pero sin garantía local y con impuestos de importación estimados incluidos."
+  ],
+  "no_cubiertas": [
+    "Mercado Libre (requiere token)",
+    "Alkosto (bloquea consultas automáticas)"
+  ]
+}

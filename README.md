@@ -105,3 +105,11 @@ js/analisis.js    proyección de caja, gráfico y lecturas de Jarvis
 js/tablero.js     pantalla de Inicio
 js/app.js         navegación y eventos
 ```
+
+## Cazador de ofertas
+
+En `ofertas/` y `.claude/` vive un agente que busca el precio más bajo de cualquier producto en tiendas
+de Colombia, internacionales y mercados chinos confiables, con cupones, y lo muestra en una página tipo
+vitrina por gamas (Económica, Media, Alta, Premium). Detalles en [`ofertas/README.md`](ofertas/README.md).
+
+Si vas a modificar el repositorio con un agente de código, lee primero [`AGENTS.md`](AGENTS.md).

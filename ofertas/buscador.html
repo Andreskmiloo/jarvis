@@ -1,0 +1,598 @@
+<title>Cazador de Ofertas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: barra fija (búsqueda + categorías), Para ti, historial y vitrina en carriles por gama */
+:root{
+  --bg:#f6f7f4; --surface:#ffffff; --fg:#1d2321; --muted:#5d6763; --line:#dde2de;
+  --accent:#0d6e5a; --accent-fg:#ffffff; --accent-soft:#e3f1ec; --tag:#f2c230; --tag-fg:#2a2200;
+  --good:#1f7a3a; --warn:#a45d00; --bad:#b42318;
+  --display:'Space Grotesk',system-ui,sans-serif; --body:'Inter',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121614; --surface:#1a201d; --fg:#e7ece9; --muted:#9aa5a0; --line:#2c3531;
+  --accent:#4cc3a3; --accent-fg:#0b1a15; --accent-soft:#1c2f29; --tag:#f2c230; --tag-fg:#2a2200;
+  --good:#5bd17e; --warn:#f0a447; --bad:#ff7a6e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121614; --surface:#1a201d; --fg:#e7ece9; --muted:#9aa5a0; --line:#2c3531;
+  --accent:#4cc3a3; --accent-fg:#0b1a15; --accent-soft:#1c2f29; --tag:#f2c230; --tag-fg:#2a2200;
+  --good:#5bd17e; --warn:#f0a447; --bad:#ff7a6e; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding-block:24px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:24px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(1.5rem,4vw,2.1rem)} h2{font-size:1.2rem}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.meta{color:var(--muted);font-size:.9rem;display:flex;flex-wrap:wrap;gap:6px 16px}
+.note{color:var(--muted);font-size:.82rem;max-width:80ch}
+a{color:var(--accent)} :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+form.search{display:grid;grid-template-columns:1fr auto auto;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px}
+form.search input,form.search select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+form.search input{font-size:1.05rem}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:12px 18px;background:var(--accent);color:var(--accent-fg);cursor:pointer;white-space:nowrap}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent);padding:6px 12px;font-size:.85rem}
+@media (max-width:620px){form.search{grid-template-columns:1fr 1fr}form.search input{grid-column:1/-1}}
+.examples{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ex{font:inherit;font-size:.85rem;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer}
+.notice{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;font-size:.9rem;display:grid;gap:6px}
+.notice.warn{border-color:var(--warn)} .notice.bad{border-color:var(--bad)}
+code.cmd{font-family:ui-monospace,Menlo,monospace;background:var(--accent-soft);color:var(--accent);padding:2px 6px;border-radius:6px}
+
+.history{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.hchip{font:inherit;flex:none;display:flex;align-items:center;gap:8px;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;max-width:260px}
+.hchip span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hchip[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--muted)}
+.dot.listo{background:var(--good)} .dot.buscando,.dot.pendiente{background:var(--warn);animation:pulse 1.4s infinite} .dot.error{background:var(--bad)}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none!important}}
+
+.progress{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:10px}
+.bar{height:6px;border-radius:999px;background:var(--accent-soft);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .6s}
+
+.best{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.price-tag{background:var(--tag);color:var(--tag-fg);font-family:var(--display);font-weight:700;font-size:clamp(1.3rem,4vw,1.9rem);padding:12px 18px 12px 26px;border-radius:6px 10px 10px 6px;position:relative;font-variant-numeric:tabular-nums;white-space:nowrap}
+.price-tag::before{content:"";position:absolute;left:9px;top:50%;width:9px;height:9px;margin-top:-4.5px;border-radius:50%;background:var(--surface)}
+.best p{margin:4px 0 0;color:var(--muted)} .best .t{min-width:0}
+@media (max-width:560px){.best{grid-template-columns:1fr}}
+section{display:grid;gap:12px;min-width:0}
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+.count{color:var(--muted);font-size:.85rem}
+.table-box{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:.9rem}
+th{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap} th.num{text-align:right}
+td.final{font-weight:700;color:var(--accent)}
+.prod{display:flex;gap:10px;align-items:flex-start;min-width:240px}
+.prod img{width:44px;height:44px;object-fit:contain;border-radius:6px;background:#fff;flex:none}
+.store{font-weight:600;white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chip{font-size:.72rem;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.chip.warn{background:transparent;border:1px solid var(--warn);color:var(--warn)}
+.chip.bad{background:transparent;border:1px solid var(--bad);color:var(--bad)}
+.chip.good{background:transparent;border:1px solid var(--good);color:var(--good)}
+.old{color:var(--muted);text-decoration:line-through;font-size:.8rem;display:block}
+.coupons{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.coupon{background:var(--surface);border:1px dashed var(--accent);border-radius:12px;padding:14px;display:grid;gap:6px;align-content:start;min-width:0}
+.code{font-family:ui-monospace,Menlo,monospace;font-weight:700;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:6px;border:0;cursor:pointer;font-size:.95rem;justify-self:start}
+.coupon small{color:var(--muted)}
+ul.tips{margin:0;padding-left:20px;display:grid;gap:6px;max-width:72ch}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.wish{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:flex-start;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line)}
+.wish>div:first-child{flex:1 1 180px;min-width:0}
+.wish:first-of-type{border-top:0;padding-top:0}
+.wish .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.wish .sub{flex-basis:100%;color:var(--muted);font-size:.85rem}
+.save{height:6px;border-radius:999px;background:var(--accent-soft);overflow:hidden;flex-basis:100%}
+.save i{display:block;height:100%;background:var(--good)}
+.learn{display:grid;gap:8px}
+.learn .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.learn .lbl{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:110px}
+.tagx{font:inherit;font-size:.8rem;display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent);border:0;border-radius:999px;padding:3px 6px 3px 10px;cursor:pointer}
+.tagx b{font-weight:400;opacity:.7}
+.sugg{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)}
+.sugg:first-of-type{border-top:0}
+details.edit summary{cursor:pointer;font-family:var(--display);font-weight:700;font-size:1.05rem;list-style:none}
+details.edit summary::-webkit-details-marker{display:none}
+details.edit summary::after{content:" +";color:var(--accent)} details.edit[open] summary::after{content:" −"}
+.addrow{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px}
+.addrow input,.addrow select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-width:0}
+@media (max-width:620px){.addrow{grid-template-columns:1fr 1fr}.addrow input:first-child{grid-column:1/-1}}
+.logro{display:flex;gap:8px;align-items:baseline;font-size:.92rem}
+.logro::before{content:"✓";color:var(--good);font-weight:700}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:28px;display:grid;gap:8px;justify-items:start}
+
+.brand-tag{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.card h3{font-family:var(--display);font-size:1.02rem}
+.pname{font-size:.75rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.also{font-size:.75rem;color:var(--muted)} .also a{white-space:nowrap}
+.top3{display:grid;gap:12px}
+.top3-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.pick{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
+.pick-1{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.pick-2{border-color:var(--tag)}
+.pick-label{position:absolute;z-index:1;left:12px;top:12px;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--fg);color:var(--bg)}
+.pick-1 .pick-label{background:var(--accent);color:var(--accent-fg)} .pick-2 .pick-label{background:var(--tag);color:var(--tag-fg)}
+.pick-img{position:relative;display:block;background:#fff;aspect-ratio:16/11;overflow:hidden}
+.pick-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:16px}
+.pick-img .ph{position:absolute;inset:0;display:grid;place-items:center}
+.pick-body{padding:14px 16px 16px;display:grid;gap:6px;align-content:start}
+.pick-body h3{font-size:1.25rem} .pick-body h3 a{color:var(--fg);text-decoration:none}
+.pick-body p{margin:0;font-size:.88rem;color:var(--muted)}
+.pick-body .price strong{font-size:1.6rem}
+.pick-body .btn{justify-self:start;text-decoration:none;margin-top:4px}
+/* ---- marketplace ---- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);display:grid;gap:10px;padding-block:12px 8px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:1.05rem;flex-wrap:wrap}
+.brand-sub{font-family:var(--body)}
+.logo{display:inline-flex;align-items:flex-end;gap:2px;height:18px}
+.logo i{width:4px;border-radius:2px;background:var(--accent)} .logo i:nth-child(1){height:6px}.logo i:nth-child(2){height:10px}.logo i:nth-child(3){height:14px}.logo i:nth-child(4){height:18px;background:var(--tag)}
+.topbar form.search{padding:6px;border-radius:12px}
+.cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cats button{font:inherit;font-size:.85rem;flex:none;border:0;background:transparent;color:var(--muted);padding:6px 12px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.cats button span{font-size:.7rem;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:0 6px}
+.cats button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.res-head{display:grid;gap:4px}
+.res-title{font-size:clamp(1.4rem,3.6vw,2rem)}
+.hero{display:grid;grid-template-columns:180px minmax(0,1fr) auto;gap:20px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px}
+.hero-img,.card-img{display:grid;place-items:center;background:#fff;border-radius:12px;overflow:hidden;position:relative}
+.hero-img{aspect-ratio:1;max-width:100%}
+.hero-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:10px}
+.hero-t{display:grid;gap:6px;min-width:0}
+.hero-t h2{font-size:1.25rem} .hero-t h2 a{color:var(--fg);text-decoration:none} .hero-t p{margin:0;color:var(--muted)}
+.ph{font-family:var(--display);font-size:1.6rem;color:#8a948f}
+@media (max-width:720px){.hero{grid-template-columns:96px minmax(0,1fr)}.hero .price-tag{grid-column:1/-1;justify-self:start}}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{font:inherit;font-size:.85rem;border:0;background:transparent;color:var(--muted);padding:5px 12px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.switch{display:inline-flex;gap:6px;align-items:center;font-size:.88rem;cursor:pointer}
+.jump{display:flex;gap:12px;font-size:.85rem;margin-left:auto;flex-wrap:wrap}
+.jump a{text-decoration:none}
+.lane{display:grid;gap:10px;min-width:0;scroll-margin-top:180px}
+.lane-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lane-head .count{margin-left:auto}
+.tier{display:inline-flex;align-items:flex-end;gap:2px;height:16px}
+.tier i{width:5px;border-radius:2px;background:var(--line)} .tier i:nth-child(1){height:5px}.tier i:nth-child(2){height:8px}.tier i:nth-child(3){height:12px}.tier i:nth-child(4){height:16px}
+.tier i.on{background:var(--accent)} .lane-premium .tier i.on{background:var(--tag)}
+.cards{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,236px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px}
+.card{scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.card.is-best{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.card-img{aspect-ratio:4/3;border-radius:0}
+.card-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:12px}
+.badges{position:absolute;left:8px;top:8px;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.badge.cheap{background:var(--tag);color:var(--tag-fg)}
+.badge{background:var(--accent);color:var(--accent-fg);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:999px}
+.card-body{padding:12px 14px 14px;display:grid;gap:6px;align-content:start}
+.card h3{font-family:var(--body);font-weight:600;font-size:.92rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card h3 a{color:var(--fg);text-decoration:none} .card h3 a:hover{text-decoration:underline}
+.spec{font-size:.8rem;color:var(--accent);font-weight:600}
+.price{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+.price strong{font-family:var(--display);font-size:1.35rem;font-variant-numeric:tabular-nums}
+.price s{color:var(--muted);font-size:.8rem;flex-basis:100%}
+.off{font-size:.78rem;font-weight:700;color:var(--good)}
+.seller{font-size:.8rem;color:var(--muted)} .seller strong{color:var(--fg)}
+.cp{display:grid;grid-template-columns:auto 1fr;gap:0 8px;align-items:center}
+.cp b{font-family:var(--display);font-size:1rem;grid-row:span 2}
+.cp-bar{height:5px;border-radius:999px;background:var(--accent-soft);overflow:hidden} .cp-bar i{display:block;height:100%;background:var(--accent)}
+.cp-l{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.card{transition:none}.card:hover{transform:none}}
+</style>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><strong>Cazador</strong> de ofertas</span><span class="note brand-sub">Bogotá · nuevos y mejor calidad-precio</span></div>
+    <form class="search" id="form" autocomplete="off">
+      <input id="q" name="q" type="search" placeholder="¿Qué quieres comprar? Ej: patineta 500 Wh, tenis Nike talla 42" maxlength="120" aria-label="Producto a buscar" required>
+      <select id="cat" name="cat" aria-label="Categoría">
+        <option value="auto">Categoría automática</option>
+        <option value="tecnologia">Tecnología</option>
+        <option value="ropa">Ropa y calzado</option>
+        <option value="deportes">Deportes</option>
+        <option value="movilidad">Bicis y patinetas</option>
+        <option value="vehiculos">Carros y motos</option>
+        <option value="hogar">Hogar y electro</option>
+        <option value="belleza">Belleza y salud</option>
+        <option value="mercado">Mercado</option>
+      </select>
+      <button class="btn" id="go" type="submit">Buscar</button>
+    </form>
+    <nav class="cats" id="cats" aria-label="Categorías"></nav>
+  </div>
+  <div class="examples" id="examples"><span class="note">Prueba:</span></div>
+  <div id="notice" hidden></div>
+
+  <section id="parati" hidden></section>
+
+  <details class="edit panel" id="editor">
+    <summary>Mis deseos, metas y logros</summary>
+    <p class="note" style="margin:0">Esto es lo que quieres a largo plazo. Lo uso para priorizar búsquedas, avisarte de ofertas relacionadas y no mostrarte cosas que no te interesan. Solo tú lo ves.</p>
+    <form class="addrow" id="addWish" autocomplete="off">
+      <input id="wName" placeholder="Algo que quieres comprar (ej: bicicleta de ruta)" maxlength="100" aria-label="Deseo" required>
+      <input id="wBudget" placeholder="Presupuesto" inputmode="numeric" maxlength="15" aria-label="Presupuesto en pesos">
+      <select id="wWhen" aria-label="Para cuándo"><option value="">¿Para cuándo?</option><option>Este mes</option><option>En 3 meses</option><option>Este año</option><option>Algún día</option></select>
+      <button class="btn" type="submit">Agregar deseo</button>
+    </form>
+    <form class="addrow" id="addGoal" autocomplete="off" style="grid-template-columns:3fr 1fr auto">
+      <input id="gText" placeholder="Una meta (ej: correr una media maratón, amoblar el apartamento)" maxlength="140" aria-label="Meta" required>
+      <input id="gDate" type="month" aria-label="Fecha objetivo">
+      <button class="btn" type="submit">Agregar meta</button>
+    </form>
+    <form class="addrow" id="addWin" autocomplete="off" style="grid-template-columns:4fr auto">
+      <input id="lText" placeholder="Un logro que ya cumpliste" maxlength="140" aria-label="Logro" required>
+      <button class="btn ghost" type="submit" style="padding:9px 14px;font-size:1rem">Agregar logro</button>
+    </form>
+  </details>
+
+  <nav class="history" id="history" aria-label="Búsquedas recientes"></nav>
+  <main id="view" style="display:grid;gap:24px"></main>
+</div>
+
+<script id="vitrina">
+/* Vitrina: render compartido por el buscador y las páginas individuales (ofertas/pagina.js la copia de aquí). */
+window.Vitrina = (() => {
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const safeUrl = (u) => (/^https?:\/\//i.test(u || '') ? u : '#');
+  const safeImg = (u) => (/^data:image\/(png|jpe?g|webp|gif|avif);base64,/i.test(u || '') ? u : '');
+  const cop = (n) => (n == null || isNaN(n) ? '—' : '$ ' + Math.round(n).toLocaleString('es-CO'));
+  const fecha = (t) => { try { return new Date(t).toLocaleString('es-CO', { timeZone: 'America/Bogota', dateStyle: 'medium', timeStyle: 'short' }); } catch { return ''; } };
+  const CATS = { auto: 'Automática', tecnologia: 'Tecnología', ropa: 'Ropa y calzado', deportes: 'Deportes', movilidad: 'Bicis y patinetas', vehiculos: 'Carros y motos', hogar: 'Hogar', belleza: 'Belleza y salud', mercado: 'Mercado' };
+  const GAMAS = [['economica', 'Económica', 1], ['media', 'Media', 2], ['alta', 'Alta', 3], ['premium', 'Premium', 4]];
+  const store = { get(k, d) { try { const v = localStorage.getItem('vitrina:' + k); return v == null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem('vitrina:' + k, JSON.stringify(v)); } catch {} } };
+
+  function prep(d) {
+    const res = (d.resultados || []).filter((r) => r && r.precio_cop).map((r) => ({ ...r,
+      precio_final_estimado_cop: r.precio_final_estimado_cop ?? r.precio_cop + (r.envio_cop || 0) + (r.impuestos_estimados_cop || 0) - (r.descuento_cupon_cop || 0) }));
+    const usado = (r) => (r.condicion && r.condicion !== 'nuevo') || r.origen === 'local';
+    const nuevos = res.filter((r) => !usado(r)), usados = res.filter(usado);
+    // Gama: la asigna el agente; si falta, por cuartiles de precio de los nuevos.
+    const precios = nuevos.map((r) => r.precio_final_estimado_cop).sort((a, b) => a - b);
+    const q = (p) => precios[Math.min(precios.length - 1, Math.floor(p * precios.length))];
+    for (const r of nuevos) {
+      if (!GAMAS.some(([k]) => k === r.gama)) {
+        const p = r.precio_final_estimado_cop;
+        r.gama = p <= q(0.25) ? 'economica' : p <= q(0.5) ? 'media' : p <= q(0.75) ? 'alta' : 'premium';
+      }
+    }
+    // Puntaje calidad-precio: lo da el agente; si falta, relativo al precio dentro de su gama + calificación.
+    for (const [k] of GAMAS) {
+      const g = nuevos.filter((r) => r.gama === k); if (!g.length) continue;
+      const min = Math.min(...g.map((r) => r.precio_final_estimado_cop));
+      for (const r of g) if (r.puntaje_cp == null) r.puntaje_cp = Math.round(55 + 35 * (min / r.precio_final_estimado_cop) + (r.calificacion ? (r.calificacion - 4) * 10 : 0) - (r.alertas || []).length * 8);
+      for (const r of g) r.puntaje_cp = Math.max(1, Math.min(100, r.puntaje_cp));
+    }
+    nuevos.sort((a, b) => b.puntaje_cp - a.puntaje_cp || a.precio_final_estimado_cop - b.precio_final_estimado_cop);
+    const rec = (d.recomendacion && res.find((r) => r.url === d.recomendacion.url)) || nuevos[0] || res[0];
+    return { res, nuevos, usados, rec };
+  }
+
+  const initials = (s) => esc(String(s || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase());
+
+  function chips(r) {
+    const c = [];
+    if (r.garantia_local || r.origen === 'nacional') c.push('<span class="chip">Garantía en Colombia</span>');
+    if (r.cupon) c.push(`<span class="chip good">Cupón ${esc(r.cupon)}</span>`);
+    if (r.envio_gratis) c.push('<span class="chip">Envío gratis</span>');
+    if (r.condicion && r.condicion !== 'nuevo') c.push(`<span class="chip warn">${esc(r.condicion)}</span>`);
+    if (r.fuente === 'web') c.push('<span class="chip warn">Precio de búsqueda web</span>');
+    for (const a of r.alertas || []) c.push(`<span class="chip bad">${esc(a)}</span>`);
+    return c.join('');
+  }
+
+  function card(r, best, cheap) {
+    const img = safeImg(r.imagen);
+    const off = r.precio_antes_cop && r.precio_antes_cop > r.precio_final_estimado_cop ? Math.round((1 - r.precio_final_estimado_cop / r.precio_antes_cop) * 100) : r.descuento_pct;
+    return `<article class="card${best ? ' is-best' : ''}">
+<a class="card-img" href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${img ? `<img src="${img}" alt="" loading="lazy">` : `<span class="ph">${initials(r.producto)}</span>`}<span class="badges">${best ? '<span class="badge">Mejor calidad-precio</span>' : ''}${cheap ? '<span class="badge cheap">La más barata</span>' : ''}</span></a>
+<div class="card-body">
+  ${r.puntaje_cp != null ? `<div class="cp" title="Puntaje calidad-precio de 0 a 100"><b>${esc(r.puntaje_cp)}</b><span class="cp-bar"><i style="width:${Math.max(0, Math.min(100, +r.puntaje_cp || 0))}%"></i></span><span class="cp-l">calidad-precio</span></div>` : ''}
+  ${r.marca ? `<span class="brand-tag">${esc(r.marca)}</span>` : ''}
+  <h3><a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(r.modelo || r.producto)}</a></h3>
+  ${r.modelo ? `<span class="pname">${esc(r.producto)}</span>` : ''}
+  ${r.spec_clave ? `<span class="spec">${esc(r.spec_clave)}</span>` : ''}
+  <div class="price">${r.precio_antes_cop && r.precio_antes_cop > r.precio_final_estimado_cop ? `<s>${cop(r.precio_antes_cop)}</s>` : ''}<strong>${cop(r.precio_final_estimado_cop)}</strong>${off ? `<span class="off">-${esc(off)}%</span>` : ''}</div>
+  ${r.impuestos_estimados_cop ? `<span class="note">Incluye ${cop(r.impuestos_estimados_cop)} de impuestos estimados</span>` : ''}
+  <div class="seller"><strong>${esc(r.tienda)}</strong>${r.entrega ? ` · ${esc(r.entrega)}` : ''}${r.calificacion ? ` · ${esc(r.calificacion)}★` : ''}</div>
+  <div class="chips">${chips(r)}</div>
+  ${(r.tambien_en || []).length ? `<div class="also">También en ${r.tambien_en.map((t) => `<a href="${esc(safeUrl(t.url))}" target="_blank" rel="noopener">${esc(t.tienda)} ${cop(t.precio_cop)}</a>`).join(' · ')}</div>` : ''}
+</div></article>`;
+  }
+
+  function fila(r) {
+    return `<tr><td>${esc(r.gama ? (GAMAS.find(([k]) => k === r.gama) || [])[1] || '' : '')}</td><td class="store">${esc(r.tienda)}</td>
+<td><a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(r.producto)}</a>${r.spec_clave ? `<div class="note">${esc(r.spec_clave)}</div>` : ''}<div class="chips">${chips(r)}</div></td>
+<td class="num">${r.puntaje_cp ?? '—'}</td><td class="num">${r.precio_antes_cop ? `<span class="old">${cop(r.precio_antes_cop)}</span>` : ''}${cop(r.precio_cop)}</td>
+<td class="num final">${cop(r.precio_final_estimado_cop)}</td><td>${esc(r.entrega || '')}</td></tr>`;
+  }
+
+  function html(d, st) {
+    const { res, nuevos, usados, rec } = prep(d);
+    const tiendas = new Set(res.map((r) => r.tienda)).size;
+    const tier = (n) => `<span class="tier" aria-hidden="true">${[1, 2, 3, 4].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
+    const toolbar = `<div class="toolbar" role="group" aria-label="Opciones de vista">
+<div class="seg"><button type="button" data-act="vista" data-v="vitrina" aria-pressed="${st.vista !== 'tabla'}">Vitrina</button><button type="button" data-act="vista" data-v="tabla" aria-pressed="${st.vista === 'tabla'}">Tabla</button></div>
+${usados.length ? `<label class="switch"><input type="checkbox" data-act="usados" ${st.usados ? 'checked' : ''}> Incluir usados (${usados.length})</label>` : '<span class="note">Solo productos nuevos</span>'}
+<nav class="jump" aria-label="Ir a gama">${GAMAS.filter(([k]) => nuevos.some((r) => r.gama === k)).map(([k, l]) => `<a href="#gama-${k}" data-act="jump" data-k="${k}">${l}</a>`).join('')}</nav></div>`;
+    const top = (d.top3 || []).map((t) => ({ t, r: res.find((x) => x.url === t.url) })).filter((x) => x.r);
+    const top3 = top.length ? `<section class="top3"><div class="sec-head"><h2>Tus ${top.length} opciones</h2><span class="note">Elegidas por calidad, precio y garantía</span></div><div class="top3-grid">${top.map(({ t, r }, i) => `<article class="pick pick-${i}">
+<span class="pick-label">${esc(t.etiqueta)}</span>
+<a class="pick-img" href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${safeImg(r.imagen) ? `<img src="${safeImg(r.imagen)}" alt="">` : `<span class="ph">${initials(r.modelo || r.producto)}</span>`}</a>
+<div class="pick-body">${r.marca ? `<span class="brand-tag">${esc(r.marca)}</span>` : ''}<h3><a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(r.modelo || r.producto)}</a></h3>
+${r.spec_clave ? `<span class="spec">${esc(r.spec_clave)}</span>` : ''}
+<div class="price"><strong>${cop(r.precio_final_estimado_cop)}</strong><span class="seller">en <b>${esc(r.tienda)}</b></span></div>
+<p>${esc(t.por_que)}</p><div class="chips">${chips(r)}</div>
+<a class="btn" href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">Ver en ${esc(r.tienda)}</a></div></article>`).join('')}</div></section>` : '';
+    const hero = top.length ? top3 : rec ? `<article class="hero">
+<a class="hero-img" href="${esc(safeUrl(rec.url))}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${safeImg(rec.imagen) ? `<img src="${safeImg(rec.imagen)}" alt="">` : `<span class="ph">${initials(rec.producto)}</span>`}</a>
+<div class="hero-t"><span class="eyebrow">Recomendada para ti</span><h2><a href="${esc(safeUrl(rec.url))}" target="_blank" rel="noopener">${esc(rec.modelo || rec.producto)}</a></h2>
+${rec.spec_clave ? `<span class="spec">${esc(rec.spec_clave)}</span>` : ''}<p>${esc(rec.tienda)}${d.recomendacion && d.recomendacion.texto ? ' — ' + esc(d.recomendacion.texto) : ''}</p><div class="chips">${chips(rec)}</div></div>
+<div class="price-tag">${cop(rec.precio_final_estimado_cop)}</div></article>` : '<div class="empty">No encontré ofertas con precio. Prueba con un nombre más general.</div>';
+    let body;
+    if (st.vista === 'tabla') {
+      const rows = (st.usados ? res : nuevos);
+      body = `<div class="table-box"><table><thead><tr><th>Gama</th><th>Tienda</th><th>Producto</th><th class="num">C/P</th><th class="num">Precio</th><th class="num">Precio final</th><th>Entrega</th></tr></thead><tbody>${rows.map(fila).join('')}</tbody></table></div>`;
+    } else {
+      body = GAMAS.map(([k, l, n]) => {
+        const g = nuevos.filter((r) => r.gama === k); if (!g.length) return '';
+        const minP = Math.min(...g.map((r) => r.precio_final_estimado_cop));
+        return `<section class="lane lane-${k}" id="gama-${k}"><div class="lane-head">${tier(n)}<h2>${l}</h2><span class="note">${esc((d.gamas || {})[k] || `${cop(Math.min(...g.map((r) => r.precio_final_estimado_cop)))} – ${cop(Math.max(...g.map((r) => r.precio_final_estimado_cop)))}`)}</span><span class="count">${g.length}</span></div>
+<div class="cards">${g.map((r, i) => card(r, i === 0, r.precio_final_estimado_cop === minP)).join('')}</div></section>`;
+      }).join('') + (st.usados && usados.length ? `<section class="lane lane-usados"><div class="lane-head"><h2>Usados y Marketplace</h2><span class="note">Revisa en persona y pide factura.</span><span class="count">${usados.length}</span></div><div class="cards">${usados.map((r) => card(r, false)).join('')}</div></section>` : '');
+    }
+    return `<header class="res-head"><span class="eyebrow">${esc(CATS[d.categoria] || 'Resultados')}</span><h2 class="res-title">${esc(d.consulta)}</h2>
+<div class="meta"><span>${fecha(d.fecha)}</span><span>${nuevos.length} productos nuevos en ${tiendas} tiendas</span>${d.trm ? `<span>TRM ${cop(d.trm.valor)}</span>` : ''}${d.requisito ? `<span>${esc(d.requisito)}</span>` : ''}</div></header>
+${hero}${toolbar}${body}
+${(d.cupones || []).length ? `<section><div class="sec-head"><h2>Cupones y promociones</h2><span class="count">${d.cupones.length}</span></div><div class="coupons">${d.cupones.map((c) => `<div class="coupon"><strong>${esc(c.tienda)}</strong>${c.codigo ? `<button class="code" type="button" data-code="${esc(c.codigo)}" title="Copiar código">${esc(c.codigo)}</button>` : ''}<span>${esc(c.descripcion)}</span><small>${esc(c.vigencia || 'Vigencia sin confirmar')}${c.url ? ` · <a href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener">Fuente</a>` : ''}</small></div>`).join('')}</div></section>` : ''}
+${(d.descartados || []).length ? `<section><h2>No cumplen lo que pediste</h2><ul class="tips">${d.descartados.map((c) => `<li>${esc(c)}</li>`).join('')}</ul></section>` : ''}
+${(d.consejos || []).length ? `<section><h2>Antes de comprar</h2><ul class="tips">${d.consejos.map((c) => `<li>${esc(c)}</li>`).join('')}</ul></section>` : ''}
+<p class="note">Precios consultados el ${fecha(d.fecha)}; pueden cambiar, confirma el valor final en la tienda. Impuestos de importación estimados: arancel 10% + IVA 19% para compras de US$200 o más.${(d.no_cubiertas || []).length ? ' No se pudo consultar: ' + esc(d.no_cubiertas.join(', ')) + '.' : ''}</p>`;
+  }
+
+  function mount(el, d) {
+    const st = { vista: store.get('vista', 'vitrina'), usados: store.get('usados', false) };
+    const draw = () => { el.innerHTML = html(d, st); };
+    el.onclick = (e) => {
+      const t = e.target.closest('[data-act]'); if (!t) return;
+      if (t.dataset.act === 'vista') { st.vista = t.dataset.v; store.set('vista', st.vista); draw(); }
+      if (t.dataset.act === 'jump') { e.preventDefault(); const s = el.querySelector('#gama-' + t.dataset.k); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    };
+    el.onchange = (e) => { if (e.target.dataset.act === 'usados') { st.usados = e.target.checked; store.set('usados', st.usados); draw(); } };
+    draw();
+  }
+
+  if (!window.__copyBound) {
+    window.__copyBound = true;
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('.code'); if (!b) return;
+      const ok = () => { const o = b.textContent; b.textContent = 'Copiado'; setTimeout(() => (b.textContent = o), 1200); };
+      try { navigator.clipboard.writeText(b.dataset.code).then(ok, () => { const r = document.createRange(); r.selectNodeContents(b); getSelection().removeAllRanges(); getSelection().addRange(r); }); } catch (_) {}
+    });
+  }
+  return { mount, html, esc, cop, fecha, safeUrl, safeImg, CATS };
+})();
+</script>
+
+<script>
+(() => {
+  const SERVER = 'Claude Code Remote';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const safeUrl = (u) => /^https?:\/\//i.test(u || '') ? u : '#';
+  const safeImg = (u) => /^data:image\/(png|jpe?g|webp|gif|avif);base64,/i.test(u || '') ? u : '';
+  const cop = (n) => (n == null || isNaN(n) ? '—' : '$ ' + Math.round(n).toLocaleString('es-CO'));
+  const fecha = (t) => { try { return new Date(t).toLocaleString('es-CO', { timeZone: 'America/Bogota', dateStyle: 'medium', timeStyle: 'short' }); } catch { return ''; } };
+  const CATS = { auto: 'Automática', tecnologia: 'Tecnología', ropa: 'Ropa y calzado', deportes: 'Deportes', movilidad: 'Bicis y patinetas', vehiculos: 'Carros y motos', hogar: 'Hogar', belleza: 'Belleza y salud', mercado: 'Mercado' };
+  const EJEMPLOS = [['Patineta eléctrica Xiaomi 4 Lite', 'movilidad'], ['Tenis Nike Air Force 1', 'ropa'], ['Bicicleta de ruta GW', 'movilidad'], ['Mazda 2 2020 usado', 'vehiculos'], ['Audífonos Sony WH-1000XM5', 'tecnologia']];
+
+  let db = null, mcp = null, triggerId = null, searches = [], dbState = 'cargando', tick = null;
+
+  for (const [t, c] of EJEMPLOS) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'ex'; b.textContent = t;
+    b.onclick = () => { $('q').value = t; $('cat').value = c; $('q').focus(); };
+    $('examples').appendChild(b);
+  }
+
+  function notice(html, kind) { const n = $('notice'); n.className = 'notice' + (kind ? ' ' + kind : ''); n.innerHTML = html; n.hidden = !html; }
+  const chatFallback = (q) => `Mientras tanto puedes pedirlo en el chat de Claude Code: <code class="cmd">/ofertas ${esc(q || '<producto>')}</code>`;
+
+  // ---------- render ----------
+  const selectedId = () => decodeURIComponent((location.hash || '').slice(1)) || (searches[0] && searches[0].id);
+
+  let catActiva = 'todas';
+  const enCat = (s) => catActiva === 'todas' || s.categoria === catActiva || (s.reporte && s.reporte.categoria === catActiva);
+  function renderCats() {
+    const cats = [['todas', 'Todas']].concat(Object.entries(CATS).filter(([k]) => k !== 'auto'));
+    $('cats').innerHTML = cats.map(([k, l]) => { const n = k === 'todas' ? searches.length : searches.filter((s) => s.categoria === k || (s.reporte && s.reporte.categoria === k)).length;
+      return `<button type="button" data-cat="${k}" aria-pressed="${k === catActiva}">${esc(l)}${n ? `<span>${n}</span>` : ''}</button>`; }).join('');
+  }
+  $('cats').addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (!b) return; catActiva = b.dataset.cat;
+    if (catActiva !== 'todas') $('cat').value = catActiva;
+    const first = searches.find(enCat);
+    if (first && location.hash !== '#' + encodeURIComponent(first.id)) location.hash = encodeURIComponent(first.id); else renderView(); });
+  function renderHistory() {
+    renderCats();
+    const sel = selectedId();
+    $('history').innerHTML = searches.filter(enCat).map((s) => `<button type="button" class="hchip" data-id="${esc(s.id)}" aria-current="${s.id === sel}"><span class="dot ${esc(s.estado)}"></span><span class="t">${esc(s.consulta)}</span></button>`).join('');
+  }
+
+  function progreso(s) {
+    const min = Math.max(0, (Date.now() - (s.creado || Date.now())) / 60000);
+    const pct = Math.min(95, 8 + (min / 6) * 87);
+    const fase = s.estado === 'pendiente' ? 'Iniciando la búsqueda…' : (s.fase || 'Revisando tiendas, cupones y promociones…');
+    const tarde = min > 15;
+    return `<div class="progress"><span class="eyebrow">${esc(CATS[s.categoria] || 'Búsqueda')}</span><h2>${esc(s.consulta)}</h2>
+<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i style="width:${pct}%"></i></div>
+<span>${esc(fase)} · ${Math.floor(min)} min</span>
+${tarde ? `<span class="note">Está tardando más de lo normal. ${chatFallback(s.consulta)}</span>` : '<span class="note">Puedes cerrar esta página: el resultado queda guardado aquí y te llega una notificación cuando termine.</span>'}</div>`;
+  }
+
+  function renderView() {
+    renderHistory();
+    const v = $('view'); v.onclick = null; v.onchange = null;
+    if (dbState === 'cargando') { v.innerHTML = '<div class="empty"><span class="note">Cargando tus búsquedas…</span></div>'; return; }
+    if (!searches.length) {
+      v.innerHTML = `<div class="empty"><h2>Tus búsquedas aparecerán aquí</h2><span class="note">Escribe un producto arriba (marca y modelo dan mejores resultados) y elige la categoría si la sabes. Verás la mejor oferta, las tablas por tienda y los cupones vigentes.</span></div>`;
+      return;
+    }
+    const s = searches.find((x) => x.id === selectedId()) || searches[0];
+    if (s.estado === 'listo' && s.reporte) Vitrina.mount(v, s.reporte);
+    else if (s.estado === 'error') v.innerHTML = `<div class="notice bad"><strong>No se pudo completar “${esc(s.consulta)}”.</strong><span>${esc(s.error || 'La búsqueda falló.')}</span><span>${chatFallback(s.consulta)}</span></div>`;
+    else v.innerHTML = progreso(s);
+    clearInterval(tick);
+    if (s.estado === 'pendiente' || s.estado === 'buscando') tick = setInterval(renderView, 30000);
+  }
+
+  $('history').addEventListener('click', (e) => { const b = e.target.closest('.hchip'); if (b) { location.hash = encodeURIComponent(b.dataset.id); } });
+  window.addEventListener('hashchange', renderView);
+
+
+
+  // ---------- perfil: deseos, metas, logros y lo aprendido ----------
+  let perfil = { deseos: [], metas: [], logros: [] }, aprendido = null;
+  const uid = () => Math.random().toString(36).slice(2, 10);
+  const numCOP = (t) => { const m = String(t || '').toLowerCase().replace(/\s/g, ''); if (!m) return null;
+    let n = parseFloat(m.replace(/[^\d.,]/g, '').replace(/\./g, '').replace(',', '.')); if (isNaN(n)) return null;
+    if (/mill|m$/.test(m) && n < 1000) n *= 1e6; else if (/k$|mil$/.test(m) && n < 100000) n *= 1e3; return Math.round(n); };
+  const ultimaBusqueda = (texto) => { const t = texto.toLowerCase(); return searches.find((s) => s.estado === 'listo' && s.reporte && (s.deseo_id && perfil.deseos.some((d) => d.id === s.deseo_id && d.nombre.toLowerCase() === t) || s.consulta.toLowerCase().includes(t) || t.includes(s.consulta.toLowerCase()))); };
+  const mejorPrecio = (s) => { const r = (s.reporte.resultados || []).filter((x) => x.precio_cop).map((x) => x.precio_final_estimado_cop ?? x.precio_cop); return r.length ? Math.min(...r) : null; };
+
+  async function guardarPerfil() {
+    if (!db) { notice('No puedo guardar en esta vista. Ábrela en claude.ai.', 'warn'); return; }
+    try { await db.doc('perfil/yo').set({ ...perfil, actualizado: Date.now() }); }
+    catch (e) { notice(`No se pudo guardar (${esc(e && e.code)}).`, 'bad'); }
+  }
+  async function guardarAprendido(next) {
+    if (!db) return;
+    try { await db.doc('perfil/aprendido').set({ ...next, actualizado: Date.now() }); } catch (e) { notice(`No se pudo guardar (${esc(e && e.code)}).`, 'bad'); }
+  }
+
+  function renderParaTi() {
+    const el = $('parati');
+    const d = perfil.deseos.filter((x) => !x.comprado), m = perfil.metas.filter((x) => !x.logrado), l = perfil.logros;
+    const a = aprendido || {};
+    const grupos = [['Marcas', 'marcas'], ['Tallas', 'tallas'], ['Presupuesto', 'presupuesto'], ['Tiendas', 'tiendas'], ['Te interesa', 'intereses'], ['Evitar', 'evitar']]
+      .map(([lbl, k]) => [lbl, k, (a[k] || []).filter((v) => !(a.descartados || []).includes(v))]).filter(([, , v]) => v.length);
+    const sug = (a.sugerencias || []).slice(0, 5);
+    if (!d.length && !m.length && !l.length && !grupos.length && !sug.length) {
+      el.hidden = false;
+      el.innerHTML = `<div class="panel"><span class="eyebrow">Para ti</span><h2>Cuéntame qué quieres a largo plazo</h2><span class="note">Agrega tus deseos y metas abajo. Con cada búsqueda aprendo tus marcas, tallas, presupuesto y tiendas, y esta sección se va llenando con lo que te sirve a ti.</span><button type="button" class="btn ghost" data-open-editor style="justify-self:start">Agregar mis deseos y metas</button></div>`;
+      return;
+    }
+    el.hidden = false;
+    const wishHtml = d.map((x) => {
+      const s = ultimaBusqueda(x.nombre); const precio = s ? mejorPrecio(s) : null;
+      const pct = x.presupuesto && precio ? Math.min(100, Math.round((x.presupuesto / precio) * 100)) : null;
+      return `<div class="wish"><div><strong>${esc(x.nombre)}</strong></div>
+<div class="acts"><button type="button" class="btn ghost" data-buscar="${esc(x.id)}">${s ? 'Actualizar precios' : 'Buscar precios'}</button><button type="button" class="btn ghost" data-comprado="${esc(x.id)}" title="Marcar como comprado">Ya lo tengo</button></div>
+<div class="sub">${[x.presupuesto && `Presupuesto ${cop(x.presupuesto)}`, x.cuando, precio && `Mejor precio visto ${cop(precio)} (${fecha(s.reporte.fecha)})`, s && `<a href="#${encodeURIComponent(s.id)}">ver ofertas</a>`].filter(Boolean).join(' · ')}</div>
+${pct != null ? `<div class="save" title="Tu presupuesto cubre el ${pct}% del mejor precio"><i style="width:${pct}%"></i></div><div class="sub">${pct >= 100 ? 'Tu presupuesto alcanza: buen momento para comprar.' : `Tu presupuesto cubre el ${pct}% del mejor precio.`}</div>` : ''}</div>`;
+    }).join('');
+    const goalHtml = m.map((x) => `<div class="wish"><div>${esc(x.texto)}</div><div class="acts"><button type="button" class="btn ghost" data-logrado="${esc(x.id)}">¡Lo logré!</button></div>${x.fecha ? `<div class="sub">Meta para ${esc(x.fecha)}</div>` : ''}</div>`).join('');
+    el.innerHTML = `<div style="display:grid;gap:12px"><div class="sec-head"><h2>Para ti</h2><span class="count">${l.length ? `${l.length} logros cumplidos` : ''}</span></div>
+<div class="grid2">
+${d.length ? `<div class="panel"><span class="eyebrow">Lo que quieres comprar</span><div>${wishHtml}</div></div>` : ''}
+${m.length || l.length ? `<div class="panel"><span class="eyebrow">Tus metas</span>${goalHtml ? `<div>${goalHtml}</div>` : ''}${l.length ? `<div style="display:grid;gap:4px"><span class="eyebrow">Logros recientes</span>${l.slice(-4).reverse().map((x) => `<div class="logro">${esc(x.texto)}</div>`).join('')}</div>` : ''}</div>` : ''}
+${sug.length ? `<div class="panel"><span class="eyebrow">Te puede interesar</span><div>${sug.map((x, i) => `<div class="sugg"><span>${esc(x.texto)}</span>${x.consulta ? `<button type="button" class="btn ghost" data-sug="${i}">Buscar</button>` : ''}</div>`).join('')}</div></div>` : ''}
+${grupos.length ? `<div class="panel"><span class="eyebrow">Lo que he aprendido de ti</span><div class="learn">${grupos.map(([lbl, k, v]) => `<div class="row"><span class="lbl">${lbl}</span>${v.map((t) => `<button type="button" class="tagx" data-olvidar="${esc(t)}" title="Olvidar esto">${esc(t)} <b>×</b></button>`).join('')}</div>`).join('')}</div><span class="note">Toca un dato para que lo olvide.</span></div>` : ''}
+</div></div>`;
+  }
+
+  function buscarAhora(consulta, categoria, deseoId) {
+    $('q').value = consulta; $('cat').value = categoria || 'auto';
+    $('form').dataset.deseo = deseoId || '';
+    $('form').requestSubmit();
+  }
+
+  $('parati').addEventListener('click', (e) => {
+    const t = e.target.closest('button'); if (!t) return;
+    if (t.hasAttribute('data-open-editor')) { $('editor').open = true; $('wName').focus(); return; }
+    if (t.dataset.buscar) { const x = perfil.deseos.find((w) => w.id === t.dataset.buscar); if (x) buscarAhora(x.nombre, x.categoria, x.id); return; }
+    if (t.dataset.comprado) { const x = perfil.deseos.find((w) => w.id === t.dataset.comprado); if (x) { x.comprado = Date.now(); perfil.logros.push({ id: uid(), texto: `Compré ${x.nombre}`, fecha: Date.now() }); guardarPerfil(); } return; }
+    if (t.dataset.logrado) { const x = perfil.metas.find((w) => w.id === t.dataset.logrado); if (x) { x.logrado = Date.now(); perfil.logros.push({ id: uid(), texto: x.texto, fecha: Date.now() }); guardarPerfil(); } return; }
+    if (t.dataset.sug) { const x = (aprendido.sugerencias || [])[+t.dataset.sug]; if (x) buscarAhora(x.consulta, x.categoria); return; }
+    if (t.dataset.olvidar) { const a = { ...aprendido, descartados: [...new Set([...(aprendido.descartados || []), t.dataset.olvidar])] }; guardarAprendido(a); }
+  });
+  $('addWish').addEventListener('submit', (e) => { e.preventDefault(); const nombre = $('wName').value.trim(); if (!nombre) return;
+    perfil.deseos.push({ id: uid(), nombre, presupuesto: numCOP($('wBudget').value), cuando: $('wWhen').value || null, creado: Date.now() });
+    $('wName').value = ''; $('wBudget').value = ''; $('wWhen').value = ''; guardarPerfil(); });
+  $('addGoal').addEventListener('submit', (e) => { e.preventDefault(); const texto = $('gText').value.trim(); if (!texto) return;
+    perfil.metas.push({ id: uid(), texto, fecha: $('gDate').value || null, creado: Date.now() }); $('gText').value = ''; $('gDate').value = ''; guardarPerfil(); });
+  $('addWin').addEventListener('submit', (e) => { e.preventDefault(); const texto = $('lText').value.trim(); if (!texto) return;
+    perfil.logros.push({ id: uid(), texto, fecha: Date.now() }); $('lText').value = ''; guardarPerfil(); });
+
+  // ---------- búsqueda ----------
+  async function lanzar(id, consulta, categoria) {
+    if (!mcp) { notice(`Esta vista no puede iniciar búsquedas (ábrela en claude.ai o en la app de Claude). ${chatFallback(consulta)}`, 'warn'); return false; }
+    if (!triggerId) { notice(`El buscador aún no está configurado. ${chatFallback(consulta)}`, 'warn'); return false; }
+    try {
+      await mcp.callTool(SERVER, 'fire_trigger', { trigger_id: triggerId, text: JSON.stringify({ id, consulta, categoria }) });
+      notice('');
+      return true;
+    } catch (e) {
+      const code = e && e.code;
+      const msg = {
+        server_not_connected: `Para buscar desde aquí necesitas el conector <strong>Claude Code Remote</strong> en claude.ai → Configuración → Conectores. ${chatFallback(consulta)}`,
+        needs_reauth: `Vuelve a conectar <strong>Claude Code Remote</strong> en claude.ai → Configuración → Conectores. ${chatFallback(consulta)}`,
+        not_in_manifest: `No diste permiso a esta página para usar Claude Code Remote. Ábrelo desde el menú Permisos de la página y vuelve a buscar. ${chatFallback(consulta)}`,
+        approval_required: 'La búsqueda necesita tu aprobación. Vuelve a pulsar <strong>Buscar ofertas</strong> y acepta el permiso.',
+        blocked_by_policy: `Tu organización no permite iniciar sesiones desde páginas. ${chatFallback(consulta)}`,
+        selection_required: 'Tienes más de un conector Claude Code Remote: elige uno en el aviso de claude.ai y vuelve a buscar.',
+        server_unavailable: 'Claude Code Remote no respondió a tiempo. Es posible que la búsqueda sí haya empezado: espera un minuto antes de intentarlo otra vez.',
+        upstream_error: 'Claude Code Remote no respondió a tiempo. Es posible que la búsqueda sí haya empezado: espera un minuto antes de intentarlo otra vez.',
+        tool_error: `No se pudo iniciar la búsqueda: ${esc(e && e.message)}. ${chatFallback(consulta)}`,
+      }[code] || `No se pudo iniciar la búsqueda (${esc(code || 'error')}). ${chatFallback(consulta)}`;
+      notice(msg, code === 'server_unavailable' || code === 'upstream_error' || code === 'approval_required' ? 'warn' : 'bad');
+      return code === 'server_unavailable' || code === 'upstream_error';
+    }
+  }
+
+  $('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const consulta = $('q').value.trim().replace(/\s+/g, ' ');
+    const categoria = $('cat').value;
+    if (consulta.length < 3) { notice('Escribe al menos 3 letras del producto.', 'warn'); return; }
+    if (!db) { notice(`No puedo guardar búsquedas en esta vista. ${chatFallback(consulta)}`, 'warn'); return; }
+    const go = $('go'); go.disabled = true; go.textContent = 'Iniciando…';
+    try {
+      const ref = db.collection('busquedas').doc();
+      const deseo_id = $('form').dataset.deseo || null; $('form').dataset.deseo = '';
+      await ref.set({ consulta, categoria, estado: 'pendiente', creado: Date.now(), ...(deseo_id ? { deseo_id } : {}) });
+      window.scrollTo({ top: $('history').offsetTop - 12, behavior: 'smooth' });
+      location.hash = encodeURIComponent(ref.id);
+      const ok = await lanzar(ref.id, consulta, categoria);
+      if (!ok) await ref.update({ estado: 'error', error: 'No se pudo iniciar la búsqueda desde la página.' }).catch(() => {});
+      else $('q').value = '';
+    } catch (err) {
+      notice(`No se pudo guardar la búsqueda (${esc(err && err.code || 'error')}). ${chatFallback(consulta)}`, 'bad');
+    } finally { go.disabled = false; go.textContent = 'Buscar ofertas'; }
+  });
+
+  // ---------- arranque ----------
+  const use = (n) => (window.claude && typeof window.claude.use === 'function' ? window.claude.use(n) : Promise.resolve(null));
+  renderView();
+  const timeout = setTimeout(() => { if (dbState === 'cargando') { dbState = 'listo'; renderView(); } }, 10000);
+  use('db').then((d) => {
+    db = d;
+    if (!db) { dbState = 'listo'; clearTimeout(timeout); notice(`Abre esta página en claude.ai para guardar y ver tus búsquedas. ${chatFallback('')}`, 'warn'); renderView(); return; }
+    db.doc('perfil/yo').onSnapshot((sn) => { const v = sn.exists ? sn.data() : {}; perfil = { deseos: [...(v.deseos || [])].map((x) => ({ ...x })), metas: [...(v.metas || [])].map((x) => ({ ...x })), logros: [...(v.logros || [])].map((x) => ({ ...x })) }; renderParaTi(); }, () => {});
+    db.doc('perfil/aprendido').onSnapshot((sn) => { aprendido = sn.exists ? sn.data() : null; renderParaTi(); }, () => {});
+    db.doc('config/app').onSnapshot((s) => { triggerId = s.exists ? (s.data().trigger_id || null) : null; }, () => {});
+    db.collection('busquedas').orderBy('creado', 'desc').limit(40).onSnapshot((snap) => {
+      clearTimeout(timeout); dbState = 'listo';
+      searches = snap.docs.map((x) => ({ id: x.id, ...x.data() }));
+      renderView(); renderParaTi();
+    }, (err) => { clearTimeout(timeout); dbState = 'listo'; notice(`No se pudieron cargar las búsquedas (${esc(err && err.code)}).`, 'bad'); renderView(); });
+  });
+  use('mcp').then((m) => { mcp = m; });
+})();
+</script>

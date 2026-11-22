@@ -1,0 +1,337 @@
+{
+  "consulta": "Walkie-talkies baratos de buena calidad",
+  "categoria": "tecnologia",
+  "fecha": "2026-11-18T00:30:15.835Z",
+  "trm": {
+    "valor": 4000,
+    "vigencia": null,
+    "fuente": "estimada (no se pudo consultar)"
+  },
+  "requisito": "Precios por par (2 radios) salvo que diga otra cosa",
+  "top3": [
+    {
+      "url": "https://es.aliexpress.com/item/3256806140236278.html",
+      "etiqueta": "Económica",
+      "por_que": "El par más barato de buena marca: uso libre (sin licencia), 4,8★ y USB-C. Llega por AliExpress en 2–4 semanas."
+    },
+    {
+      "url": "https://www.falabella.com.co/falabella-co/product/136980605/Walkie-Talkie-Motorola-Solutions-Motorola-Talkabout-T114",
+      "etiqueta": "Mejor calidad-precio",
+      "por_que": "Motorola con garantía en Colombia y uso libre. Ideal para conjunto, finca o paseo; funciona con pilas AAA o recargables."
+    },
+    {
+      "url": "https://www.falabella.com.co/falabella-co/product/157726922/radios-bidireccionales-motorola-22-canales-t470",
+      "etiqueta": "Premium",
+      "por_que": "Resistentes al agua (IPX4), linterna, alertas de clima y mejor alcance de la gama Talkabout."
+    }
+  ],
+  "gamas": {
+    "economica": "Hasta $110.000 el par · uso casero y paseos cortos",
+    "media": "$110.000–$290.000 · mejor marca o más funciones",
+    "alta": "$215.000–$360.000 · resistentes o de más alcance",
+    "premium": "Más de $450.000 · Motorola para exterior"
+  },
+  "recomendacion": {
+    "url": "https://www.falabella.com.co/falabella-co/product/136980605/Walkie-Talkie-Motorola-Solutions-Motorola-Talkabout-T114",
+    "texto": "Motorola de uso libre con garantía local."
+  },
+  "resultados": [
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Walkie Talkie Solutions Talkabout T114",
+      "marca": "Motorola",
+      "precio_cop": 282200,
+      "precio_antes_cop": null,
+      "descuento_pct": null,
+      "precio_tipo": "internetPrice",
+      "vendedor": "Seller Group",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/136980605/Walkie-Talkie-Motorola-Solutions-Motorola-Talkabout-T114",
+      "imagen": "https://media.falabella.com.co/falabellaCO/136980606_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 282200,
+      "modelo": "Motorola Talkabout T114",
+      "gama": "media",
+      "spec_clave": "Par · 22 canales FRS · 3 pilas AAA",
+      "fuente": "directa",
+      "alertas": [
+        "Confirma que sea el par"
+      ],
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 76
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Radio Walkie Talkies Bidireccional Midland 22 Canales Hasta 45 Km",
+      "marca": "Midland",
+      "precio_cop": 359900,
+      "precio_antes_cop": 899900,
+      "descuento_pct": 60,
+      "precio_tipo": "eventPrice",
+      "vendedor": "Jesucristo Electro",
+      "calificacion": 0,
+      "url": "https://www.falabella.com.co/falabella-co/product/127716826/Radio-Walkie-Talkies-Bidireccional-Midland-22-Canales-Hasta-45-Km",
+      "imagen": "https://media.falabella.com.co/falabellaCO/127716827_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 359900,
+      "modelo": "Midland 22 canales",
+      "gama": "alta",
+      "spec_clave": "Par · 22 canales FRS/GMRS · hasta 45 km (ideal)",
+      "fuente": "directa",
+      "alertas": [],
+      "tambien_en": [],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 75
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Radios Bidireccionales Motorola, 22 Canales, T470",
+      "marca": "Motorola",
+      "precio_cop": 499900,
+      "precio_antes_cop": null,
+      "descuento_pct": null,
+      "precio_tipo": "internetPrice",
+      "vendedor": "Camcron Seguridad Electronica Sas",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/157726922/radios-bidireccionales-motorola-22-canales-t470",
+      "imagen": "https://media.falabella.com.co/falabellaCO/157726923_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 499900,
+      "modelo": "Motorola Talkabout T470",
+      "gama": "premium",
+      "spec_clave": "Par · 22 canales · IPX4 · linterna",
+      "fuente": "directa",
+      "alertas": [],
+      "tambien_en": [
+        {
+          "tienda": "Falabella",
+          "precio_cop": 519900,
+          "url": "https://www.falabella.com.co/falabella-co/product/122242634/Radios-Motorola-Talkabout-T470co-Hasta-56kms"
+        }
+      ],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 80
+    },
+    {
+      "tienda": "Falabella",
+      "origen": "nacional",
+      "producto": "Radio Trasmisor 888s x 2 walkie talkie",
+      "marca": "Baofeng",
+      "precio_cop": 89900,
+      "precio_antes_cop": 125000,
+      "descuento_pct": 28,
+      "precio_tipo": "cmrPrice",
+      "vendedor": "Tecnopolis Store.",
+      "calificacion": null,
+      "url": "https://www.falabella.com.co/falabella-co/product/147083192/Radio-Trasmisor-Baofeng-888s-x-2-walkie-talkie",
+      "imagen": "https://media.falabella.com.co/falabellaCO/147083193_01/public",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 89900,
+      "modelo": "Baofeng BF-888S (par)",
+      "gama": "economica",
+      "spec_clave": "Par · UHF 400–470 MHz · 16 canales · 5 W",
+      "fuente": "directa",
+      "alertas": [
+        "Bandas que pueden requerir licencia MinTIC"
+      ],
+      "tambien_en": [
+        {
+          "tienda": "Falabella",
+          "precio_cop": 99000,
+          "url": "https://www.falabella.com.co/falabella-co/product/142876392/Radio-Baofeng-Bf-888S-Radio-De-Comunicaciones-Walkietalkie"
+        },
+        {
+          "tienda": "Falabella",
+          "precio_cop": 103900,
+          "url": "https://www.falabella.com.co/falabella-co/product/145791688/BF-888S-Walkie-talkie-radios-Baofeng-original-dos-radios"
+        }
+      ],
+      "entrega": "1–4 días (Bogotá)",
+      "garantia_local": true,
+      "puntaje_cp": 71
+    },
+    {
+      "tienda": "AliExpress",
+      "origen": "internacional",
+      "producto": "2 Pack BAOFENG UV-5R Mini Dual Band Two-Way Radio (5W/999CH) - Bluetooth APP Programming, NOAA Alert, Type-C Fast Charging",
+      "precio_usd": 41.19,
+      "precio_cop": 136320,
+      "precio_antes_cop": null,
+      "descuento_pct": null,
+      "vendidos": "1,000+",
+      "calificacion": 4.9,
+      "url": "https://es.aliexpress.com/item/3256810573016182.html",
+      "imagen": "https://ae-pic-a1.aliexpress-media.com/kf/Sfd849025e0694bd28f4a212dcae52ae1T.jpg_480x480q75.jpg_.avif",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 136320,
+      "modelo": "Baofeng UV-5R Mini (par)",
+      "marca": "Baofeng",
+      "gama": "media",
+      "spec_clave": "Par · doble banda VHF/UHF · 999 canales · app",
+      "fuente": "directa",
+      "alertas": [
+        "Bandas que pueden requerir licencia MinTIC"
+      ],
+      "tambien_en": [],
+      "entrega": "10–25 días",
+      "puntaje_cp": 56
+    },
+    {
+      "tienda": "AliExpress",
+      "origen": "internacional",
+      "producto": "Retevis H777D (H777Upgraded) Walkie Talkie PMR/FRS Portable License-Free LCD Display Two Way Radio Long Range Type-C for Camping Portable for Hiking & School",
+      "precio_usd": 17.16,
+      "precio_cop": 68640,
+      "precio_antes_cop": 169880,
+      "descuento_pct": 60,
+      "vendidos": "596",
+      "calificacion": 4.9,
+      "url": "https://es.aliexpress.com/item/3256808971168376.html",
+      "imagen": "https://ae-pic-a1.aliexpress-media.com/kf/Sc1a7c9a4a49343278d0fa0ee8a25a82f4.png_480x480.png_.avif",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 68640,
+      "modelo": "Retevis H777D",
+      "marca": "Retevis",
+      "gama": "economica",
+      "spec_clave": "FRS/PMR uso libre · 16 canales · pantalla",
+      "fuente": "directa",
+      "alertas": [],
+      "tambien_en": [],
+      "entrega": "10–25 días",
+      "puntaje_cp": 77
+    },
+    {
+      "tienda": "AliExpress",
+      "origen": "internacional",
+      "producto": "Retevis B63S(3nd Gen RT622) Walkie Talkie 2 Pcs with LCD Screen Ultra-thin, License-free, Type C, for Communication Radios Clear, instant 3km range",
+      "precio_usd": 27.39,
+      "precio_cop": 109560,
+      "precio_antes_cop": 244440,
+      "descuento_pct": 55,
+      "vendidos": "447",
+      "calificacion": 4.8,
+      "url": "https://es.aliexpress.com/item/3256806140236278.html",
+      "imagen": "https://ae-pic-a1.aliexpress-media.com/kf/S8218365ea1ca4d05be87ddb06ef041b6R.png_480x480.png_.avif",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 109560,
+      "modelo": "Retevis B63S",
+      "marca": "Retevis",
+      "gama": "economica",
+      "spec_clave": "Par · FRS/PMR uso libre · ultradelgados · USB-C",
+      "fuente": "directa",
+      "alertas": [],
+      "tambien_en": [],
+      "entrega": "10–25 días",
+      "puntaje_cp": 71
+    },
+    {
+      "tienda": "AliExpress",
+      "origen": "internacional",
+      "producto": "Retevis RT86 Walkie Talkie Professional Two Way Radio Long Range Type-C Communication Radio for Outdoor Business Farm RETEVIS · Portable · 5 - 10 KM",
+      "precio_usd": 32.22,
+      "precio_cop": 128880,
+      "precio_antes_cop": 194600,
+      "descuento_pct": 34,
+      "vendidos": "783",
+      "calificacion": 4.9,
+      "url": "https://es.aliexpress.com/item/3256801378846172.html",
+      "imagen": "https://ae-pic-a1.aliexpress-media.com/kf/S3938e90094b246e6b1808f7725177b8c6.png_480x480.png_.avif",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 128880,
+      "modelo": "Retevis RT86",
+      "marca": "Retevis",
+      "gama": "media",
+      "spec_clave": "UHF · 2 W · batería 2600 mAh · USB-C",
+      "fuente": "directa",
+      "alertas": [
+        "Bandas que pueden requerir licencia MinTIC"
+      ],
+      "tambien_en": [],
+      "entrega": "10–25 días",
+      "puntaje_cp": 61
+    },
+    {
+      "tienda": "AliExpress",
+      "origen": "internacional",
+      "producto": "Retevis RT29 Walkie Talkie Long Range Powerful IP67 Waterproof VHF or UHF 1pc or 2pcs Durable Two Way Radio Station Long-range signal",
+      "precio_usd": 53.76,
+      "precio_cop": 215040,
+      "precio_antes_cop": 287400,
+      "descuento_pct": 25,
+      "vendidos": "100",
+      "calificacion": null,
+      "url": "https://es.aliexpress.com/item/2251832695055503.html",
+      "imagen": "https://ae-pic-a1.aliexpress-media.com/kf/S0f62419143ac45769a90bdc62c1d8c5cA.jpg_480x480q75.jpg_.avif",
+      "condicion": "nuevo",
+      "disponible": true,
+      "impuestos_estimados_cop": 0,
+      "precio_final_estimado_cop": 215040,
+      "modelo": "Retevis RT29",
+      "marca": "Retevis",
+      "gama": "alta",
+      "spec_clave": "IP67 · 2 W · batería 3200 mAh",
+      "fuente": "directa",
+      "alertas": [
+        "Bandas que pueden requerir licencia MinTIC"
+      ],
+      "tambien_en": [],
+      "entrega": "10–25 días",
+      "puntaje_cp": 51
+    }
+  ],
+  "descartados": [
+    "Radios 'woki toki' genéricos sin marca: sin especificaciones ni reseñas",
+    "Walkie-talkies infantiles y de juguete",
+    "Radios profesionales DMR/P25 de más de $3 millones",
+    "Motorola EP450 en AliExpress: probable imitación"
+  ],
+  "cupones": [
+    {
+      "tienda": "AliExpress",
+      "codigo": "",
+      "descripcion": "Cupones de nuevo usuario y de tienda Retevis en la página del producto",
+      "vigencia": "Revisa al pagar",
+      "url": "https://es.aliexpress.com"
+    },
+    {
+      "tienda": "Black Friday",
+      "codigo": "",
+      "descripcion": "27 de noviembre: Falabella suele rebajar Motorola Talkabout",
+      "vigencia": "27–30 nov 2026",
+      "url": "https://www.diariodelsur.com.co/noticias/cuando-es-el-black-friday-2026-en-colombia-fechas-y-tips"
+    }
+  ],
+  "consejos": [
+    "El alcance real en ciudad es de 1 a 3 km; los '45 km' o '56 km' de la caja son en campo abierto y sin obstáculos.",
+    "Para no necesitar licencia, elige radios FRS/PMR de uso libre (Motorola Talkabout, Midland, Retevis B63S/H777D).",
+    "Los Baofeng transmiten en bandas de radioaficionado o comerciales: para usarlos legalmente necesitas licencia del MinTIC.",
+    "Compra del mismo modelo para que sean compatibles, o radios que compartan canales FRS."
+  ],
+  "no_cubiertas": [
+    "Mercado Libre (requiere token)",
+    "Alkosto y Ktronix (bloquean consultas automáticas)"
+  ]
+}
