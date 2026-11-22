@@ -6,6 +6,7 @@ const SECCIONES = [
   { id: 'finanzas', texto: 'Finanzas', icono: 'finanzas', vista: vistaFinanzas },
   { id: 'patrimonio', texto: 'Patrimonio', icono: 'patrimonio', vista: vistaPatrimonio },
   { id: 'compras', texto: 'Compras', icono: 'bolsa', vista: vistaCompras },
+  { id: 'mercados', texto: 'Mercados', icono: 'tendencia', vista: vistaMercados },
   { id: 'pendientes', texto: 'Pendientes', icono: 'pendientes', vista: vistaPendientes },
   { id: 'negocio', texto: 'Negocio', icono: 'negocio', vista: vistaNegocio },
 ];
@@ -31,7 +32,7 @@ function construirMenu() {
   const menu = document.getElementById('menu');
   menu.style.setProperty('--n', MENU_CEL + 1);
   menu.innerHTML = SECCIONES.map((s, i) =>
-    `<a href="#${s.id}" data-vista="${s.id}"${i >= MENU_CEL ? ' class="extra"' : ''}>${ic(s.icono)}<span>${s.texto}</span></a>`).join('')
+    `<a href="#${s.id}" data-vista="${s.id}"${i >= MENU_CEL ? ' class="en-mas"' : ''}>${ic(s.icono)}<span>${s.texto}</span></a>`).join('')
     + `<button type="button" class="mas-menu" data-accion="menuMas" aria-haspopup="dialog">${ic('puntos')}<span>Más</span></button>`
     + '<i class="ind" aria-hidden="true"></i>';
   document.getElementById('fab').innerHTML = ic('mas');
@@ -77,7 +78,7 @@ function render() {
 }
 
 // Los diálogos se abren en el mismo evento para que el foco responda de inmediato.
-const accionesConGuardado = new Set(['confirmarSi', 'exportar', 'pagar', 'cobrado', 'tareaHecha', 'metaHecha', 'habitoHoy']);
+const accionesConGuardado = new Set(['confirmarSi', 'exportar', 'pagar', 'cobrado', 'tareaHecha', 'metaHecha', 'habitoHoy', 'deseoComprado', 'responderLeccion']);
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-accion]');
   const accion = el?.dataset.accion;

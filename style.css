@@ -126,7 +126,7 @@ main { padding: 2px 12px calc(86px + var(--inset-inf)); }
 }
 .menu .mas-menu .ic { width: 20px; height: 20px; }
 .menu .mas-menu.activo, .menu .mas-menu.activo .ic { color: var(--acc); }
-.menu a.extra { display: none; }
+.menu a.en-mas { display: none; }
 .menu-mas { display: grid; gap: 6px; }
 .menu-mas a { display: flex; align-items: center; gap: 12px; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--linea); color: var(--txt); font-weight: 650; text-decoration: none; }
 .menu-mas a > .ic:first-child { width: 20px; height: 20px; color: var(--acc); }
@@ -635,7 +635,7 @@ select.estado.pagado { color: var(--pos); border-color: rgba(61, 220, 151, .45);
     border: 0; border-radius: 0; background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
   }
   .menu a { flex-direction: row; justify-content: flex-start; gap: 12px; height: 40px; padding: 0 12px; border-radius: 12px; font-size: .88rem; }
-  .menu a.extra { display: flex; }
+  .menu a.en-mas { display: flex; }
   .menu .mas-menu { display: none; }
   .pie-lateral { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding: 10px 12px; border-radius: 14px; background: rgba(255, 214, 150, .035); border: 1px solid var(--linea); }
   .pie-estado { display: flex; align-items: center; gap: 8px; color: var(--txt-2); font-size: .76rem; font-weight: 600; }
@@ -932,3 +932,63 @@ input, select { min-height: 42px; background: #0e121a; }
 @media (min-width: 1360px) {
   .compras { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "momento gasto" "deseos gasto" "deseos fijos"; }
 }
+
+/* ---------- Mercados y aprender ---------- */
+.explica { margin: 4px 0 0; color: var(--txt-3); font-size: .78rem; line-height: 1.45; }
+.explica b { color: var(--txt-2); }
+.cambio { font-size: .76rem; font-weight: 650; white-space: nowrap; }
+.trm { padding: 12px; margin-bottom: 8px; border: 1px solid var(--linea); border-radius: 14px; background: #ffffff04; }
+.trm > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.trm .etiqueta { width: 100%; }
+.trm b { font-size: 1.5rem; letter-spacing: -.03em; }
+.lista-vivo { list-style: none; margin: 0; padding: 0; }
+.activo-vivo { padding: 10px 0; border-bottom: 1px solid var(--linea); }
+.activo-vivo .linea { display: flex; justify-content: space-between; gap: 10px; }
+.activo-vivo .nombre b { color: var(--acc); margin-right: 4px; }
+.activo-vivo .detalle { font-size: .76rem; color: var(--txt-3); }
+.escalera { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+.escalera li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; }
+.escalera p { margin: 2px 0 6px; color: var(--txt-3); font-size: .8rem; }
+.num-paso { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--linea-2, #434b59); font-size: .78rem; font-weight: 700; color: var(--txt-3); }
+.num-paso .ic { width: 13px; height: 13px; }
+.escalera li.hecho .num-paso, .lecciones li.hecha .num-paso { background: #72dfb31a; border-color: #72dfb366; color: var(--pos); }
+.escalera li.hecho b { color: var(--txt-3); }
+.escalera li.actual .num-paso { border-color: var(--acc); color: var(--acc); box-shadow: 0 0 12px -2px #ffca7066; }
+.escalera li.actual b { color: var(--acc); }
+.reparto-inv { display: flex; align-items: center; gap: 16px; margin: 10px 0; }
+.reparto-inv ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .8rem; flex: 1; }
+.reparto-inv li { display: flex; justify-content: space-between; gap: 10px; }
+.calc { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+.calc label { font-size: .72rem; }
+.barras-anos { display: flex; align-items: flex-end; gap: 4px; height: 70px; margin: 12px 0 4px; }
+.barras-anos i { flex: 1; height: var(--h); border-radius: 4px 4px 0 0; background: linear-gradient(180deg, var(--acc), #ffca7022); }
+.siguiente-leccion { width: 100%; margin: 12px 0 8px; justify-content: flex-start; white-space: normal; text-align: left; }
+.lecciones { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 2px; }
+.lecciones button { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; padding: 7px 4px; border: 0; border-radius: 10px; background: none; color: var(--txt); font: inherit; font-size: .86rem; text-align: left; cursor: pointer; }
+.lecciones button:hover { background: #ffffff08; }
+.lecciones small { color: var(--txt-3); }
+.lecciones li.hecha button > span:nth-child(2) { color: var(--txt-3); }
+.glosario { margin-top: 10px; font-size: .82rem; }
+.glosario summary { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; color: var(--acc); list-style: none; }
+.glosario summary::-webkit-details-marker { display: none; }
+.glosario summary .ic { width: 14px; height: 14px; }
+.glosario dt { margin-top: 8px; font-weight: 700; }
+.glosario dd { margin: 2px 0 0; color: var(--txt-3); }
+.leccion p { line-height: 1.55; color: var(--txt-2); }
+.leccion p b { color: var(--txt); }
+.quiz { display: grid; gap: 8px; margin: 16px 0; padding: 14px; border-radius: 14px; border: 1px solid var(--linea); background: #ffffff05; }
+.quiz .opcion { padding: 11px 13px; border-radius: 12px; border: 1px solid var(--linea-2, #434b59); background: none; color: var(--txt); font: inherit; text-align: left; cursor: pointer; }
+.quiz .opcion:hover:not(:disabled) { border-color: var(--acc); }
+.quiz .opcion.bien { border-color: var(--pos); background: #72dfb314; }
+.quiz .opcion.mal { border-color: var(--neg); background: #ff879314; }
+.quiz .opcion:disabled { cursor: default; }
+.quiz p { margin: 4px 0 0; }
+@media (min-width: 760px) {
+  .mercados { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "vivo plan" "inversiones calculadora" "fuentes aprender"; }
+  .mercados .a-vivo { grid-area: vivo; } .mercados .a-plan { grid-area: plan; } .mercados .a-inversiones { grid-area: inversiones; }
+  .mercados .a-calculadora { grid-area: calculadora; } .mercados .a-fuentes { grid-area: fuentes; } .mercados .a-aprender { grid-area: aprender; }
+}
+@media (min-width: 1360px) {
+  .mercados { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "vivo plan aprender" "inversiones calculadora aprender" "fuentes calculadora aprender"; }
+}
+.a-calculadora .stats b { font-size: clamp(.86rem, 1.5vw, 1.02rem); white-space: nowrap; overflow-wrap: normal; }

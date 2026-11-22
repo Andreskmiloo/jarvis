@@ -48,9 +48,10 @@ function balance() {
   const cuentas = totalCuentas();
   const bienes = suma(datos.bienes, valorBien);
   const cobrar = suma(porCobrar(), o => o.precio);
+  const inversiones = suma(datos.inversiones, valorInversion);
   const deudas = suma(deudasActivas(), montoDeuda);
-  const activos = cuentas + bienes + cobrar;
-  return { cuentas, bienes, cobrar, deudas, activos, pasivos: deudas, neto: activos - deudas };
+  const activos = cuentas + bienes + cobrar + inversiones;
+  return { cuentas, bienes, cobrar, inversiones, deudas, activos, pasivos: deudas, neto: activos - deudas };
 }
 
 // La foto del mes se actualiza con cada cambio (la llama cambiarDatos antes de guardar).
@@ -136,6 +137,7 @@ function vistaPatrimonio() {
             derecha: `<span class="${c.saldo < 0 ? 'rojo' : ''}">${peso(c.saldo)}</span>`,
             detalle: (c.tipo === 'efectivo' ? 'Efectivo' : 'Digital') + (c.actualizado ? ' · actualizado ' + hace(c.actualizado) : ' · sin actualizar'),
           })),
+          ...(datos.inversiones.length ? [fila({ izquierda: ico('tendencia', 'acc'), titulo: 'Inversiones', derecha: peso(b.inversiones), detalle: `${datos.inversiones.length} · ver en <a class="enlace" href="#mercados">Mercados</a>` })] : []),
           ...(datos.bienes.length ? [fila({ izquierda: ico('caja', 'acc'), titulo: 'Inventario', derecha: peso(b.bienes), detalle: `${datos.bienes.length} ${datos.bienes.length === 1 ? 'cosa' : 'cosas'} · valor de hoy` })] : []),
           ...porCobrar().map(o => fila({ izquierda: ico('cobro', 'warn'), titulo: 'Te debe ' + esc(o.cliente), derecha: `<span class="ambar">${peso(o.precio)}</span>`, detalle: o.fechaCobro ? 'cobro ' + textoFecha(o.fechaCobro) : 'sin fecha de cobro' })),
         ], 'Agrega tus cuentas en <a class="enlace" href="#cuentas">Cuentas</a> y tus cosas en el inventario.')}

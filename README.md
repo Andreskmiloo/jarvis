@@ -32,6 +32,14 @@ pide reducir el movimiento, muestra una composición fija.
   ofertas (sus archivos JSON) y los liga al deseo; al marcarlo comprado pasa a tu inventario. Además,
   en qué se va tu dinero (este mes frente al anterior), los gastos hormiga y lo que pagas cada mes y al año.
   Son reglas simples sobre tus datos para ayudarte a decidir, no asesoría financiera.
+- **Mercados**: el dólar (TRM oficial) y las principales criptomonedas en vivo, cada uno explicado en
+  palabras simples (qué es, qué significa que suba o baje). Tus inversiones (cripto con precio en vivo,
+  acciones, cuentas que rinden y CDT) suman a tu patrimonio. "Mi plan" es una escalera de 6 pasos que
+  se calcula con tus datos (deudas al día, colchón, salir de deudas caras, fondo de 3 meses, primera
+  inversión y más de una fuente de ingreso). Calculadora de interés compuesto, de dónde viene tu dinero y
+  12 lecciones cortas con pregunta de repaso y glosario. Los precios vienen de fuentes públicas sin
+  llave (CoinGecko y datos.gov.co), se piden como mucho cada 10 minutos y sin conexión se ve el último
+  dato. Es educativo, no asesoría financiera.
 - **Pendientes**: matriz de Eisenhower (urgente / importante), metas con anillo de progreso y
   una rutina de hábitos con rachas.
 - **Negocio**: ventas, pedidos y ganancia hacia tu meta, y el ritmo que necesitas para llegar.
@@ -92,7 +100,7 @@ Jarvis lo avisa desde que abres la página.
 
 ## Compatibilidad
 
-Funciona sin conexión, sin librerías externas y con scripts normales (no módulos), así que abre
+Funciona sin conexión (salvo los precios en vivo de Mercados), sin librerías externas y con scripts normales (no módulos), así que abre
 con doble clic. Está pensada para las versiones recientes de Chrome, Edge, Firefox y Safari
 (incluidos iPhone y Android). Respeta la opción "reducir movimiento" del sistema: si la activas,
 no hay animaciones.
@@ -114,6 +122,8 @@ js/pendientes.js  matriz de Eisenhower, metas y rutina
 js/negocio.js     pedidos, ventas y ganancia
 js/patrimonio.js  balance, estado de resultados, inventario y línea de tiempo
 js/compras.js     deseos, semáforo de compras, ofertas importadas y en qué se va el dinero
+js/mercados.js    precios en vivo, inversiones, mi plan, calculadora y fuentes de ingreso
+js/aprender.js    lecciones cortas, preguntas de repaso y glosario
 js/analisis.js    proyección de caja, gráfico y lecturas de Jarvis
 js/tablero.js     pantalla de Inicio
 js/app.js         navegación y eventos
